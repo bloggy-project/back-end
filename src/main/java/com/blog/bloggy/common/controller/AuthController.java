@@ -24,7 +24,7 @@ public class AuthController {
     /**
      * 토큰갱신
      *
-     * @author gon11
+     * @author gon
      * @param userId
      * @return accessToken, refreshToken
      */
