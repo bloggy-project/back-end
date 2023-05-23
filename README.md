@@ -145,8 +145,41 @@ saveAll의 쿼리 갯수가 건당 1개씩 발생하는지 추후에 체크해�
 
 ### AccessToken방식을 RefreshToken방식으로 교체
 
-#### 보안 취약점 개선.
+- Redis, ControllerAdvice, Interceptor를 활용
 
-### Controller Advice를 활용한 예외 처리 및 Log 출력 개선
+### 문제점
+- 기존에 적용된 jwt Token은 access token 1개만 사용하며, 만료기간이 하루이므로 탈취와 같은 보안문제에 취약
+### 목표
+- refresh token을 적용하여 보안문제를 개선.
 
+### 고려요소
+
+#### RefreshToken의 SignKey와 AccessToken의 SignKey는 다르게 관리
+
+- Access Token과 RefreshToken의 SignKey가 같을 경우, RefreshToken을 탈취하여, Access Token처럼 활용가능할 수 있음.
+
+#### RefreshToken은 User당 1개만 할당
+
+Key를 UserId가 아닌 RefreshToken의 Value로 할당하고, Value를 UserId로 할당하는 경우
+
+##### 장점
+- UserId의 활용이 편리함.
+
+##### 단점
+- User마다 RefreshToken을 여러 개 지닐 수 있음. 즉, Refresh Token 탈취범도 문제없이 Refresh Token을 사용할 수 있음.
+
+Key를 UserId, Value를 RefreshToken Value로 할당하는 경우
+
+##### 장점
+- User마다 RefreshToken을 1개만 지닐 수 있음. 만약 탈취범이 RefreshToken을 탈취해서 사용가능 한 경우, 진짜 User는 Login을 해야 서비스를 이용할 수 있음. User가 Login을 하면 탈취범은 탈취한 RefreshToken을 더이상 이용 불가능.
+
+##### 단점
+- Redis방식은 Value만으로 Key값,즉 UserId를 알 수 없으므로, RefreshToken의 Value에 UserId 정보를 넣거나, Redis의 DB 보조 인덱스 전략이 필요함.
+- 필자는 RefreshToken의 Value에 Jwt(String)값을 넣어 UserId를 Value 자체적으로 알 수 있게 구현함.
+
+#### AccessToken을 갱신할 때, RefreshToken도 새로 발급
+
+- Refresh Token Rotation, 이렇게 구성하면 Refresh Token은 1회용이 되고, DB에 이미 사용된 Refresh Token정보를 추가적으로 관리한다면, 재사용된 Token을 추적하고 이 Refresh Token을 발급 받았던 User에게 알려줄 수 있음.
 	
+### 자세한 설명 블로그 링크 첨부
+- https://velog.io/@gon109/Refresh-Token-%EC%A0%81%EC%9A%A9%EA%B3%BC%EC%A0%95-%EC%9E%91%EC%84%B1%EC%A4%91
