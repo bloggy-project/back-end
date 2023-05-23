@@ -13,4 +13,5 @@ public class RefreshTokenRequiredException extends BaseException {
     public RefreshTokenRequiredException() {
         super(ResultType.REFRESH_TOKEN_REQUIRED);
     }
+
 }

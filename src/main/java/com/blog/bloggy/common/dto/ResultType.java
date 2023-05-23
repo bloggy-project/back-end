@@ -17,7 +17,9 @@ public enum ResultType {
     REFRESH_TOKEN_REQUIRED(HttpStatus.UNAUTHORIZED, "401004", "Refresh token required"),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "401005", "token expired"),
     NO_ROLE(HttpStatus.UNAUTHORIZED, "401006", "No Role"),
-    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "401007", "Refresh token does not match"),
+    NOT_MATCH_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "401007", "Refresh token does not match"),
+    FAIL_GENERATE_TOKEN(HttpStatus.BAD_REQUEST, "401008", "Generate token failed"),
+    INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "401009", "Token type does not match"),
 
 
     PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "404001", "Page not found"),

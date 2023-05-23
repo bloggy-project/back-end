@@ -1,4 +1,4 @@
-package com.blog.bloggy.exhandler;
+package com.blog.bloggy.common.exception.exhandler;
 
 
 import lombok.AllArgsConstructor;

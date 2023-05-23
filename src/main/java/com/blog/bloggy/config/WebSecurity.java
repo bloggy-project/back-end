@@ -17,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableWebSecurity //스프링 시큐리티 필터가 스프링 필터체인에 등록
 @RequiredArgsConstructor
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private final Environment env;
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TokenUtil tokenUtil;
@@ -38,12 +37,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
         AuthenticationFilter authenticationFilter =
-                new AuthenticationFilter(authenticationManager(),userService,env,tokenUtil);
+                new AuthenticationFilter(authenticationManager(),userService,tokenUtil);
 //        authenticationFilter.setAuthenticationManager(authenticationManager());
         return authenticationFilter;
     }
-
-
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder);

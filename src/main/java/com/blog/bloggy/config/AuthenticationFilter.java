@@ -28,16 +28,13 @@ import static com.blog.bloggy.common.util.TokenUtil.*;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private UserService userService;
-    private Environment env;
 
     private TokenUtil tokenUtil;
 
-
     public AuthenticationFilter(AuthenticationManager authenticationManager, UserService userService
-            , Environment env,TokenUtil tokenUtil) {
+            ,TokenUtil tokenUtil) {
         super(authenticationManager);
         this.userService = userService;
-        this.env = env;
         this.tokenUtil=tokenUtil;
     }
 
@@ -68,7 +65,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         log.info("userId ::: {}",userId);
         String accessToken = tokenUtil.generateAccessToken(userId);
         String refreshToken = tokenUtil.generateRefreshToken(userId);
-        response.addHeader(ACCESS_TOKEN_HEADER, accessToken);
-        response.addHeader(REFRESH_TOKEN_HEADER,refreshToken);
+        response.addHeader("accessToken", accessToken);
+        response.addHeader("refreshToken",refreshToken);
     }
 }

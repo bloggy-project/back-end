@@ -13,7 +13,7 @@ public class AuthService {
 
 
 
-    public TokenDto reGenerateAccessToken(String userId,String refreshToken){
-        return tokenUtil.reGenerateAccessToken(userId,refreshToken);
+    public TokenDto reGenerateAccessToken(String userId){
+        return tokenUtil.reGenerateAccessToken(userId);
     }
 }

@@ -1,10 +1,10 @@
-package com.blog.bloggy.exhandler.advice;
+package com.blog.bloggy.common.exception.exhandler.advice;
 
 import com.blog.bloggy.common.dto.ExceptionResult;
 import com.blog.bloggy.common.dto.ResultType;
 import com.blog.bloggy.common.exception.BaseException;
+import com.blog.bloggy.common.exception.exhandler.ErrorResult;
 import com.blog.bloggy.exception.NotFoundException;
-import com.blog.bloggy.exhandler.ErrorResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

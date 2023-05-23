@@ -16,6 +16,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
+
 @RestController
 @RequiredArgsConstructor
 public class PostController {
@@ -25,7 +27,7 @@ public class PostController {
     private final PostRepository postRepository;
     @PostMapping("/posts")
     public ResponseEntity<ResponsePostRegister> postRegister(
-            @RequestAttribute(TokenUtil.USER_ID_ATTRIBUTE_KEY) String userId,
+            @RequestAttribute(USER_ID_ATTRIBUTE_KEY) String userId,
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostDto postDto= PostDto.builder()

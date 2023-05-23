@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +19,7 @@ public class CommentController {
 
     @PostMapping("/comment")
     public ResponseEntity<ResponseCommentRegister> commentRegister(
-            @RequestAttribute(USER_ID_ATTRIBUTE_KEY) String userId,
+            @RequestAttribute String userId,
             @RequestBody RequestCommentRegister commentRegister){
         CommentDto commentDto= CommentDto.builder()
                 .postId(commentRegister.getPostId())

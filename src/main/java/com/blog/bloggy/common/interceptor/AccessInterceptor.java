@@ -7,13 +7,11 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.blog.bloggy.common.util.TokenUtil.*;
 import static org.springframework.util.ObjectUtils.isEmpty;
-import static com.blog.bloggy.common.util.TokenUtil.ACCESS_TOKEN_HEADER;
 
 @Component
 public class AccessInterceptor extends AuthInterceptor {
-
-
 
     public AccessInterceptor(TokenUtil tokenUtil) {
         super(tokenUtil);
@@ -23,19 +21,35 @@ public class AccessInterceptor extends AuthInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
-        this.setToken(this.getTokenFromHeader(request, ACCESS_TOKEN_HEADER));
         return super.preHandle(request, response, handler);
     }
 
     @Override
-    protected void checkTokenValid() {
-        tokenUtil.isExpired(this.token);
+    protected String getBearerTokenFromHeader(HttpServletRequest request) {
+        String requestHeader = request.getHeader("Authorization");
+        String token="";
+        if(requestHeader!=null&& requestHeader.startsWith("Bearer")){
+            token= requestHeader.substring(7, requestHeader.length());
+        }else{
+            throw new AccessTokenRequiredException(this.uri);
+        }
+        return token;
     }
     @Override
     protected void checkTokenExist() {
         if (isEmpty(this.token)) {
             throw new AccessTokenRequiredException(this.uri);
         }
+    }
+    @Override
+    protected void checkTokenValid() {
+        tokenUtil.isExpired(this.token);
+    }
+
+    @Override
+    protected void setUserIdToAttribute(HttpServletRequest request) {
+        String userId = tokenUtil.getUserIdFromAccessToken(this.token);
+        request.setAttribute(USER_ID_ATTRIBUTE_KEY, userId);
     }
 
 }
