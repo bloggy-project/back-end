@@ -25,8 +25,8 @@ public class TokenUtil {
     private final TokenRepository tokenRepository;
     public static final String USER_ID_ATTRIBUTE_KEY = "userId";
 
-    private static final String ACCESS_TOKEN_TYPE="ACCESS";
-    private static final String REFRESH_TOKEN_TYPE="REFRESH";
+    public static final String ACCESS_TOKEN_TYPE="ACCESS";
+    public static final String REFRESH_TOKEN_TYPE="REFRESH";
 
 
     public String generateToken(String userId,String type){
@@ -37,37 +37,42 @@ public class TokenUtil {
         // 2. token 생성일
         Date createdDate = new Date(); //현재 시간으로 생성.
         // 3. token 만료일
-        Date expirationDate = createdDate;
+        Date expirationDate = new Date();
         Calendar cal=Calendar.getInstance();
         cal.setTime(expirationDate);
         if(type.equals(ACCESS_TOKEN_TYPE)){
             cal.add(Calendar.SECOND, Integer.parseInt(env.getProperty("token.expiration_time")));
             expirationDate = cal.getTime();
-            return Jwts.builder()
-                    .setClaims(claims)      // 1
-                    .setIssuedAt(createdDate)       // 2
-                    .setExpiration(expirationDate)      // 3
-                    .signWith(SignatureAlgorithm.HS512,env.getProperty("token.secret"))
-                    .compact();
         }
         else if(type.equals(REFRESH_TOKEN_TYPE)){
             cal.add(Calendar.SECOND, Integer.parseInt(env.getProperty("refresh_token.random_time")));
             expirationDate = cal.getTime();
-            return Jwts.builder()
-                    .setClaims(claims)      // 1
-                    .setIssuedAt(createdDate)       // 2
-                    .setExpiration(expirationDate)      // 3
-                    .signWith(SignatureAlgorithm.HS512,env.getProperty("refresh_token.secret"))
-                    .compact();
         }
-        throw new InvalidTokenTypeException(type);
+        return Jwts.builder()
+                .setClaims(claims)      // 1
+                .setIssuedAt(createdDate)       // 2
+                .setExpiration(expirationDate)      // 3
+                .signWith(SignatureAlgorithm.HS512,env.getProperty("token.secret"))
+                .compact();
     }
     public String generateAccessToken(String userId) {
         return generateToken(userId,ACCESS_TOKEN_TYPE);
     }
 
+    public String generateRefreshToken(String userId) {
+        String refreshToken = generateToken(userId, REFRESH_TOKEN_TYPE);
+        // Refresh Token 생성 로직을 구현합니다.
+        Token token = tokenRepository.save(
+                Token.builder()
+                        .id(userId)
+                        .refresh_token(refreshToken)
+                        .expiration(Long.valueOf(env.getProperty("refresh_token.expiration_time")))
+                        .build()
+        );
+        return token.getRefresh_token();
+    }
 
-    public Claims getClaimsFromAccessToken(String token) {
+    public Claims getClaimsFromToken(String token){
         try {
             return Jwts.parser()
                     .setSigningKey(env.getProperty("token.secret"))
@@ -79,32 +84,21 @@ public class TokenUtil {
             throw new InvalidTokenException();
         }
     }
-    public Claims getClaimsFromRefreshToken(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(env.getProperty("refresh_token.secret"))
-                    .parseClaimsJws(token)
-                    .getBody();
-        }catch (ExpiredJwtException ex) {
-            throw new ExpiredTokenException();
-        }catch (JwtException ex){
-            throw new InvalidTokenException();
-        }
-    }
 
     public boolean isExpired(String token) {
 
-        Date date = getClaimsFromAccessToken(token).getExpiration();
+        Date date = getClaimsFromToken(token).getExpiration();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); // use your desired format
         String formattedDate = sdf.format(date);
         log.info("Expired Time : {}",formattedDate);
         return false;
     }
-    public String getUserIdFromAccessToken(String token) {
-        return getClaimsFromAccessToken(token).get(USER_ID_ATTRIBUTE_KEY,String.class);
+
+    public String getTypeFromToken(String token) {
+        return getClaimsFromToken(token).get("type", String.class);
     }
-    public String getUserIdFromRefreshToken(String token) {
-        return getClaimsFromRefreshToken(token).get(USER_ID_ATTRIBUTE_KEY,String.class);
+    public String getUserIdFromToken(String token) {
+        return getClaimsFromToken(token).get(USER_ID_ATTRIBUTE_KEY,String.class);
     }
     //Interceptor에서 검증.
     public boolean validRefreshToken(String userId, String refreshToken)  {
@@ -125,18 +119,6 @@ public class TokenUtil {
                 .refresh_token(generateRefreshToken(userId))
                 .build();
     }
-    // Refresh Token을 발급하는 메서드
-    public String generateRefreshToken(String userId) {
-        String refreshToken = generateToken(userId, REFRESH_TOKEN_TYPE);
-        // Refresh Token 생성 로직을 구현합니다.
-        Token token = tokenRepository.save(
-                Token.builder()
-                        .id(userId)
-                        .refresh_token(refreshToken)
-                        .expiration(Long.valueOf(env.getProperty("refresh_token.expiration_time")))
-                        .build()
-        );
-        return token.getRefresh_token();
-    }
+
 
 }

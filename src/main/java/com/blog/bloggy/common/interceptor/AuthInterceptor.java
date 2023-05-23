@@ -1,8 +1,7 @@
 package com.blog.bloggy.common.interceptor;
 
 
-import com.blog.bloggy.common.exception.AccessTokenRequiredException;
-import com.blog.bloggy.common.exception.RefreshTokenRequiredException;
+import com.blog.bloggy.common.exception.RequiredTokenException;
 import com.blog.bloggy.common.util.TokenUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.blog.bloggy.common.util.TokenUtil.*;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RequiredArgsConstructor
 abstract public class AuthInterceptor implements HandlerInterceptor {
@@ -36,8 +35,25 @@ abstract public class AuthInterceptor implements HandlerInterceptor {
         setUserIdToAttribute(request);
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
-    abstract protected String getBearerTokenFromHeader(HttpServletRequest request);
-    abstract protected void checkTokenExist();
+    protected String getBearerTokenFromHeader(HttpServletRequest request){
+        String requestHeader = request.getHeader("Authorization");
+        String token="";
+        if(requestHeader!=null&& requestHeader.startsWith("Bearer")){
+            token= requestHeader.substring(7, requestHeader.length());
+        }else{
+            throw new RequiredTokenException(this.uri);
+        }
+        return token;
+    }
+    protected void checkTokenExist() {
+        if (isEmpty(this.token)) {
+            throw new RequiredTokenException(this.uri);
+        }
+    }
+    protected boolean isValidType(String tokenType) {
+        return tokenUtil.getTypeFromToken(this.token).equals(tokenType);
+    }
+
     abstract protected void checkTokenValid();
     abstract protected void setUserIdToAttribute(HttpServletRequest request);
 }
