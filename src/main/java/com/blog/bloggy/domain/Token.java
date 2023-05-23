@@ -22,10 +22,7 @@ public class Token {
     @TimeToLive(unit = TimeUnit.SECONDS)
     private Long expiration;
 
-    public Token() {
-
-    }
-
+    public Token() {}
     public void setExpiration(Long expiration) {
         this.expiration = expiration;
     }

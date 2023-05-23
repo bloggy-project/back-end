@@ -18,7 +18,6 @@ public class RefreshInterceptor extends AuthInterceptor {
     public RefreshInterceptor(TokenUtil tokenUtil) {
         super(tokenUtil);
     }
-
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
@@ -48,7 +47,6 @@ public class RefreshInterceptor extends AuthInterceptor {
         String userId = tokenUtil.getUserIdFromRefreshToken(this.token);
         tokenUtil.validRefreshToken(userId,this.token);
     }
-
     @Override
     protected void setUserIdToAttribute(HttpServletRequest request) {
         String userId = tokenUtil.getUserIdFromRefreshToken(this.token);

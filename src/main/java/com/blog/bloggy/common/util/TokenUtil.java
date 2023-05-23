@@ -29,18 +29,6 @@ public class TokenUtil {
     private static final String REFRESH_TOKEN_TYPE="REFRESH";
 
 
-    /*
-    public String generate(String userId) {
-        String token = Jwts.builder()
-                .setSubject(userId)
-                .setExpiration(new Date(System.currentTimeMillis()+
-                        Long.parseLong(env.getProperty("token.expiration_time"))))
-                .signWith(SignatureAlgorithm.HS512,env.getProperty("token.secret"))
-                .compact();
-        return token;
-    }
-     */
-
     public String generateToken(String userId,String type){
         // 1. token 내부에 저장할 정보
         Map<String, Object> claims = new HashMap<>();
@@ -100,7 +88,7 @@ public class TokenUtil {
         }catch (ExpiredJwtException ex) {
             throw new ExpiredTokenException();
         }catch (JwtException ex){
-            throw new NotMatchRefreshTokenException();
+            throw new InvalidTokenException();
         }
     }
 
@@ -121,7 +109,7 @@ public class TokenUtil {
     //Interceptor에서 검증.
     public boolean validRefreshToken(String userId, String refreshToken)  {
         //Redis에 해당 유저 정보 존재하지 않음-> 발급이 안됐거나, 만료된 상태.
-        Token token = tokenRepository.findById(userId).orElseThrow(RefreshTokenRequiredException::new);
+        Token token = tokenRepository.findById(userId).orElseThrow(ExpiredTokenException::new);
         // 토큰이 같은지 비교
         if(!token.getRefresh_token().equals(refreshToken)) {
             //토큰이 다른경우
