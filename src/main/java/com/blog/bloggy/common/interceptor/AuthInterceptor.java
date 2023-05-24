@@ -50,10 +50,6 @@ abstract public class AuthInterceptor implements HandlerInterceptor {
             throw new RequiredTokenException(this.uri);
         }
     }
-    protected boolean isValidType(String tokenType) {
-        return tokenUtil.getTypeFromToken(this.token).equals(tokenType);
-    }
-
     abstract protected void checkTokenValid();
     abstract protected void setUserIdToAttribute(HttpServletRequest request);
 }

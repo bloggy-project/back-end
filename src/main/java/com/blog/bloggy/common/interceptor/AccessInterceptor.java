@@ -26,11 +26,8 @@ public class AccessInterceptor extends AuthInterceptor {
     @Override
     protected void checkTokenValid() {
         tokenUtil.isExpired(this.token);
-        if(!isValidType(ACCESS_TOKEN_TYPE)){
-            throw new InvalidTokenTypeException();
-        }
+        tokenUtil.isValidType(this.token,ACCESS_TOKEN_TYPE);
     }
-
     @Override
     protected void setUserIdToAttribute(HttpServletRequest request) {
         String userId = tokenUtil.getUserIdFromToken(this.token);

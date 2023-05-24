@@ -25,10 +25,9 @@ public class RefreshInterceptor extends AuthInterceptor {
 
     @Override
     protected void checkTokenValid() {
+        //getUserIdFromToken -> Token parse하면서 내부적으로 만료나 토큰 value 관련 예외 처리.
         String userId = tokenUtil.getUserIdFromToken(this.token);
-        if(!isValidType(REFRESH_TOKEN_TYPE)){
-            throw new InvalidTokenTypeException();
-        }
+        tokenUtil.isValidType(this.token,REFRESH_TOKEN_TYPE);
         tokenUtil.validRefreshToken(userId,this.token);
     }
     @Override

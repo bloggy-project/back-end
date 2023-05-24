@@ -97,6 +97,11 @@ public class TokenUtil {
     public String getTypeFromToken(String token) {
         return getClaimsFromToken(token).get("type", String.class);
     }
+    public void isValidType(String token,String tokenType){
+        if(!getTypeFromToken(token).equals(tokenType)){
+            throw new InvalidTokenTypeException();
+        }
+    }
     public String getUserIdFromToken(String token) {
         return getClaimsFromToken(token).get(USER_ID_ATTRIBUTE_KEY,String.class);
     }
