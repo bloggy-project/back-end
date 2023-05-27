@@ -1,7 +1,7 @@
 package com.blog.bloggy.common.config;
 
-import com.blog.bloggy.common.interceptor.AccessInterceptor;
-import com.blog.bloggy.common.interceptor.RefreshInterceptor;
+import com.blog.bloggy.interceptor.AccessInterceptor;
+import com.blog.bloggy.interceptor.RefreshInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

@@ -1,13 +1,15 @@
 package com.blog.bloggy.service;
 
-import com.blog.bloggy.domain.Post;
-import com.blog.bloggy.dto.comment.CommentDto;
-import com.blog.bloggy.dto.comment.ResponseCommentRegister;
-import com.blog.bloggy.dto.post.PostDto;
-import com.blog.bloggy.dto.post.ResponsePostRegister;
-import com.blog.bloggy.exception.NotFoundException;
-import com.blog.bloggy.repository.comment.CommentRepository;
-import com.blog.bloggy.repository.post.PostRepository;
+import com.blog.bloggy.comment.service.CommentService;
+import com.blog.bloggy.post.model.Post;
+import com.blog.bloggy.comment.dto.CommentDto;
+import com.blog.bloggy.comment.dto.ResponseCommentRegister;
+import com.blog.bloggy.post.dto.PostDto;
+import com.blog.bloggy.post.dto.ResponsePostRegister;
+import com.blog.bloggy.common.exception.NotFoundException;
+import com.blog.bloggy.post.service.PostService;
+import com.blog.bloggy.comment.repository.CommentRepository;
+import com.blog.bloggy.post.repository.PostRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

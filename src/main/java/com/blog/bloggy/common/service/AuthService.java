@@ -1,7 +1,7 @@
 package com.blog.bloggy.common.service;
 
 import com.blog.bloggy.common.util.TokenUtil;
-import com.blog.bloggy.dto.TokenDto;
+import com.blog.bloggy.token.dto.TokenDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,9 +1,9 @@
 package com.blog.bloggy.common.util;
 
 import com.blog.bloggy.common.exception.*;
-import com.blog.bloggy.domain.Token;
-import com.blog.bloggy.dto.TokenDto;
-import com.blog.bloggy.repository.TokenRepository;
+import com.blog.bloggy.token.model.Token;
+import com.blog.bloggy.token.dto.TokenDto;
+import com.blog.bloggy.token.repository.TokenRepository;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
