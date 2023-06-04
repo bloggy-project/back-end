@@ -73,7 +73,7 @@ jobs:
         env:
           NAME: "gon109"
           APP: "bloggy"
-          COMPOSE: "./bloggy-cd.yml"
+          COMPOSE: "./docker-compose.yml"
         with:
           username: ubuntu
           host: ${{secrets.SERVER_HOST}}
