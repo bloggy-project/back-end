@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
+
+  mysql:
+    container_name: mysql
+    image: mysql
+    environment:
+      MYSQL_DATABASE: bloggy_db
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_USER: gongon
+      MYSQL_PASSWORD: 1234
+      TZ: Asia/Seoul
+    volumes:
+      - ./db/data:/var/lib/mysql:rw
+      #volumes에 잡은 경로인 "/var/lib/mysql:rw"는 MySQL의 실제 저장 경로입니다.
+      #Docker를 구동을 하게 되면 "db/data"에 파일들이 많이 생성될 텐데요.
+      #이것들이 DB에 접속했을 때 보이는 정보랍니다.
+      #이렇게 만들어진 이유는 컨테이너가 종료 혹은 삭제 되었을 때 내부 데이터가 날아가는걸 방지하기 위함입니다.
+      #로컬에 데이터를 보관하여 다시 컨테이너를 생성할 때도 DB는 그대로 남아있습니다.
+    ports:
+      - "3308:3306"
+    command:
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
+    #restart: always
+
+  backend:
+    restart: always
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "9092:9090"
+    expose:
+      - "9092"
+    depends_on:
+      - redis
+      - mysql
