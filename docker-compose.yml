@@ -31,9 +31,6 @@ services:
 
   backend:
     restart: always
-    build:
-      context: ./docker
-      dockerfile: Dockerfile
     ports:
       - "9092:9090"
     expose:
