@@ -4,7 +4,7 @@ FROM openjdk:11-jdk
 	# JAR_FILE 변수를 정의
   # 프로젝트를 빌드할 시, build/libs/xxxx.jar 의 형태로 jar file이 생성되고, 그 파일의 위치를 변수로 저장하는 것
   # 기본적으로 jar file이 2개이기 때문에 이름을 특정해야함
-ARG JAR_FILE=../build/libs/bloggy-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=../back-end/build/libs/bloggy-0.0.1-SNAPSHOT.jar
 
 # JAR 파일 메인 디렉토리에 복사
 	# 프로젝트의 jar 파일 위치를 참조하여 jar 파일을 가져와서(ARG의 JAR_FILE 변수), 컨테이너의 루트 디렉토리에 app.jar의 이름으로 복사
