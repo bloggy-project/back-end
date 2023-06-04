@@ -91,14 +91,14 @@ jobs:
         env:
           NAME: "gon109"
           APP: "bloggy"
-          COMPOSE: "./docker-compose.yml"
         with:
           username: ubuntu
           host: ${{secrets.SERVER_HOST}}
           key: ${{secrets.BLOGGY_KEY}}
-          envs: APP, COMPOSE
+          envs: APP, NAME
           script_stop: true
           script: |
+            echo "NAME: $NAME, APP: $APP"
             sudo docker-compose -f /home/ubuntu/docker-compose.yml down --rmi all
             sudo docker pull $NAME/$APP:latest
             sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
