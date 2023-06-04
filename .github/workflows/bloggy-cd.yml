@@ -81,6 +81,7 @@ jobs:
           envs: APP, COMPOSE
           script_stop: true
           script: |
-            sudo docker-compose -f $COMPOSE down --rmi all
+            sudo cp docker-compose.yml /home/ubuntu/
+            sudo docker-compose -f /home/ubuntu/docker-compose.yml down --rmi all
             sudo docker pull $NAME/$APP:latest
-            sudo docker-compose -f $COMPOSE up -d
+            sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
