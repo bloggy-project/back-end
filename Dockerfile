@@ -14,5 +14,4 @@ COPY ${JAR_FILE} backend.jar
     # Docker파일이 Docker엔진을 통해서 컨테이너로 올라갈 때, Docker 컨테이너의 시스템 진입점이 어디인지를 선언
     # java -jar 명령어를 이용해서, 컨테이너의 루트에 위치한 app.jar을 실행하라.
 #EXPOSE 9092/tcp
-EXPOSE 80
 ENTRYPOINT ["java","-jar","/backend.jar"]
