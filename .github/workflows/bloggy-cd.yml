@@ -93,5 +93,5 @@ jobs:
             echo "NAME: $NAME, APP: $APP"
             sudo docker-compose -f /home/ubuntu/docker-compose.yml down --rmi all
             sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
-            docker run --rm -dp 9092:9090 --network ubuntu_default --name bloggy-server $NAME/$APP:latest
+            docker run --rm -dp 9092:80 --network ubuntu_default --name bloggy-server $NAME/$APP:latest
 
