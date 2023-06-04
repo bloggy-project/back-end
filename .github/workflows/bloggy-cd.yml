@@ -31,7 +31,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: 'gradle'
-      - users: actions/checkout@v2
+      - uses: actions/checkout@v2
       - run: touch ./src/main/resources/application.yml
       - run: echo "${{env.APPLICATION}" > ./src/main/resources/application.yml
       - uses: actions/upload-artifact@v2
