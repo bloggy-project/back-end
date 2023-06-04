@@ -94,6 +94,5 @@ jobs:
             sudo docker-compose -f /home/ubuntu/docker-compose.yml down --rmi all
             sudo docker pull $NAME/$APP:latest
             sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
-            docker stop bloggy-server
             docker image rm $NAME/$APP:latest
             docker run --rm -dp 9092:9090 --name bloggy-server $NAME/$APP:latest
