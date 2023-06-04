@@ -28,16 +28,3 @@ services:
       - '--character-set-server=utf8mb4'
       - '--collation-server=utf8mb4_unicode_ci'
     #restart: always
-
-  backend:
-    restart: always
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    ports:
-      - "9092:9090"
-    expose:
-      - "9092"
-    depends_on:
-      - redis
-      - mysql
