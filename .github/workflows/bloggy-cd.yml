@@ -68,6 +68,7 @@ jobs:
         run: |
           docker build -t $NAME/$APP -f ./Dockerfile . 
           docker push $NAME/$APP:latest
+
       - name: Copy docker-compose.yml to EC2
         uses: appleboy/scp-action@master
         with:
