@@ -4,7 +4,7 @@ FROM openjdk:11-jdk
 	# JAR_FILE 변수를 정의
   # 프로젝트를 빌드할 시, build/libs/xxxx.jar 의 형태로 jar file이 생성되고, 그 파일의 위치를 변수로 저장하는 것
   # 기본적으로 jar file이 2개이기 때문에 이름을 특정해야함
-CMD ["./gradlew","clean","build"]
+
 ARG JAR_FILE=/build/libs/bloggy-0.0.1-SNAPSHOT.jar
 
 # JAR 파일 메인 디렉토리에 복사
