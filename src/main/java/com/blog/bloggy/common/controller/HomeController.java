@@ -13,8 +13,8 @@ public class HomeController {
         return "home";
     }
 
-    @ResponseBody
     @GetMapping(value="/test")
+    @ResponseBody
     public Test test(){
         Test test=new Test();
         test.setName("테스트 성공");

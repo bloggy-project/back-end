@@ -1,6 +1,5 @@
 package com.blog.bloggy.interceptor;
 
-
 import com.blog.bloggy.common.exception.RequiredTokenException;
 import com.blog.bloggy.common.util.TokenUtil;
 import lombok.Getter;

@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static com.blog.bloggy.common.util.TokenUtil.*;
-
 @Component
 public class AccessInterceptor extends AuthInterceptor {
 
