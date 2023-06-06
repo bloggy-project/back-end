@@ -30,7 +30,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-          #cache: 'gradle' # Here we enable caching for Gradle
+          cache: 'gradle' # Here we enable caching for Gradle
 
       - uses: actions/checkout@v2
       - run: touch ./src/main/resources/application.yml
@@ -47,16 +47,11 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
-        #  cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Execute Gradle build
         run: ./gradlew clean build -x test #-Pprofile=sns #application 프로필 이름
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: bloggy-jar
-          path: ./build/libs/
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -65,18 +60,13 @@ jobs:
         with:
           username: ${{secrets.DOCKER_USERNAME}}
           password: ${{secrets.DOCKER_PASSWORD}}
-      - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: bloggy-jar
-          path: ./build/libs/
 
       - name: build and release to DockerHub
         env:
           NAME: ${{secrets.DOCKERHUB_NAME}}
           APP: "bloggy"
         run: |
-          docker build -t $NAME/$APP --build-arg JAR_FILE=/build/libs/bloggy-0.0.1-SNAPSHOT.jar .
+          docker build -t $NAME/$APP .
           docker push $NAME/$APP:latest
 
       - name: EC2 Docker Run
