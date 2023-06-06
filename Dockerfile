@@ -10,6 +10,7 @@ ARG JAR_FILE=/build/libs/bloggy-0.0.1-SNAPSHOT.jar
 # JAR 파일 메인 디렉토리에 복사
 	# 프로젝트의 jar 파일 위치를 참조하여 jar 파일을 가져와서(ARG의 JAR_FILE 변수), 컨테이너의 루트 디렉토리에 app.jar의 이름으로 복사
 COPY ${JAR_FILE} backend.jar
+#COPY target/bloggy-0.0.1-SNAPSHOT.jar backend.jar
 
 # 시스템 진입점(컨테이너가 시작됐을 떄 실행할 스크립트) 정의
     # Docker파일이 Docker엔진을 통해서 컨테이너로 올라갈 때, Docker 컨테이너의 시스템 진입점이 어디인지를 선언
