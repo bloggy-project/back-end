@@ -13,7 +13,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final AccessInterceptor accessInterceptor;
     private final RefreshInterceptor refreshInterceptor;
-
+    //깃 에러로 다시 테스트
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(accessInterceptor)
