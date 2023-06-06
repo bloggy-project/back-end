@@ -78,7 +78,7 @@ jobs:
           NAME: ${{secrets.DOCKERHUB_NAME}}
           APP: "bloggy"
         run: |
-          docker build -t $NAME/$APP --build-arg JAR_FILE=./build/libs//bloggy-0.0.1-SNAPSHOT.jar .
+          docker build -t $NAME/$APP --build-arg JAR_FILE=/home/runner/work/back-end/back-end/build/libs/bloggy-0.0.1-SNAPSHOT.jar .
           docker push $NAME/$APP:latest
 
       - name: EC2 Docker Run
