@@ -15,13 +15,6 @@ public class AccessInterceptor extends AuthInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
-        return super.preHandle(request, response, handler);
-    }
-
-    @Override
     protected void checkTokenValid() {
         tokenUtil.isExpired(this.token);
         tokenUtil.isValidType(this.token,ACCESS_TOKEN_TYPE);
