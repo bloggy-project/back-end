@@ -82,5 +82,6 @@ jobs:
           script_stop: true
           script: |
             echo "NAME: $NAME, APP: $APP"
+            sudo docker pull $NAME/$APP:latest
             docker run --rm -dp 9092:9090 --network ubuntu_default --name bloggy-server $NAME/$APP:latest
 
