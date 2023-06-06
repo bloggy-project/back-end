@@ -1,12 +1,12 @@
-name: Bloggy Server CD
+name: Bloggy Server CD-DEV
 
 on:
   push:
     branches:
-      - ''
+      - 'dev'
   pull_request:
     branches:
-      - ''
+      - 'dev'
 
 jobs:
   deploy:
@@ -91,7 +91,5 @@ jobs:
           script_stop: true
           script: |
             echo "NAME: $NAME, APP: $APP"
-            sudo docker-compose -f /home/ubuntu/docker-compose.yml down --rmi all
-            sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
             docker run --rm -dp 9092:9090 --network ubuntu_default --name bloggy-server $NAME/$APP:latest
 
