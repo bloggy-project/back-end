@@ -2,6 +2,7 @@ package com.blog.bloggy.post.service;
 
 
 import com.blog.bloggy.comment.model.Comment;
+import com.blog.bloggy.common.exception.PostNotFoundException;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.comment.dto.CommentStatus;
 import com.blog.bloggy.common.exception.NotFoundException;
@@ -58,7 +59,7 @@ public class PostService {
                 .build();
 
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(PostNotFoundException::new);
         post.setPostUser(user);
         postRepository.save(post);
         List<PostTag> postTags=new ArrayList<>();
@@ -104,7 +105,7 @@ public class PostService {
         Long postId = postUpdateDto.getPostId();
 
         Post post = postRepository.findByIdWithPostTag(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(PostNotFoundException::new);
         String title = postUpdateDto.getTitle();
         String content = postUpdateDto.getContent();
         post.updatePost(title,content);
@@ -166,7 +167,7 @@ public class PostService {
 
     public ResponsePostOne getPostOne(Long postId){
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(PostNotFoundException::new);
         ResponsePostOne responsePostOne= ResponsePostOne.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -179,7 +180,7 @@ public class PostService {
 
     public void deletePostAndMark(Long postId){
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(PostNotFoundException::new);
         deletePostComments(post);
         commentRepository.deleteCommentsByPostId(postId);
         post.getFavorites().clear();
@@ -227,7 +228,7 @@ public class PostService {
         if(valueOperations.get(key)==null){
             valueOperations.set( key,
                     String.valueOf(postRepository.findById(postId)
-                    .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다.")).getViews()),
+                    .orElseThrow(PostNotFoundException::new).getViews()),
                     Duration.ofMinutes(10));
             valueOperations.increment(key);
         }

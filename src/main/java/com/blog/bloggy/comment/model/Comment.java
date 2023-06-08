@@ -2,6 +2,7 @@ package com.blog.bloggy.comment.model;
 
 
 import com.blog.bloggy.comment.dto.CommentStatus;
+import com.blog.bloggy.common.model.BaseTimeEntity;
 import com.blog.bloggy.post.model.Post;
 import com.blog.bloggy.user.model.UserEntity;
 import lombok.Getter;
@@ -12,11 +13,13 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Comment {
+public class Comment extends BaseTimeEntity {
     @Id
     @GeneratedValue
     @Column(name = "comment_id")
     private Long id;
+
+    private long depth=1; //default 값은 1로 시작
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -26,6 +29,8 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "users_id")
     private UserEntity commentUser;
+
+    private Long parentId;
 
     private String username;
 
@@ -46,6 +51,11 @@ public class Comment {
         this.body=body;
         this.username=username;
         this.status=registered;
+    }
+
+    public void setParentId(Long parentId, long depth) {
+        this.parentId=parentId;
+        this.depth=depth+1;
     }
 }
 
