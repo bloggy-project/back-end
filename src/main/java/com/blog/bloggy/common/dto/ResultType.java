@@ -23,10 +23,15 @@ public enum ResultType {
 
     PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "404001", "Page not found"),
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "404002", "Data not found"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "404003", "user not found"),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "404004", "post not found"),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "404005", "comment not found"),
 
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "405001", "Http method is not allowed"),
 
     NOT_ACCEPTABLE(HttpStatus.NOT_ACCEPTABLE, "406001", "Not acceptable"),
+
+    DEPTH_OVER_REPLY(HttpStatus.NOT_ACCEPTABLE, "407001", "Not acceptable depth"),
 
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "415001", "Unsupported media type"),
 
