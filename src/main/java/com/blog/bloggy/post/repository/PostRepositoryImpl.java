@@ -1,6 +1,9 @@
 package com.blog.bloggy.post.repository;
 
 import com.blog.bloggy.post.model.Post;
+import com.blog.bloggy.post.model.QPost;
+import com.blog.bloggy.user.model.QUserEntity;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +17,7 @@ import static com.blog.bloggy.comment.model.QComment.comment;
 import static com.blog.bloggy.post.model.QPost.post;
 import static com.blog.bloggy.postTag.model.QPostTag.postTag;
 import static com.blog.bloggy.user.model.QUserEntity.userEntity;
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor
@@ -56,6 +60,30 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
     }
+    @Override
+    public Page<Post> findUserPagePostAll(String name,Pageable pageable) {
+        List<Post> posts = queryFactory
+                .select(post)
+                .from(post)
+                .join(post.postTags,postTag).fetchJoin()
+                .leftJoin(post.postUser, userEntity)
+                .where(
+                    usernameEq(name)
+                )
+                .orderBy(post.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        Long total = queryFactory
+                .select(post.count())
+                .from(post)
+                .leftJoin(post.postUser, userEntity)
+                .where(
+                        usernameEq(name)
+                )
+                .fetchOne();
+        return new PageImpl<>(posts, pageable, total);
+    }
 
     @Override
     public Optional<Post> findByIdWithPostTag(Long id) {
@@ -68,5 +96,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         );
     }
 
+    private BooleanExpression usernameEq(String name) {
+        return hasText(name) ? post.postUser.name.eq(name) : null;
+    }
 
 }

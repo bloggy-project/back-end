@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 
+
 import static com.blog.bloggy.post.model.QPost.post;
 
 
@@ -24,4 +25,5 @@ public class PostQueryRepository {
                 .where(post.id.eq(postId))
                 .execute();
     }
+
 }

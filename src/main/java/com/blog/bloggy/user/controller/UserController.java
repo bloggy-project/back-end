@@ -1,6 +1,8 @@
 package com.blog.bloggy.user.controller;
 
 
+import com.blog.bloggy.post.dto.ResponsePostOne;
+import com.blog.bloggy.post.dto.ResponseUserPagePost;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.comment.dto.ResponseUserComment;
 import com.blog.bloggy.user.dto.RequestUser;
@@ -57,5 +59,6 @@ public class UserController {
         List<ResponseUserComment> registeredComment = userQueryService.getRegisteredComment(userId);
         return ResponseEntity.status(HttpStatus.OK).body(registeredComment);
     }
+
 
 }

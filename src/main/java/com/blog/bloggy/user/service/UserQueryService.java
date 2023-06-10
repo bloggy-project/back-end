@@ -2,6 +2,7 @@ package com.blog.bloggy.user.service;
 
 
 import com.blog.bloggy.comment.model.Comment;
+import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.comment.dto.ResponseUserComment;
 import com.blog.bloggy.common.exception.NotFoundException;
@@ -23,7 +24,7 @@ public class UserQueryService {
 
     public List<ResponseUserComment> getRegisteredComment(String userId){
         UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
         List<Comment> comments = commentRepository.findRegisteredByCommentUser(user);
         List<ResponseUserComment> responseUserComments = comments.stream()
                 .map(c -> ResponseUserComment.builder()
