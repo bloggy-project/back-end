@@ -5,7 +5,6 @@ import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.exception.PostNotFoundException;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.comment.dto.CommentStatus;
-import com.blog.bloggy.common.exception.NotFoundException;
 import com.blog.bloggy.favorite.model.Favorite;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.model.Post;
@@ -22,13 +21,13 @@ import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,6 +49,10 @@ public class PostService {
     private final TagRepository tagRepository;
     private final RedisTemplate redisTemplate;
 
+    @Transactional //트랜잭셔널을 붙이지 않으면 TestData삽입 시
+    //LazyInitializationException: failed to lazily initialize a collection of role:
+    // com.blog.bloggy.user.model.UserEntity.posts, could not initialize proxy
+    //라는 에러가 발생함 이유는?
     public ResponsePostRegister createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
         Post post = Post.builder()
@@ -188,9 +191,9 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public Page<PostListDto> getPostAllByCreatedAt(Integer page, Integer size){
-        PageRequest pageRequest=PageRequest.of(page, size, Sort.Direction.DESC,"createdAt");
-        Page<Post> posts = postRepository.findPostsWithUsersAsPage(pageRequest);
+    public Page<PostListDto> getPostAllByCreatedAt( Pageable page){
+        //PageRequest pageRequest=PageRequest.of(page, size, Sort.Direction.DESC,"createdAt");
+        Page<Post> posts = postRepository.findPostsWithUsersAsPage(page);
         Page<PostListDto> toMap = posts.map(post -> PostListDto.builder()
                 .title(post.getTitle())
                 .categoryName(post.getCategoryName())
@@ -199,6 +202,18 @@ public class PostService {
                 .build());
         return toMap;
     }
+    public Page<ResponseUserPagePost> getUserPostAllOrderByCreatedAt(String name,Pageable page){
+        Page<Post> posts = postRepository.findUserPagePostAll(name,page);
+        Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
+                .build());
+        return toMap;
+    }
+
 
     private static void deletePostFavorite(Post post) {
         Iterator<Favorite> iterator = post.getFavorites().iterator();
