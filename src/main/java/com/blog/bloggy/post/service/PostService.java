@@ -205,7 +205,7 @@ public class PostService {
         return toMap;
     }
     public Page<ResponseUserPagePost> getUserPostAllOrderByCreatedAt(String name,Pageable page){
-        Page<Post> posts = pagingQueryRepository.findUserPagePostAllV2(name,page);
+        Page<Post> posts = pagingQueryRepository.findUserPagePostAllV1(name,page);
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())

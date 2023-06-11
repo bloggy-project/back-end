@@ -37,40 +37,6 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
     }
-    //커버링 인덱스 적용
-
-    public Page<Post> findUserPagePostAllV2(String name, Pageable pageable) {
-        // 1) 커버링 인덱스로 대상 조회
-        List<Long> ids = queryFactory
-                .select(post.id)
-                .from(post)
-                .leftJoin(post.postUser, userEntity)
-                .where(usernameEq(name))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        List<Post> posts = queryFactory
-                .select(post)
-                .from(post)
-                .join(post.postTags,postTag).fetchJoin()
-                .where(post.id.in(ids))
-                .orderBy(post.createdAt.desc())
-                .fetch();
-        Long total = queryFactory
-                .select(post.count())
-                .from(post)
-                .where(post.id.in(ids))
-                .fetchOne();
-        return new PageImpl<>(posts, pageable, total);
-    }
-
-    private BooleanExpression usernameEq(String name) {
-        return hasText(name) ? post.postUser.name.eq(name) : null;
-    }
-
-
-
     // 인덱스 미사용버전
     public Page<Post> findUserPagePostAllV1(String name, Pageable pageable) {
         List<Post> posts = queryFactory
@@ -95,7 +61,12 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
     }
-    //커버링 인덱스 적용 및 Entity를 Dto로 전환 문제 해결 x. 사용 금지
+
+    private BooleanExpression usernameEq(String name) {
+        return hasText(name) ? post.postUser.name.eq(name) : null;
+    }
+
+    // Entity를 Dto로 전환 문제 해결 x. 사용 금지
     public Page<ResponseUserPagePostForLazy> findUserPagePostAllV3(String name, Pageable pageable) {
         // 1) 커버링 인덱스로 대상 조회
         List<Long> ids = queryFactory
