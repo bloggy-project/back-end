@@ -3,6 +3,7 @@ package com.blog.bloggy.post.service;
 
 import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.exception.PostNotFoundException;
+import com.blog.bloggy.common.repository.PagingQueryRepository;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.comment.dto.CommentStatus;
 import com.blog.bloggy.favorite.model.Favorite;
@@ -43,6 +44,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostQueryRepository postQueryRepository;
+    private final PagingQueryRepository pagingQueryRepository;
     private final CommentRepository commentRepository;
     private final FavoriteRepository favoriteRepository;
     private final PostTagRepository postTagRepository;
@@ -193,7 +195,7 @@ public class PostService {
 
     public Page<PostListDto> getPostAllByCreatedAt( Pageable page){
         //PageRequest pageRequest=PageRequest.of(page, size, Sort.Direction.DESC,"createdAt");
-        Page<Post> posts = postRepository.findPostsWithUsersAsPage(page);
+        Page<Post> posts = pagingQueryRepository.findPostsWithUsersAsPage(page);
         Page<PostListDto> toMap = posts.map(post -> PostListDto.builder()
                 .title(post.getTitle())
                 .categoryName(post.getCategoryName())
@@ -203,7 +205,7 @@ public class PostService {
         return toMap;
     }
     public Page<ResponseUserPagePost> getUserPostAllOrderByCreatedAt(String name,Pageable page){
-        Page<Post> posts = postRepository.findUserPagePostAll(name,page);
+        Page<Post> posts = pagingQueryRepository.findUserPagePostAllV2(name,page);
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -213,6 +215,7 @@ public class PostService {
                 .build());
         return toMap;
     }
+
 
 
     private static void deletePostFavorite(Post post) {
