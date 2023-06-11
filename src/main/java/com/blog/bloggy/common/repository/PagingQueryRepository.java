@@ -61,6 +61,31 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
     }
+    // 커버링 인덱스 적용
+    public Page<Post> findUserPagePostAllV2(String name, Pageable pageable) {
+        List<Long> ids = queryFactory
+                .select(post.id)
+                .from(post)
+                .leftJoin(post.postUser, userEntity)
+                .where(usernameEq(name))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        List<Post> posts = queryFactory
+                .select(post)
+                .from(post)
+                .join(post.postTags,postTag).fetchJoin()
+                .where(post.id.in(ids))
+                .orderBy(post.createdAt.desc())
+                .fetch();
+        Long total = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(post.id.in(ids))
+                .fetchOne();
+        return new PageImpl<>(posts, pageable, total);
+    }
 
     private BooleanExpression usernameEq(String name) {
         return hasText(name) ? post.postUser.name.eq(name) : null;
