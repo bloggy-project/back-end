@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -208,19 +207,9 @@ public class PostService {
         return toMap;
     }
 
-    public Slice<ResponsePostList> getPostsV1(Long postId, Pageable pageable) {
-        Slice<Post> posts = pagingQueryRepository.findPostsForMainV1(postId, pageable);
-        Slice<ResponsePostList> results= posts.map(post -> ResponsePostList.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-                .build());
-        return results;
-    }
 
-    public Slice<ResponsePostList> getPostsV2(Long postId, Pageable pageable) {
-        return pagingQueryRepository.findPostsForMainV2(postId, pageable);
+    public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
+        return pagingQueryRepository.findPostsForMain(postId, pageable);
     }
 
     private static void deletePostFavorite(Post post) {

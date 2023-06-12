@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,19 +28,7 @@ public class PagingQueryRepository {
     private final JPAQueryFactory queryFactory;
 
 
-    public Slice<Post> findPostsForMainV1(Long postId, Pageable pageable) {
-        List<Post> posts = queryFactory
-                .selectFrom(post)
-                .where(
-                        ltPostId(postId)
-                )
-                .join(post.postUser, userEntity).fetchJoin()
-                .orderBy(post.id.desc())
-                .limit(pageable.getPageSize()+1)
-                .fetch();
-        return checkLastPage(pageable, posts);
-    }
-    public Slice<ResponsePostList> findPostsForMainV2(Long postId, Pageable pageable) {
+    public Slice<ResponsePostList> findPostsForMain(Long postId, Pageable pageable) {
 
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(

@@ -13,11 +13,11 @@ public class ResponsePostList {
     private String content;
     private String username;
     private LocalDateTime createdAt;
-    private Long commentCount;
-    private Long favoriteCount;
+    private long commentCount;
+    private long favoriteCount;
     @Builder
     @QueryProjection
-    public ResponsePostList(Long postId, String title, String content, String username, LocalDateTime createdAt, Long commentCount, Long favoriteCount) {
+    public ResponsePostList(Long postId, String title, String content, String username, LocalDateTime createdAt, long commentCount, long favoriteCount) {
         this.postId = postId;
         this.title = title;
         this.content = content;
