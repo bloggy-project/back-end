@@ -8,6 +8,7 @@ import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.user.model.UserEntity;
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "commentPost")
     private List<Comment> comments = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "favoritePost")
     private List<Favorite> favorites = new ArrayList<>();
@@ -72,10 +74,10 @@ public class Post extends BaseTimeEntity {
     public void removeComment(Comment comment){
         this.comments.remove(comment);
     }
+
     public void removeFavorite(Favorite favorite) {
         favorites.remove(favorite);
     }
-
 
     public void addPostTag(PostTag postTag) {
         this.postTags.add(postTag);
@@ -88,6 +90,17 @@ public class Post extends BaseTimeEntity {
     public void updatePost(String title, String content) {
         this.title=title;
         this.content=content;
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", views=" + views +
+                ", createdAt "+this.getCreatedAt()+'\''+
+                '}';
     }
 }
 

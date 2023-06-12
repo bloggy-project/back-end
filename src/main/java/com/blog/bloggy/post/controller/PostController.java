@@ -1,21 +1,16 @@
 package com.blog.bloggy.post.controller;
 
 
-import com.blog.bloggy.post.model.Post;
 import com.blog.bloggy.post.dto.*;
-import com.blog.bloggy.post.repository.PostRepository;
 import com.blog.bloggy.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
 
@@ -70,21 +65,22 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(postOne);
     }
 
-    @GetMapping("/postAll")
-    public Page<PostListDto> getPostAllOrderByCreatedAt(
-                                                         @RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
-        return postService.getPostAllByCreatedAt(pageable);
+    @GetMapping("/posts")
+    public ResponseEntity<Slice<ResponsePostList>> getPostsALl(
+            @RequestParam(value = "postId")Long postId){
+        Pageable pageable = PageRequest.of(0,10);
+        Slice<ResponsePostList> result=postService.getPosts(postId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @GetMapping("/postAll/{name}")
-    public ResponseEntity<Page<ResponseUserPagePost>> getUserPostAllOrderByCreatedAt(
+
+    @GetMapping("/posts/{name}")
+    public ResponseEntity<Page<ResponseUserPagePost>> getUserPostsOrderByCreatedAt(
             @PathVariable(value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<ResponseUserPagePost> result = postService.getUserPostAllOrderByCreatedAt(name, pageable);
+        Page<ResponseUserPagePost> result = postService.getUserPostsOrderByCreatedAt(name, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
