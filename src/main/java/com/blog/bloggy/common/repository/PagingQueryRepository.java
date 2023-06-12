@@ -1,9 +1,14 @@
 package com.blog.bloggy.common.repository;
 
+import com.blog.bloggy.comment.model.QComment;
+import com.blog.bloggy.favorite.model.QFavorite;
+import com.blog.bloggy.post.dto.QResponsePostList;
+import com.blog.bloggy.post.dto.ResponsePostList;
 import com.blog.bloggy.post.dto.ResponseUserPagePostForLazy;
 import com.blog.bloggy.post.model.Post;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -11,6 +16,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.blog.bloggy.comment.model.QComment.comment;
+import static com.blog.bloggy.favorite.model.QFavorite.favorite;
 import static com.blog.bloggy.post.model.QPost.post;
 import static com.blog.bloggy.postTag.model.QPostTag.postTag;
 import static com.blog.bloggy.user.model.QUserEntity.userEntity;
@@ -34,6 +41,30 @@ public class PagingQueryRepository {
                 .fetch();
         return checkLastPage(pageable, posts);
     }
+    public Slice<ResponsePostList> findPostsForMainV2(Long lastId, Pageable pageable) {
+
+        List<ResponsePostList> posts = queryFactory
+                .select(new QResponsePostList(
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.postUser.name,
+                        post.createdAt,
+                        JPAExpressions
+                                .select(comment.count())
+                                .from(comment)
+                                .where(comment.commentPost.eq(post)),
+                        JPAExpressions
+                                .select(favorite.count())
+                                .from(favorite)
+                                .where(favorite.favoritePost.eq(post))
+                ))
+                .orderBy(post.createdAt.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+        return checkLastPageV2(pageable, posts);
+    }
+
 
     private Slice<Post> checkLastPage(Pageable pageable, List<Post> posts) {
         boolean hasNext=false;
@@ -43,7 +74,14 @@ public class PagingQueryRepository {
         }
         return new SliceImpl<>(posts,pageable,hasNext);
     }
-
+    private Slice<ResponsePostList> checkLastPageV2(Pageable pageable, List<ResponsePostList> posts) {
+        boolean hasNext=false;
+        if(posts.size()> pageable.getPageSize()){
+            hasNext=true;
+            posts.remove(pageable.getPageSize());
+        }
+        return new SliceImpl<>(posts,pageable,hasNext);
+    }
 
     public Page<Post> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
         // 커버링 인덱스 적용

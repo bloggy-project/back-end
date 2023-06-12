@@ -69,7 +69,8 @@ public class PostController {
     public ResponseEntity<Slice<ResponsePostList>> getPostsALl(
             @RequestParam(value = "postId") Long postId ){
         Pageable pageable = PageRequest.of(0,10);
-        Slice<ResponsePostList> result=postService.getPosts(postId, pageable);
+        //Slice<ResponsePostList> result=postService.getPostsV1(postId, pageable);
+        Slice<ResponsePostList> result=postService.getPostsV2(postId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

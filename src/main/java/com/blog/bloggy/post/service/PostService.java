@@ -207,7 +207,7 @@ public class PostService {
         return toMap;
     }
 
-    public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
+    public Slice<ResponsePostList> getPostsV1(Long postId, Pageable pageable) {
         Slice<Post> posts = pagingQueryRepository.findPostsForMainV1(postId, pageable);
         Slice<ResponsePostList> results= posts.map(post -> ResponsePostList.builder()
                 .postId(post.getId())
@@ -218,7 +218,9 @@ public class PostService {
         return results;
     }
 
-
+    public Slice<ResponsePostList> getPostsV2(Long postId, Pageable pageable) {
+        return pagingQueryRepository.findPostsForMainV2(postId, pageable);
+    }
 
     private static void deletePostFavorite(Post post) {
         Iterator<Favorite> iterator = post.getFavorites().iterator();
