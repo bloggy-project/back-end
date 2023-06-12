@@ -15,10 +15,8 @@ class PagingQueryRepositoryTest {
     private PagingQueryRepository repository;
 
 
-
-
     @Test
-    void findPostsForMainV2() {
+    void findPostsForMain() {
         int page=0; int size=10;
         Pageable pageable = PageRequest.of(page, size);
         Slice<ResponsePostList> postsForMainV2 = repository.findPostsForMain(200L, pageable);
