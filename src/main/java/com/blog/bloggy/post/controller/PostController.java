@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
 
 @RestController
@@ -67,7 +69,7 @@ public class PostController {
 
     @GetMapping("/posts")
     public ResponseEntity<Slice<ResponsePostList>> getPostsALl(
-            @RequestParam(value = "postId") Long postId ){
+            @RequestParam(value = "postId")Long postId){
         Pageable pageable = PageRequest.of(0,10);
         //Slice<ResponsePostList> result=postService.getPostsV1(postId, pageable);
         Slice<ResponsePostList> result=postService.getPostsV2(postId, pageable);

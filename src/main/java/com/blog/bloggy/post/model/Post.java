@@ -74,10 +74,10 @@ public class Post extends BaseTimeEntity {
     public void removeComment(Comment comment){
         this.comments.remove(comment);
     }
+
     public void removeFavorite(Favorite favorite) {
         favorites.remove(favorite);
     }
-
 
     public void addPostTag(PostTag postTag) {
         this.postTags.add(postTag);
@@ -90,6 +90,17 @@ public class Post extends BaseTimeEntity {
     public void updatePost(String title, String content) {
         this.title=title;
         this.content=content;
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", views=" + views +
+                ", createdAt "+this.getCreatedAt()+'\''+
+                '}';
     }
 }
 

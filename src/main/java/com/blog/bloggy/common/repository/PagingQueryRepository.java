@@ -1,7 +1,5 @@
 package com.blog.bloggy.common.repository;
 
-import com.blog.bloggy.comment.model.QComment;
-import com.blog.bloggy.favorite.model.QFavorite;
 import com.blog.bloggy.post.dto.QResponsePostList;
 import com.blog.bloggy.post.dto.ResponsePostList;
 import com.blog.bloggy.post.dto.ResponseUserPagePostForLazy;
@@ -14,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.blog.bloggy.comment.model.QComment.comment;
@@ -29,19 +29,19 @@ public class PagingQueryRepository {
     private final JPAQueryFactory queryFactory;
 
 
-    public Slice<Post> findPostsForMainV1(Long lastId, Pageable pageable) {
+    public Slice<Post> findPostsForMainV1(Long postId, Pageable pageable) {
         List<Post> posts = queryFactory
                 .selectFrom(post)
                 .where(
-                        ltPostId(lastId)
+                        ltPostId(postId)
                 )
                 .join(post.postUser, userEntity).fetchJoin()
-                .orderBy(post.createdAt.desc())
+                .orderBy(post.id.desc())
                 .limit(pageable.getPageSize()+1)
                 .fetch();
         return checkLastPage(pageable, posts);
     }
-    public Slice<ResponsePostList> findPostsForMainV2(Long lastId, Pageable pageable) {
+    public Slice<ResponsePostList> findPostsForMainV2(Long postId, Pageable pageable) {
 
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
@@ -61,30 +61,12 @@ public class PagingQueryRepository {
                 ))
                 .from(post)
                 .where(
-                        ltPostId(lastId)
+                        ltPostId(postId)
                 )
-                .orderBy(post.createdAt.desc())
+                .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
         return checkLastPageV2(pageable, posts);
-    }
-
-
-    private Slice<Post> checkLastPage(Pageable pageable, List<Post> posts) {
-        boolean hasNext=false;
-        if(posts.size()> pageable.getPageSize()){
-            hasNext=true;
-            posts.remove(pageable.getPageSize());
-        }
-        return new SliceImpl<>(posts,pageable,hasNext);
-    }
-    private Slice<ResponsePostList> checkLastPageV2(Pageable pageable, List<ResponsePostList> posts) {
-        boolean hasNext=false;
-        if(posts.size()> pageable.getPageSize()){
-            hasNext=true;
-            posts.remove(pageable.getPageSize());
-        }
-        return new SliceImpl<>(posts,pageable,hasNext);
     }
 
     public Page<Post> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
@@ -111,12 +93,33 @@ public class PagingQueryRepository {
                 .where(post.id.in(ids))
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
+    }
 
+    private Slice<Post> checkLastPage(Pageable pageable, List<Post> posts) {
+        boolean hasNext=false;
+        if(posts.size()> pageable.getPageSize()){
+            hasNext=true;
+            posts.remove(pageable.getPageSize());
+        }
+        return new SliceImpl<>(posts,pageable,hasNext);
+    }
+
+    private Slice<ResponsePostList> checkLastPageV2(Pageable pageable, List<ResponsePostList> posts) {
+        boolean hasNext=false;
+        if(posts.size()> pageable.getPageSize()){
+            hasNext=true;
+            posts.remove(pageable.getPageSize());
+        }
+        return new SliceImpl<>(posts,pageable,hasNext);
     }
     private BooleanExpression usernameEq(String name) {
         return hasText(name) ? post.postUser.name.eq(name) : null;
     }
-
+    private BooleanExpression createdAtExpression(LocalDateTime createdAt){
+        if(createdAt==null)
+            return null;
+        return post.createdAt.gt(createdAt);
+    }
     private BooleanExpression ltPostId(Long postId){
         if(postId==null)
             return null;
