@@ -59,6 +59,10 @@ public class PagingQueryRepository {
                                 .from(favorite)
                                 .where(favorite.favoritePost.eq(post))
                 ))
+                .from(post)
+                .where(
+                        ltPostId(lastId)
+                )
                 .orderBy(post.createdAt.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
