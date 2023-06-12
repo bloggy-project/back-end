@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -193,19 +194,9 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public Page<PostListDto> getPostAllByCreatedAt( Pageable page){
-        //PageRequest pageRequest=PageRequest.of(page, size, Sort.Direction.DESC,"createdAt");
-        Page<Post> posts = pagingQueryRepository.findPostsWithUsersAsPage(page);
-        Page<PostListDto> toMap = posts.map(post -> PostListDto.builder()
-                .title(post.getTitle())
-                .categoryName(post.getCategoryName())
-                .createdAt(post.getCreatedAt())
-                .username(post.getPostUser().getName())
-                .build());
-        return toMap;
-    }
-    public Page<ResponseUserPagePost> getUserPostAllOrderByCreatedAt(String name,Pageable page){
-        Page<Post> posts = pagingQueryRepository.findUserPagePostAllV2(name,page);
+
+    public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
+        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(name,page);
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -214,6 +205,17 @@ public class PostService {
                 .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
                 .build());
         return toMap;
+    }
+
+    public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
+        Slice<Post> posts = pagingQueryRepository.findPostsForMainV1(postId, pageable);
+        Slice<ResponsePostList> results= posts.map(post -> ResponsePostList.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .build());
+        return results;
     }
 
 
@@ -262,8 +264,8 @@ public class PostService {
     private static String getKey(Long postId) {
         return "post:" + postId + ":views";
     }
-
     //3분마다 자동 실행해주는 스케쥴러
+
     @Scheduled(cron = "0 0/3 * * * ?")
     public void deleteViewCntCacheFromRedis() {
         Set<String> redisKeys = redisTemplate.keys("post:*:views");
@@ -280,7 +282,5 @@ public class PostService {
             redisTemplate.delete("post:"+postId+"views");
         }
     }
-
-
 
 }

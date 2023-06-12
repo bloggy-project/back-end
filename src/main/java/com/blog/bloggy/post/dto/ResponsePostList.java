@@ -7,9 +7,12 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class PostListDto {
+public class ResponsePostList {
+    private Long postId;
     private String title;
-    private String categoryName;
+    private String content;
     private String username;
     private LocalDateTime createdAt;
+    private Long commentCount;
+    private Long favoriteCount;
 }
