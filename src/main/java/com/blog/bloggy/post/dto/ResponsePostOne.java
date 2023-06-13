@@ -10,7 +10,6 @@ import lombok.Data;
 public class ResponsePostOne extends BaseTimeEntity {
     private Long postId;
 
-    private String categoryName;
 
     private String title;
 
@@ -18,9 +17,8 @@ public class ResponsePostOne extends BaseTimeEntity {
 
     private String name;
 
-    public ResponsePostOne(Long postId, String categoryName, String title, String content, String name) {
+    public ResponsePostOne(Long postId, String title, String content, String name) {
         this.postId = postId;
-        this.categoryName = categoryName;
         this.title = title;
         this.content = content;
         this.name = name;

@@ -61,7 +61,6 @@ public class PostService {
         Post post = Post.builder()
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
-                .categoryName(postDto.getCategoryName())
                 .build();
 
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
@@ -90,7 +89,6 @@ public class PostService {
                 .userId(post.getPostUser().getUserId())
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
-                .categoryName(postDto.getCategoryName())
                 .tagNames(tags)
                 .build();
     }
@@ -166,7 +164,6 @@ public class PostService {
                 .userId(postUpdateDto.getUserId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .categoryName(post.getCategoryName())
                 .tagNames(tags)
                 .build();
     }
@@ -179,7 +176,6 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .name(post.getPostUser().getName())
-                .categoryName(post.getCategoryName())
                 .build();
         return responsePostOne;
     }

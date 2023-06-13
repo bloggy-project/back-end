@@ -16,6 +16,10 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(indexes = {
+        @Index(name = "fk_tag_post", columnList = "post_id"),
+        @Index(name = "fk_tag", columnList = "tag_id")
+})
 public class PostTag {
     @Id
     @GeneratedValue
@@ -23,11 +27,11 @@ public class PostTag {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Post tagPost;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
+    @JoinColumn(name = "tag_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Tag tag;
 
     private String tagName;
