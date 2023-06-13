@@ -28,7 +28,6 @@ public class PostController {
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
                 .userId(userId)
-                .categoryName(requestPostRegister.getCategoryName())
                 .tagNames(requestPostRegister.getTagNames())
                 .build();
         ResponsePostRegister responsePostRegister = postService.createPost(postDto);
@@ -43,7 +42,6 @@ public class PostController {
                 .postId(postId)
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
-                .categoryName(requestPostRegister.getCategoryName())
                 .tagNames(requestPostRegister.getTagNames())
                 .build();
         ResponsePostRegister responsePostRegister = postService.updatePost(postDto);

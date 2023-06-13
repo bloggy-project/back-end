@@ -42,8 +42,8 @@ public class FavoriteService {
                 (favorite)-> new NotFoundException("User already liked this post"),
                 ()->{
                     Favorite favorite=new Favorite();
-                    favorite.setRegisterFavorite(post,user);
                     favoriteRepository.save(favorite);
+                    favorite.setRegisterFavorite(post,user);
                 }
         );
     }

@@ -12,6 +12,5 @@ public class PostDto extends BaseTimeEntity {
     private String title;
     private String content;
     private String userId;
-    private String categoryName;
     private List<String> tagNames;
 }

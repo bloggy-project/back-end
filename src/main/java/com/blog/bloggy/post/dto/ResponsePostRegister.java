@@ -15,7 +15,6 @@ public class ResponsePostRegister extends BaseTimeEntity {
 
     private Long postId;
 
-    private String categoryName;
 
     private String title;
 
@@ -25,10 +24,9 @@ public class ResponsePostRegister extends BaseTimeEntity {
 
     private List<String> tagNames;
 
-    public ResponsePostRegister(Long postId, String categoryName, String title,
+    public ResponsePostRegister(Long postId, String title,
                                 String content, String userId, List<String> tagNames) {
         this.postId = postId;
-        this.categoryName = categoryName;
         this.title = title;
         this.content = content;
         this.userId = userId;

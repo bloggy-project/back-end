@@ -13,6 +13,10 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(indexes = {
+        @Index(name = "fk_comment_post", columnList = "post_id"),
+        @Index(name = "fk_comment_user", columnList = "users_id")
+})
 public class Comment extends BaseTimeEntity {
     @Id
     @GeneratedValue
@@ -22,12 +26,12 @@ public class Comment extends BaseTimeEntity {
     private long depth=1; //default 값은 1로 시작
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Post commentPost;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "users_id")
+    @JoinColumn(name = "users_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private UserEntity commentUser;
 
     private Long parentId;
