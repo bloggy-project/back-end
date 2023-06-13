@@ -52,6 +52,7 @@ class PagingQueryRepositoryTest {
         createPosts(userA, tagNames);
         tagNames.add("게임");
         createPosts(userB,tagNames);
+        //외래키 제거 후 다시 진행 예정
     }
     private void createPosts(UserEntity user, List<String> tagNames) throws InterruptedException {
         for(int i=0;i<=20;i++){
