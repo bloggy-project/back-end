@@ -40,8 +40,10 @@ class PagingQueryRepositoryTest {
     private FavoriteService favoriteService;
 
     @BeforeEach
-    @Transactional
     public void setup() throws InterruptedException {
+    }
+
+    private void init() throws InterruptedException {
         UserEntity userA=new UserEntity("test1@naver.com","gon1","abcde1");
         UserEntity userB=new UserEntity("test2@naver.com","go2","abcde2");
         userRepository.save(userA);
@@ -54,8 +56,9 @@ class PagingQueryRepositoryTest {
         createPosts(userB,tagNames);
         //외래키 제거 후 다시 진행 예정
     }
+
     private void createPosts(UserEntity user, List<String> tagNames) throws InterruptedException {
-        for(int i=0;i<=20;i++){
+        for(int i=0;i<=10;i++){
             String title="제목"+i+" "+user.getEmail();
             String content="본문 내용"+i+" "+ user.getName();
             PostDto postDto= PostDto.builder()
@@ -65,7 +68,7 @@ class PagingQueryRepositoryTest {
                     .tagNames(tagNames)
                     .build();
             ResponsePostRegister post = postService.createPost(postDto);
-            Thread.sleep(200);
+            //Thread.sleep(200);
             if(i%2==0) {
                 FavoriteDto favoriteDto = FavoriteDto.builder()
                         .postId(post.getPostId())
@@ -73,13 +76,7 @@ class PagingQueryRepositoryTest {
                         .build();
                 favoriteService.addFavoriteToPost(favoriteDto);
             }
-            if(i%4==0){
-                FavoriteDto favoriteDto = FavoriteDto.builder()
-                        .postId(post.getPostId())
-                        .userId(user.getUserId())
-                        .build();
-                favoriteService.removeFavoriteToPost(favoriteDto);
-            }
+
         }
 
     }
@@ -94,4 +91,13 @@ class PagingQueryRepositoryTest {
         }
     }
 
+    @Test
+    void findPostsFromMainTrend() {
+        int page=0; int size=10;
+        Pageable pageable = PageRequest.of(page, size);
+        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(null, pageable);
+        for (ResponsePostList responsePostList : postsForMain) {
+            System.out.println("responsePostList = " + responsePostList);
+        }
+    }
 }

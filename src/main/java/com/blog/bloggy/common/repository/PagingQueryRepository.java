@@ -4,6 +4,8 @@ import com.blog.bloggy.post.dto.QResponsePostList;
 import com.blog.bloggy.post.dto.ResponsePostList;
 import com.blog.bloggy.post.dto.ResponseUserPagePostForLazy;
 import com.blog.bloggy.post.model.Post;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -55,6 +57,7 @@ public class PagingQueryRepository {
     }
 
     public Slice<ResponsePostList> findPostsForMainTrend(String date, Pageable pageable) {
+
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
                         post.id,
@@ -63,15 +66,15 @@ public class PagingQueryRepository {
                         post.postUser.name,
                         post.createdAt,
                         getPostCommentCount(),
-                        getPostFavoriteCount()
+                        favorite.count().as("favoriteCount")
                 ))
                 .from(post)
+                .leftJoin(post.favorites,favorite)
                 .where(
                         rangeDate(date)
                 )
-                .orderBy(Expressions.numberTemplate(Long.class,"{0}",JPAExpressions.select(favorite.count())
-                                .from(favorite)
-                                .where(favorite.favoritePost.eq(post))).desc())
+                .groupBy(post)
+                .orderBy(favorite.count().desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
         return checkLastPageDto(pageable, posts);
@@ -153,12 +156,12 @@ public class PagingQueryRepository {
     }
     private BooleanExpression rangeDate(String date){
         LocalDate now=LocalDate.now();
-        if(date.equals("day")) {
-            return post.createdAt.after(now.atStartOfDay())
+        if(date==null || date.equals("week")) {
+            return post.createdAt.after(now.minusDays(7).atStartOfDay())
                     .and(post.createdAt.before(now.plusDays(1).atStartOfDay()));
         }
-        if(date.equals("week")) {
-            return post.createdAt.after(now.minusDays(7).atStartOfDay())
+        if(date.equals("day")) {
+            return post.createdAt.after(now.atStartOfDay())
                     .and(post.createdAt.before(now.plusDays(1).atStartOfDay()));
         }
         if(date.equals("month")) {

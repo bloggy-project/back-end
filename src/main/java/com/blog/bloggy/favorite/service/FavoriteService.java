@@ -12,6 +12,8 @@ import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class FavoriteService {
@@ -32,6 +34,7 @@ public class FavoriteService {
                 .userId(userId)
                 .build();
     }
+    @Transactional
     public void addFavoriteToPost(FavoriteDto favoriteDto) {
         Long postId = favoriteDto.getPostId();
         String userId = favoriteDto.getUserId();
@@ -47,6 +50,7 @@ public class FavoriteService {
                 }
         );
     }
+    @Transactional
     public void removeFavoriteToPost(FavoriteDto favoriteDto) {
         Long postId = favoriteDto.getPostId();
         String userId = favoriteDto.getUserId();
