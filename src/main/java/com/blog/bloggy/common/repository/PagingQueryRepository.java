@@ -6,13 +6,17 @@ import com.blog.bloggy.post.dto.ResponseUserPagePostForLazy;
 import com.blog.bloggy.post.model.Post;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import static com.blog.bloggy.comment.model.QComment.comment;
@@ -37,14 +41,8 @@ public class PagingQueryRepository {
                         post.content,
                         post.postUser.name,
                         post.createdAt,
-                        JPAExpressions
-                                .select(comment.count())
-                                .from(comment)
-                                .where(comment.commentPost.eq(post)),
-                        JPAExpressions
-                                .select(favorite.count())
-                                .from(favorite)
-                                .where(favorite.favoritePost.eq(post))
+                        getPostCommentCount(),
+                        getPostFavoriteCount()
                 ))
                 .from(post)
                 .where(
@@ -53,7 +51,30 @@ public class PagingQueryRepository {
                 .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
-        return checkLastPageV2(pageable, posts);
+        return checkLastPageDto(pageable, posts);
+    }
+
+    public Slice<ResponsePostList> findPostsForMainTrend(String date, Pageable pageable) {
+        List<ResponsePostList> posts = queryFactory
+                .select(new QResponsePostList(
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.postUser.name,
+                        post.createdAt,
+                        getPostCommentCount(),
+                        getPostFavoriteCount()
+                ))
+                .from(post)
+                .where(
+                        rangeDate(date)
+                )
+                .orderBy(Expressions.numberTemplate(Long.class,"{0}",JPAExpressions.select(favorite.count())
+                                .from(favorite)
+                                .where(favorite.favoritePost.eq(post))).desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+        return checkLastPageDto(pageable, posts);
     }
 
     public Page<Post> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
@@ -82,6 +103,20 @@ public class PagingQueryRepository {
         return new PageImpl<>(posts, pageable, total);
     }
 
+    private static JPQLQuery<Long> getPostCommentCount() {
+        return JPAExpressions
+                .select(comment.count())
+                .from(comment)
+                .where(comment.commentPost.eq(post));
+    }
+
+    private static JPQLQuery<Long> getPostFavoriteCount() {
+        return JPAExpressions
+                .select(favorite.count())
+                .from(favorite)
+                .where(favorite.favoritePost.eq(post));
+    }
+
     private Slice<Post> checkLastPage(Pageable pageable, List<Post> posts) {
         boolean hasNext=false;
         if(posts.size()> pageable.getPageSize()){
@@ -91,7 +126,7 @@ public class PagingQueryRepository {
         return new SliceImpl<>(posts,pageable,hasNext);
     }
 
-    private Slice<ResponsePostList> checkLastPageV2(Pageable pageable, List<ResponsePostList> posts) {
+    private Slice<ResponsePostList> checkLastPageDto(Pageable pageable, List<ResponsePostList> posts) {
         boolean hasNext=false;
         if(posts.size()> pageable.getPageSize()){
             hasNext=true;
@@ -99,6 +134,10 @@ public class PagingQueryRepository {
         }
         return new SliceImpl<>(posts,pageable,hasNext);
     }
+
+    /*
+     *  BooleanExpression 영역
+     */
     private BooleanExpression usernameEq(String name) {
         return hasText(name) ? post.postUser.name.eq(name) : null;
     }
@@ -112,7 +151,28 @@ public class PagingQueryRepository {
             return null;
         return post.id.lt(postId);
     }
-
+    private BooleanExpression rangeDate(String date){
+        LocalDate now=LocalDate.now();
+        if(date.equals("day")) {
+            return post.createdAt.after(now.atStartOfDay())
+                    .and(post.createdAt.before(now.plusDays(1).atStartOfDay()));
+        }
+        if(date.equals("week")) {
+            return post.createdAt.after(now.minusDays(7).atStartOfDay())
+                    .and(post.createdAt.before(now.plusDays(1).atStartOfDay()));
+        }
+        if(date.equals("month")) {
+            return post.createdAt.after(now.with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay())
+                    .and(post.createdAt.before(now.plusMonths(1)
+                            .with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay()));
+        }
+        if(date.equals("year")) {
+            return post.createdAt.after(now.with(TemporalAdjusters.firstDayOfYear()).atStartOfDay())
+                    .and(post.createdAt.before(now.plusYears(1)
+                            .with(TemporalAdjusters.firstDayOfYear()).atStartOfDay()));
+        }
+        return null;
+    }
 
 
     public Page<Post> findUserPagePostAllV1(String name, Pageable pageable) {
