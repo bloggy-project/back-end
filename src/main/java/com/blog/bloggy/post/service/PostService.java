@@ -190,7 +190,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
-
+    @Transactional
     public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
         Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(name,page);
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()

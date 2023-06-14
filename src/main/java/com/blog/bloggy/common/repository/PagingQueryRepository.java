@@ -2,11 +2,9 @@ package com.blog.bloggy.common.repository;
 
 import com.blog.bloggy.post.dto.QResponsePostList;
 import com.blog.bloggy.post.dto.ResponsePostList;
-import com.blog.bloggy.post.dto.ResponseUserPagePostForLazy;
+import com.blog.bloggy.post.dto.ResponseUserPagePost;
 import com.blog.bloggy.post.model.Post;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -14,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
@@ -24,6 +23,7 @@ import static com.blog.bloggy.favorite.model.QFavorite.favorite;
 import static com.blog.bloggy.post.model.QPost.post;
 import static com.blog.bloggy.postTag.model.QPostTag.postTag;
 import static com.blog.bloggy.user.model.QUserEntity.userEntity;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.util.StringUtils.hasText;
 
 @Repository
@@ -55,6 +55,7 @@ public class PagingQueryRepository {
     }
 
     public Slice<ResponsePostList> findPostsForMainTrend(String date, Pageable pageable) {
+
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
                         post.id,
@@ -63,20 +64,20 @@ public class PagingQueryRepository {
                         post.postUser.name,
                         post.createdAt,
                         getPostCommentCount(),
-                        getPostFavoriteCount()
+                        favorite.count()
                 ))
                 .from(post)
+                .join(post.favorites,favorite) //leftJoin에서 innerJoin으로 변경. 연관관계없는 데이터는 조회x.
+                .join(post.postUser,userEntity) //join명시하지않으면 내부적으로 join on이 아닌 join where로 실행
                 .where(
                         rangeDate(date)
                 )
-                .orderBy(Expressions.numberTemplate(Long.class,"{0}",JPAExpressions.select(favorite.count())
-                                .from(favorite)
-                                .where(favorite.favoritePost.eq(post))).desc())
+                .groupBy(post)
+                .orderBy(favorite.count().desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
         return checkLastPageDto(pageable, posts);
     }
-
     public Page<Post> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
         // 커버링 인덱스 적용
         List<Long> ids = queryFactory
@@ -91,7 +92,7 @@ public class PagingQueryRepository {
         List<Post> posts = queryFactory
                 .select(post)
                 .from(post)
-                .join(post.postTags,postTag).fetchJoin()
+                //.join(post.postTags,postTag).fetchJoin() // 일대다 페치조인으로 postId가 중복되서 나옴
                 .where(post.id.in(ids))
                 .orderBy(post.createdAt.desc())
                 .fetch();
@@ -101,6 +102,39 @@ public class PagingQueryRepository {
                 .where(post.id.in(ids))
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
+    }
+    @Transactional
+    public Page<ResponseUserPagePost> findUserPostsOrderByCreatedAtV3(String name, Pageable pageable) {
+        // 1) 커버링 인덱스로 대상 조회
+        List<Long> ids = queryFactory
+                .select(post.id)
+                .from(post)
+                .leftJoin(post.postUser, userEntity)
+                .where(usernameEq(name))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        List<Post> posts = queryFactory
+                .select(post)
+                .from(post)
+                .where(post.id.in(ids))
+                .orderBy(post.createdAt.desc())
+                .fetch();
+        List<ResponseUserPagePost> results= posts.stream()
+                .map(post -> ResponseUserPagePost.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .createdAt(post.getCreatedAt())
+                        .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
+                        .build()).collect(toList());
+
+        Long total = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(post.id.in(ids))
+                .fetchOne();
+        return new PageImpl<>(results, pageable, total);
     }
 
     private static JPQLQuery<Long> getPostCommentCount() {
@@ -134,7 +168,6 @@ public class PagingQueryRepository {
         }
         return new SliceImpl<>(posts,pageable,hasNext);
     }
-
     /*
      *  BooleanExpression 영역
      */
@@ -151,14 +184,15 @@ public class PagingQueryRepository {
             return null;
         return post.id.lt(postId);
     }
+
     private BooleanExpression rangeDate(String date){
         LocalDate now=LocalDate.now();
-        if(date.equals("day")) {
-            return post.createdAt.after(now.atStartOfDay())
+        if(date==null || date.equals("week")) {
+            return post.createdAt.after(now.minusDays(7).atStartOfDay())
                     .and(post.createdAt.before(now.plusDays(1).atStartOfDay()));
         }
-        if(date.equals("week")) {
-            return post.createdAt.after(now.minusDays(7).atStartOfDay())
+        if(date.equals("day")) {
+            return post.createdAt.after(now.atStartOfDay())
                     .and(post.createdAt.before(now.plusDays(1).atStartOfDay()));
         }
         if(date.equals("month")) {
@@ -198,39 +232,6 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
 
-    }
-
-    public Page<ResponseUserPagePostForLazy> findUserPagePostAllV3(String name, Pageable pageable) {
-        // 1) 커버링 인덱스로 대상 조회
-        List<Long> ids = queryFactory
-                .select(post.id)
-                .from(post)
-                .leftJoin(post.postUser, userEntity)
-                .where(usernameEq(name))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-        List<ResponseUserPagePostForLazy> posts = queryFactory
-                .select(Projections.fields(ResponseUserPagePostForLazy.class,
-                        post.id,
-                        post.title,
-                        post.content,
-                        post.createdAt,
-                        Projections.list(
-                                post.postTags.as("postTags")
-                        )
-                ))
-                .from(post)
-                .join(post.postTags, postTag).fetchJoin()
-                .where(post.id.in(ids))
-                .orderBy(post.createdAt.desc())
-                .fetch();
-        Long total = queryFactory
-                .select(post.count())
-                .from(post)
-                .where(post.id.in(ids))
-                .fetchOne();
-        return new PageImpl<>(posts, pageable, total);
     }
 
 }

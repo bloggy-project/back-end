@@ -36,7 +36,8 @@ public enum ResultType {
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "415001", "Unsupported media type"),
 
     DATA_ALREADY_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "500001", "Data already exist"),
-    NOT_ALLOWED_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "500002", "Not allowed operation");
+    DATA_ALREADY_REMOVE(HttpStatus.INTERNAL_SERVER_ERROR, "500002", "Data already remove"),
+    NOT_ALLOWED_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "500003", "Not allowed operation");
 
     private final HttpStatus status;
     private final String code;
