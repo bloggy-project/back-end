@@ -66,10 +66,11 @@ public class PagingQueryRepository {
                         post.postUser.name,
                         post.createdAt,
                         getPostCommentCount(),
-                        favorite.count().as("favoriteCount")
+                        favorite.count()
                 ))
                 .from(post)
-                .leftJoin(post.favorites,favorite)
+                .join(post.favorites,favorite) //leftJoin에서 innerJoin으로 변경. 연관관계없는 데이터는 조회x.
+                .join(post.postUser,userEntity) //join명시하지않으면 내부적으로 join on이 아닌 join where로 실행
                 .where(
                         rangeDate(date)
                 )

@@ -57,7 +57,7 @@ class PagingQueryRepositoryTest {
         //외래키 제거 후 다시 진행 예정
     }
 
-    private void createPosts(UserEntity user, List<String> tagNames) throws InterruptedException {
+    private void createPosts(UserEntity user, List<String> tagNames)  {
         for(int i=0;i<=10;i++){
             String title="제목"+i+" "+user.getEmail();
             String content="본문 내용"+i+" "+ user.getName();
@@ -92,7 +92,7 @@ class PagingQueryRepositoryTest {
     }
 
     @Test
-    void findPostsFromMainTrend() {
+    void findPostsFromMainTrend() throws InterruptedException {
         int page=0; int size=10;
         Pageable pageable = PageRequest.of(page, size);
         Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(null, pageable);
