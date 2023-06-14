@@ -14,6 +14,7 @@ import com.blog.bloggy.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,68 +26,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-
-@SpringBootTest
+@DataJpaTest //@Transactional 포함
 class PagingQueryRepositoryTest {
 
     @Autowired
     private PagingQueryRepository pagingQueryRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PostService postService;
-    @Autowired
-    private CommentService commentService;
-    @Autowired
-    private FavoriteService favoriteService;
-
     @BeforeEach
     public void setup() throws InterruptedException {
-    }
-
-    private void init() throws InterruptedException {
-        UserEntity userA=new UserEntity("test1@naver.com","gon1","abcde1");
-        UserEntity userB=new UserEntity("test2@naver.com","go2","abcde2");
-        userRepository.save(userA);
-        userRepository.save(userB);
-        List<String> tagNames=new ArrayList<>();
-        tagNames.add("소설");
-        tagNames.add("영화");
-        createPosts(userA, tagNames);
-        tagNames.add("게임");
-        createPosts(userB,tagNames);
-        //외래키 제거 후 다시 진행 예정
-    }
-
-    private void createPosts(UserEntity user, List<String> tagNames)  {
-        for(int i=0;i<=10;i++){
-            String title="제목"+i+" "+user.getEmail();
-            String content="본문 내용"+i+" "+ user.getName();
-            PostDto postDto= PostDto.builder()
-                    .title(title)
-                    .content(content)
-                    .userId(user.getUserId())
-                    .tagNames(tagNames)
-                    .build();
-            ResponsePostRegister post = postService.createPost(postDto);
-            //Thread.sleep(200);
-            if(i%2==0) {
-                FavoriteDto favoriteDto = FavoriteDto.builder()
-                        .postId(post.getPostId())
-                        .userId(user.getUserId())
-                        .build();
-                favoriteService.addFavoriteToPost(favoriteDto);
-            }
-
-        }
-
     }
 
     @Test
     void findPostsForMain() {
         int page=0; int size=10;
         Pageable pageable = PageRequest.of(page, size);
-        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMain(200L, pageable);
+        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMain(null, pageable);
         for (ResponsePostList responsePostList : postsForMain) {
             System.out.println("responsePostList = " + responsePostList);
         }
@@ -103,7 +56,6 @@ class PagingQueryRepositoryTest {
     }
 
     @Test
-    @Transactional
     void findUserPostsOrderByCreatedAtV2() {
         Pageable pageable = PageRequest.of(0, 5);
         Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2("gon1", pageable);
