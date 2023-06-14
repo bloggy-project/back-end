@@ -12,9 +12,7 @@ public interface PostRepositoryCustom {
 
     Optional<Post> findByIdWithUserComment(Long id);
 
-    Page<Post> findPostsWithUsersAsPage(Pageable pageable);
 
-    Page<Post> findUserPagePostAll(String name,Pageable pageable);
 
     Optional<Post> findByIdWithPostTag(Long id);
 

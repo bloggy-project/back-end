@@ -3,6 +3,7 @@ package com.blog.bloggy.post.service;
 
 import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.exception.PostNotFoundException;
+import com.blog.bloggy.common.repository.PagingQueryRepository;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.comment.dto.CommentStatus;
 import com.blog.bloggy.favorite.model.Favorite;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,6 +45,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostQueryRepository postQueryRepository;
+    private final PagingQueryRepository pagingQueryRepository;
     private final CommentRepository commentRepository;
     private final FavoriteRepository favoriteRepository;
     private final PostTagRepository postTagRepository;
@@ -58,7 +61,6 @@ public class PostService {
         Post post = Post.builder()
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
-                .categoryName(postDto.getCategoryName())
                 .build();
 
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
@@ -87,7 +89,6 @@ public class PostService {
                 .userId(post.getPostUser().getUserId())
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
-                .categoryName(postDto.getCategoryName())
                 .tagNames(tags)
                 .build();
     }
@@ -163,7 +164,6 @@ public class PostService {
                 .userId(postUpdateDto.getUserId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .categoryName(post.getCategoryName())
                 .tagNames(tags)
                 .build();
     }
@@ -176,7 +176,6 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .name(post.getPostUser().getName())
-                .categoryName(post.getCategoryName())
                 .build();
         return responsePostOne;
     }
@@ -191,19 +190,9 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public Page<PostListDto> getPostAllByCreatedAt( Pageable page){
-        //PageRequest pageRequest=PageRequest.of(page, size, Sort.Direction.DESC,"createdAt");
-        Page<Post> posts = postRepository.findPostsWithUsersAsPage(page);
-        Page<PostListDto> toMap = posts.map(post -> PostListDto.builder()
-                .title(post.getTitle())
-                .categoryName(post.getCategoryName())
-                .createdAt(post.getCreatedAt())
-                .username(post.getPostUser().getName())
-                .build());
-        return toMap;
-    }
-    public Page<ResponseUserPagePost> getUserPostAllOrderByCreatedAt(String name,Pageable page){
-        Page<Post> posts = postRepository.findUserPagePostAll(name,page);
+    @Transactional
+    public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
+        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(name,page);
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -214,6 +203,10 @@ public class PostService {
         return toMap;
     }
 
+
+    public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
+        return pagingQueryRepository.findPostsForMain(postId, pageable);
+    }
 
     private static void deletePostFavorite(Post post) {
         Iterator<Favorite> iterator = post.getFavorites().iterator();
@@ -259,8 +252,8 @@ public class PostService {
     private static String getKey(Long postId) {
         return "post:" + postId + ":views";
     }
-
     //3분마다 자동 실행해주는 스케쥴러
+
     @Scheduled(cron = "0 0/3 * * * ?")
     public void deleteViewCntCacheFromRedis() {
         Set<String> redisKeys = redisTemplate.keys("post:*:views");
@@ -277,7 +270,5 @@ public class PostService {
             redisTemplate.delete("post:"+postId+"views");
         }
     }
-
-
 
 }

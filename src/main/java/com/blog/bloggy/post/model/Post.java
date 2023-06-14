@@ -8,6 +8,7 @@ import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.user.model.UserEntity;
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(indexes = @Index(name = "fk_post_user",columnList = "users_id"))
 public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue
@@ -25,17 +27,16 @@ public class Post extends BaseTimeEntity {
 
     private String content;
 
-    private String categoryName;
-
     //Redis 캐시에서는 primitive type 권장?
     private Long views;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "users_id")
+    @JoinColumn(name = "users_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private UserEntity postUser;
 
     @OneToMany(mappedBy = "commentPost")
     private List<Comment> comments = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "favoritePost")
     private List<Favorite> favorites = new ArrayList<>();
@@ -58,11 +59,10 @@ public class Post extends BaseTimeEntity {
     }
 
     @Builder
-    public Post(String title, String content, String categoryName) {
+    public Post(String title, String content) {
         this.views =1L;
         this.title = title;
         this.content = content;
-        this.categoryName = categoryName;
     }
 
     public void addFavorite(Favorite favorite) {
@@ -72,10 +72,10 @@ public class Post extends BaseTimeEntity {
     public void removeComment(Comment comment){
         this.comments.remove(comment);
     }
+
     public void removeFavorite(Favorite favorite) {
         favorites.remove(favorite);
     }
-
 
     public void addPostTag(PostTag postTag) {
         this.postTags.add(postTag);
@@ -88,6 +88,17 @@ public class Post extends BaseTimeEntity {
     public void updatePost(String title, String content) {
         this.title=title;
         this.content=content;
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", views=" + views +
+                ", createdAt "+this.getCreatedAt()+'\''+
+                '}';
     }
 }
 
