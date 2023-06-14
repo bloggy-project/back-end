@@ -1,8 +1,6 @@
 package com.blog.bloggy.post.repository;
 
 import com.blog.bloggy.post.model.Post;
-import com.blog.bloggy.post.model.QPost;
-import com.blog.bloggy.user.model.QUserEntity;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
