@@ -1,16 +1,15 @@
 package com.blog.bloggy.post.repository;
 
 import com.blog.bloggy.post.model.Post;
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
 
 import static com.blog.bloggy.comment.model.QComment.comment;
 import static com.blog.bloggy.post.model.QPost.post;
 import static com.blog.bloggy.postTag.model.QPostTag.postTag;
 import static com.blog.bloggy.user.model.QUserEntity.userEntity;
-
 
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepositoryCustom{
@@ -38,7 +37,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         );
     }
 
-
     @Override
     public Optional<Post> findByIdWithPostTag(Long id) {
         return Optional.ofNullable(
@@ -49,7 +47,5 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         .fetchOne()
         );
     }
-
-
 
 }
