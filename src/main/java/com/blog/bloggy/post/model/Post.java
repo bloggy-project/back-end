@@ -37,7 +37,6 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "commentPost")
     private List<Comment> comments = new ArrayList<>();
 
-
     @OneToMany(mappedBy = "favoritePost")
     private List<Favorite> favorites = new ArrayList<>();
 
@@ -47,6 +46,14 @@ public class Post extends BaseTimeEntity {
 
 
     public Post() {}
+
+    @Builder //updatePost 테스트용 생성자
+    public Post(Long id, String title, String content, List<PostTag> postTags) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.postTags = postTags;
+    }
 
 
     public void setPostUser(UserEntity postUser) {

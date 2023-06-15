@@ -3,6 +3,7 @@ package com.blog.bloggy.post.service;
 
 import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.exception.PostNotFoundException;
+import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.common.repository.PagingQueryRepository;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.comment.dto.CommentStatus;
@@ -52,10 +53,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final RedisTemplate redisTemplate;
 
-    @Transactional //트랜잭셔널을 붙이지 않으면 TestData삽입 시
-    //LazyInitializationException: failed to lazily initialize a collection of role:
-    // com.blog.bloggy.user.model.UserEntity.posts, could not initialize proxy
-    //라는 에러가 발생함 이유는?
+    @Transactional
     public ResponsePostRegister createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
         Post post = Post.builder()
@@ -64,22 +62,21 @@ public class PostService {
                 .build();
 
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
-                .orElseThrow(PostNotFoundException::new);
+                .orElseThrow(UserNotFoundException::new);
         post.setPostUser(user);
         postRepository.save(post);
         List<PostTag> postTags=new ArrayList<>();
         for (String tagName : tagNames) {
             tagRepository.findByName(tagName).ifPresentOrElse(
                     (tag)->{
-                        postTags.add(createPostTag(post, tag, tagName, PostTagStatus.REGISTERED));
+                        postTags.add(createPostTag(post, tag, tagName));
                     },
                     ()->{
-                        postTags.add(updatePostTag(post, tagName, PostTagStatus.UPDATED));
+                        postTags.add(updatePostTag(post, tagName));
                     }
             );
         }
         Long postId=post.getId();
-        String name=user.getName();
 
         postTagRepository.saveAll(postTags);
         List<String> tags = postTags.stream().map((pt) -> pt.getTagName()).collect(toList());
@@ -93,12 +90,12 @@ public class PostService {
                 .build();
     }
 
-    private PostTag updatePostTag(Post post, String tagName, PostTagStatus status) {
-        return PostTag.updatePostTag(post,tagName,status);
+    private PostTag updatePostTag(Post post, String tagName) {
+        return PostTag.updatePostTag(post,tagName);
     }
 
-    private PostTag createPostTag(Post post, Tag tag,String tagName,PostTagStatus status) {
-        return PostTag.createPostTag(post, tag,tagName,status);
+    private PostTag createPostTag(Post post, Tag tag,String tagName) {
+        return PostTag.createPostTag(post, tag,tagName);
     }
     /*
         UPDATED: Tag 생성 전
@@ -149,10 +146,10 @@ public class PostService {
         for (String tagName : tagNames) {
             tagRepository.findByName(tagName).ifPresentOrElse(
                     (tag)->{
-                        postTags.add(createPostTag(post, tag, tagName, PostTagStatus.REGISTERED));
+                        postTags.add(createPostTag(post, tag, tagName));
                     },
                     ()->{
-                        postTags.add(updatePostTag(post, tagName, PostTagStatus.UPDATED));
+                        postTags.add(updatePostTag(post, tagName));
                     }
             );
         }
@@ -160,7 +157,7 @@ public class PostService {
         List<String> tags = postTags.stream().map((pt) -> pt.getTagName()).collect(toList());
 
         return ResponsePostRegister.builder()
-                .postId(postId)
+                .postId(post.getId())
                 .userId(postUpdateDto.getUserId())
                 .title(post.getTitle())
                 .content(post.getContent())
