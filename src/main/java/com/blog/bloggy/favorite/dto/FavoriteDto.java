@@ -8,4 +8,9 @@ import lombok.Data;
 public class FavoriteDto {
     Long postId;
     String userId;
+
+    public FavoriteDto(Long postId, String userId) {
+        this.postId = postId;
+        this.userId = userId;
+    }
 }

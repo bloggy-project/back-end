@@ -23,20 +23,25 @@ public class FavoriteService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void addFavoriteToPost(FavoriteDto favoriteDto) {
+    public ResponseFavoriteClick addFavoriteToPost(FavoriteDto favoriteDto) {
         Long postId = favoriteDto.getPostId();
         String userId = favoriteDto.getUserId();
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException());
         UserEntity user = userRepository.findByUserId(userId).orElseThrow(() -> new UserNotFoundException());
 
         favoriteRepository.findByFavoritePostAndFavoriteUser(post, user).ifPresentOrElse(
-                (favorite)-> new DataAlreadyExistException(),
+                (favorite)-> {throw new DataAlreadyExistException();},
                 ()->{
                     Favorite favorite=new Favorite();
                     favoriteRepository.save(favorite);
                     favorite.setRegisterFavorite(post,user);
                 }
         );
+        ResponseFavoriteClick response = ResponseFavoriteClick.builder()
+                .postId(post.getId())
+                .username(user.getName())
+                .build();
+        return response;
     }
     @Transactional
     public void removeFavoriteToPost(FavoriteDto favoriteDto) {
