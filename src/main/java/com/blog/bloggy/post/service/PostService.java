@@ -69,23 +69,20 @@ public class PostService {
         for (String tagName : tagNames) {
             tagRepository.findByName(tagName).ifPresentOrElse(
                     (tag)->{
-                        createPostTag(post, tag, tagName);
+                        postTags.add(createPostTag(post, tag, tagName));
                     },
                     ()->{
-                        updatePostTag(post, tagName);
+                        postTags.add(updatePostTag(post, tagName));
                     }
             );
         }
-        Long postId=post.getId();
-
         postTagRepository.saveAll(postTags);
-        List<String> tags = postTags.stream().map((pt) -> pt.getTagName()).collect(toList());
-
+        List<String> tags = post.getPostTags().stream().map((pt) -> pt.getTagName()).collect(toList());
         return ResponsePostRegister.builder()
-                .postId(postId)
+                .postId(post.getId())
                 .userId(post.getPostUser().getUserId())
-                .title(postDto.getTitle())
-                .content(postDto.getContent())
+                .title(post.getTitle())
+                .content(post.getContent())
                 .tagNames(tags)
                 .build();
     }

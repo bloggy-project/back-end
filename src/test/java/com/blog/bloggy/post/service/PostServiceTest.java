@@ -8,6 +8,7 @@ import com.blog.bloggy.post.repository.PostRepository;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.postTag.repository.PostTagRepository;
+import com.blog.bloggy.tag.model.Tag;
 import com.blog.bloggy.tag.repository.TagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
@@ -47,6 +48,7 @@ class PostServiceTest {
     private PostTagRepository postTagRepository;
 
     @Test
+    @DisplayName("게시물 생성")
     void createPost() {
         // Given
         String userId = "testUser";
@@ -64,13 +66,45 @@ class PostServiceTest {
         for(String tagName: tagNames){
             given(tagRepository.findByName(tagName)).willReturn(Optional.empty());
         }
+
         //when
         ResponsePostRegister response = postService.createPost(postDto);
 
         //then
+        assertEquals(response.getTagNames().size(),tagNames.size());
         assertEquals(userId,response.getUserId());
         assertEquals(title, response.getTitle());
         assertEquals(content, response.getContent());
+        assertEquals(tagNames, response.getTagNames());
+    }
+    @Test
+    @DisplayName("게시물 생성_기존 태그가 존재할 때 PostTag의 Status REGISTERED등록 확인")
+    void createPost_check_REGISTERED() {
+        // Given
+        String userId = "testUser";
+        String title = "Test Title";
+        String content = "Test Content";
+        Tag tag1 = Tag.builder()
+                .name("tag1")
+                .build();
+        List<String> tagNames = new ArrayList<>();
+        tagNames.add(tag1.getName());
+        UserEntity user = getUserEntity(userId);
+        PostDto postDto = getPostDto(userId, title, content, tagNames);
+        when(userRepository.findByUserId(postDto.getUserId()))
+                .thenReturn(Optional.of(user));
+        for(String tagName: tagNames){
+            given(tagRepository.findByName(tagName)).willReturn(Optional.of(tag1));
+        }
+        //when
+        ResponsePostRegister response = postService.createPost(postDto);
+
+        //then
+        assertEquals(response.getTagNames().size(),tagNames.size());
+        assertEquals(userId,response.getUserId());
+        assertEquals(title, response.getTitle());
+        assertEquals(content, response.getContent());
+        assertEquals(tag1.getPostTags().get(0).getStatus(),PostTagStatus.REGISTERED);
         assertEquals(tagNames, response.getTagNames());
     }
 
@@ -92,7 +126,6 @@ class PostServiceTest {
                 .build();
         return user;
     }
-
     private static List<String> getTagNames2() {
         List<String> tagNames = new ArrayList<>();
         tagNames.add("tag1");
@@ -109,7 +142,6 @@ class PostServiceTest {
     }
 
 
-
     @Test
     @DisplayName("게시물 수정_기존 태그 삭제")
     void updatePost() {
@@ -122,7 +154,6 @@ class PostServiceTest {
                 .content("new content")
                 .tagNames(tagNames)
                 .build();
-
         List<PostTag> postTags=new ArrayList<>();
         PostTag postTag1= PostTag.builder()
                 .id(1L)
@@ -154,12 +185,14 @@ class PostServiceTest {
         ResponsePostRegister result = postService.updatePost(postUpdateDto);
         List<String> newTagNames = post.getPostTags().stream().map(postTag -> postTag.getTagName())
                 .collect(Collectors.toList());
+
         assertEquals(postId, result.getPostId());
         assertEquals(postUpdateDto.getTitle(), result.getTitle());
         assertEquals(postUpdateDto.getContent(), result.getContent());
         assertEquals(postTag1.getStatus(),PostTagStatus.UPDATED);
         assertEquals(postTag2.getStatus(),PostTagStatus.UPDATED);
         assertEquals(postTag3.getStatus(),PostTagStatus.DELETED);
+        assertEquals(newTagNames.size(),2);
         assertEquals(newTagNames, result.getTagNames());
     }
     @Test
@@ -174,7 +207,6 @@ class PostServiceTest {
                 .content("new content")
                 .tagNames(tagNames)
                 .build();
-
         List<PostTag> postTags=new ArrayList<>();
         PostTag postTag1= PostTag.builder()
                 .id(1L)
@@ -205,7 +237,7 @@ class PostServiceTest {
         ResponsePostRegister result = postService.updatePost(postUpdateDto);
         List<String> newTagNames = post.getPostTags().stream().map(postTag -> postTag.getTagName())
                 .collect(Collectors.toList());
-
+        assertEquals(newTagNames.size(),4);
         assertEquals(postId, result.getPostId());
         assertEquals(postUpdateDto.getTitle(), result.getTitle());
         assertEquals(postUpdateDto.getContent(), result.getContent());

@@ -85,6 +85,8 @@ public class Post extends BaseTimeEntity {
     }
 
     public void addPostTag(PostTag postTag) {
+        if(this.postTags==null)
+            this.postTags=new ArrayList<>();
         this.postTags.add(postTag);
     }
 
