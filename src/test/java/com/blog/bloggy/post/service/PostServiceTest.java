@@ -11,6 +11,7 @@ import com.blog.bloggy.postTag.repository.PostTagRepository;
 import com.blog.bloggy.tag.repository.TagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,9 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -51,7 +52,7 @@ class PostServiceTest {
         String userId = "testUser";
         String title = "Test Title";
         String content = "Test Content";
-        List<String> tagNames = getTagNames();
+        List<String> tagNames = getTagNames2();
 
         UserEntity user = getUserEntity(userId);
 
@@ -92,64 +93,123 @@ class PostServiceTest {
         return user;
     }
 
-    private static List<String> getTagNames() {
+    private static List<String> getTagNames2() {
         List<String> tagNames = new ArrayList<>();
         tagNames.add("tag1");
         tagNames.add("tag2");
         return tagNames;
     }
+    private static List<String> getTagNames4() {
+        List<String> tagNames = new ArrayList<>();
+        tagNames.add("tag1");
+        tagNames.add("tag2");
+        tagNames.add("tag3");
+        tagNames.add("tag4");
+        return tagNames;
+    }
+
+
 
     @Test
+    @DisplayName("게시물 수정_기존 태그 삭제")
     void updatePost() {
         // Given
         Long postId = 1L;
-        List<String> tagNames = getTagNames();
+        List<String> tagNames = getTagNames2();
         PostUpdateDto postUpdateDto =PostUpdateDto.builder()
                 .postId(postId)
                 .title("new title")
                 .content("new content")
                 .tagNames(tagNames)
                 .build();
-        Post post=mock(Post.class);
-        given(post.getId()).willReturn(postId);
-        given(post.getPostTags()).willReturn(getPostTags3UPDATED(post));
-        given(post.getTitle()).willReturn(postUpdateDto.getTitle());
-        given(post.getContent()).willReturn(postUpdateDto.getContent());
 
-        given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
-        for (PostTag postTag : post.getPostTags()) {
-            System.out.println("postTag = " + postTag);
-        }
-        //When
-        ResponsePostRegister result = postService.updatePost(postUpdateDto);
-        //assertEquals(postTags.get(2).getStatus(),PostTagStatus.DELETED);
-        assertEquals(postId, result.getPostId());
-        assertEquals(postUpdateDto.getTitle(), result.getTitle());
-        assertEquals(postUpdateDto.getContent(), result.getContent());
-        assertEquals(postUpdateDto.getTagNames(), result.getTagNames());
-    }
-
-    private static List<PostTag> getPostTags3UPDATED(Post post) {
         List<PostTag> postTags=new ArrayList<>();
         PostTag postTag1= PostTag.builder()
-                .tagPost(post)
+                .id(1L)
                 .tagName("tag1")
                 .status(PostTagStatus.UPDATED)
                 .build();
         PostTag postTag2= PostTag.builder()
-                .tagPost(post)
+                .id(2L)
                 .tagName("tag2")
                 .status(PostTagStatus.UPDATED)
                 .build();
         PostTag postTag3= PostTag.builder()
-                .tagPost(post)
+                .id(3L)
                 .tagName("tag3")
                 .status(PostTagStatus.UPDATED)
                 .build();
         postTags.add(postTag1);
         postTags.add(postTag2);
         postTags.add(postTag3);
-        return postTags;
+        Post post= Post.builder()
+                .id(postId)
+                .title("title")
+                .content("content")
+                .postTags(postTags)
+                .build();
+
+        given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
+        //When
+        ResponsePostRegister result = postService.updatePost(postUpdateDto);
+        List<String> newTagNames = post.getPostTags().stream().map(postTag -> postTag.getTagName())
+                .collect(Collectors.toList());
+        assertEquals(postId, result.getPostId());
+        assertEquals(postUpdateDto.getTitle(), result.getTitle());
+        assertEquals(postUpdateDto.getContent(), result.getContent());
+        assertEquals(postTag1.getStatus(),PostTagStatus.UPDATED);
+        assertEquals(postTag2.getStatus(),PostTagStatus.UPDATED);
+        assertEquals(postTag3.getStatus(),PostTagStatus.DELETED);
+        assertEquals(newTagNames, result.getTagNames());
+    }
+    @Test
+    @DisplayName("게시물 수정_기존 태그보다 더 추가")
+    void updatePost_tagAdd() {
+        // Given
+        Long postId = 1L;
+        List<String> tagNames = getTagNames4();
+        PostUpdateDto postUpdateDto =PostUpdateDto.builder()
+                .postId(postId)
+                .title("new title")
+                .content("new content")
+                .tagNames(tagNames)
+                .build();
+
+        List<PostTag> postTags=new ArrayList<>();
+        PostTag postTag1= PostTag.builder()
+                .id(1L)
+                .tagName("tag1")
+                .status(PostTagStatus.UPDATED)
+                .build();
+        PostTag postTag2= PostTag.builder()
+                .id(2L)
+                .tagName("tag2")
+                .status(PostTagStatus.UPDATED)
+                .build();
+        PostTag postTag3= PostTag.builder()
+                .id(3L)
+                .tagName("tag3")
+                .status(PostTagStatus.UPDATED)
+                .build();
+        postTags.add(postTag1);
+        postTags.add(postTag2);
+        postTags.add(postTag3);
+        Post post= Post.builder()
+                .id(postId)
+                .title("title")
+                .content("content")
+                .postTags(postTags)
+                .build();
+        given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
+        //When
+        ResponsePostRegister result = postService.updatePost(postUpdateDto);
+        List<String> newTagNames = post.getPostTags().stream().map(postTag -> postTag.getTagName())
+                .collect(Collectors.toList());
+
+        assertEquals(postId, result.getPostId());
+        assertEquals(postUpdateDto.getTitle(), result.getTitle());
+        assertEquals(postUpdateDto.getContent(), result.getContent());
+        assertEquals(newTagNames, result.getTagNames());
     }
 
     @Test

@@ -69,10 +69,10 @@ public class PostService {
         for (String tagName : tagNames) {
             tagRepository.findByName(tagName).ifPresentOrElse(
                     (tag)->{
-                        postTags.add(createPostTag(post, tag, tagName));
+                        createPostTag(post, tag, tagName);
                     },
                     ()->{
-                        postTags.add(updatePostTag(post, tagName));
+                        updatePostTag(post, tagName);
                     }
             );
         }
@@ -104,12 +104,13 @@ public class PostService {
     */
     public ResponsePostRegister updatePost(PostUpdateDto postUpdateDto){
         Long postId = postUpdateDto.getPostId();
-
         Post post = postRepository.findByIdWithPostTag(postId)
                 .orElseThrow(PostNotFoundException::new);
         String title = postUpdateDto.getTitle();
         String content = postUpdateDto.getContent();
         post.updatePost(title,content);
+        //default batch size로 지연로딩 미리 초기화. (쿼리 테스트 before)
+        List<Tag> init_tag = post.getPostTags().stream().map(postTag -> postTag.getTag()).collect(toList());
         Iterator<PostTag> iterator = post.getPostTags().iterator();
         while(iterator.hasNext()){
             PostTag postTag = iterator.next();
@@ -143,13 +144,14 @@ public class PostService {
         }
         List<String> tagNames = postUpdateDto.getTagNames();
         List<PostTag> postTags = post.getPostTags();
+
         for (String tagName : tagNames) {
             tagRepository.findByName(tagName).ifPresentOrElse(
                     (tag)->{
-                        postTags.add(createPostTag(post, tag, tagName));
+                        createPostTag(post, tag, tagName);
                     },
                     ()->{
-                        postTags.add(updatePostTag(post, tagName));
+                        updatePostTag(post, tagName);
                     }
             );
         }
