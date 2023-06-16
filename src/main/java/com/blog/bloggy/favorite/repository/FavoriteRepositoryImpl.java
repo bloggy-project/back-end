@@ -35,17 +35,18 @@ public class FavoriteRepositoryImpl implements FavoriteRepositoryCustom{
     }
     @Override
     public List<String> getPostsFavoritesUsernames(Long postId){
+        //Non-Unique Key Lookup
         List<Long> ids = queryFactory
                 .select(favorite.id)
                 .from(favorite)
-                .where(favorite.id.eq(postId)).fetch();
+                .where(favorite.favoritePost.id.eq(postId)).fetch();
 
         List<String> favoriteUsernames = queryFactory
                 .select(favorite.favoriteUser.name)
                 .from(favorite)
-                .join(favorite.favoriteUser, userEntity)
+                .join(favorite.favoriteUser, userEntity) //favorite.user_id = userEntity.users_id Unique Key Lookup
                 .where(
-                        favorite.id.in(ids)
+                        favorite.id.in(ids) //Index Range Scan
                 )
                 .fetch();
         return favoriteUsernames;

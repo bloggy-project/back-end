@@ -120,8 +120,8 @@ class PostServiceTest {
 
     private static UserEntity getUserEntity(String userId) {
         UserEntity user = UserEntity.builder()
-                .email("test1234@naver.com")
-                .name("gon")
+                .email(userId + "@naver.com")
+                .name("gon"+userId)
                 .userId(userId)
                 .build();
         return user;
