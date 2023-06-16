@@ -57,9 +57,10 @@ public class PostController {
 
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ResponsePostOne> getPostOne(
-            @PathVariable Long postId) {
+            @PathVariable Long postId,
+            @RequestParam(value = "username",required = false) String username) {
         postService.addViewCntToRedis(postId);
-        ResponsePostOne postOne = postService.getPostOne(postId);
+        ResponsePostOne postOne = postService.getPostOne(postId,username);
         return ResponseEntity.status(HttpStatus.OK).body(postOne);
     }
 

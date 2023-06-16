@@ -163,15 +163,26 @@ public class PostService {
                 .tagNames(tags)
                 .build();
     }
-
-    public ResponsePostOne getPostOne(Long postId){
-        Post post = postRepository.findById(postId)
+    // 이 포스트를 클릭했을 때 Favorite을 누른 User는 하트가 색깔이 차있도록 보여야 한다.
+    // 그렇다면 필요한 정보는? 현재 로그인한 User의 정보 Post가 보유한 Favorite중에 User에 대한 정보가 있는경우
+    // isFavorite은 true로 반환. User는 로그인을 했을 수도 있고, 안했을 수도 있다.
+    public ResponsePostOne getPostOne(Long postId,String username){
+        Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(PostNotFoundException::new);
+        boolean isFavorite=false;
+        if(username!=null){
+            List<String> usernames = favoriteRepository.getPostsFavoritesUsernames(postId);
+            for(String favoriteName : usernames){
+                if(username.equals(favoriteName))
+                    isFavorite=true;
+            }
+        }
         ResponsePostOne responsePostOne= ResponsePostOne.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .name(post.getPostUser().getName())
+                .isFavorite(isFavorite)
                 .build();
         return responsePostOne;
     }
