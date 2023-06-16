@@ -56,14 +56,13 @@ public class PostService {
     @Transactional
     public ResponsePostRegister createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
-        Post post = Post.builder()
-                .title(postDto.getTitle())
-                .content(postDto.getContent())
-                .build();
-
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
                 .orElseThrow(UserNotFoundException::new);
-        post.setPostUser(user);
+        Post post = Post.builder()
+                .title(postDto.getTitle())
+                .content(postDto.getTitle())
+                .user(user)
+                .build();
         postRepository.save(post);
         List<PostTag> postTags=new ArrayList<>();
         for (String tagName : tagNames) {
@@ -209,7 +208,6 @@ public class PostService {
                 .build());
         return toMap;
     }
-
 
     public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
         return pagingQueryRepository.findPostsForMain(postId, pageable);

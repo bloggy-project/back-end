@@ -1,7 +1,9 @@
 package com.blog.bloggy.post.service;
 
+import com.blog.bloggy.favorite.repository.FavoriteRepository;
 import com.blog.bloggy.post.dto.PostDto;
 import com.blog.bloggy.post.dto.PostUpdateDto;
+import com.blog.bloggy.post.dto.ResponsePostOne;
 import com.blog.bloggy.post.dto.ResponsePostRegister;
 import com.blog.bloggy.post.model.Post;
 import com.blog.bloggy.post.repository.PostRepository;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,6 +46,9 @@ class PostServiceTest {
 
     @Mock
     private TagRepository tagRepository;
+
+    @Mock
+    private FavoriteRepository favoriteRepository;
 
     @Mock
     private PostTagRepository postTagRepository;
@@ -173,12 +179,8 @@ class PostServiceTest {
         postTags.add(postTag1);
         postTags.add(postTag2);
         postTags.add(postTag3);
-        Post post= Post.builder()
-                .id(postId)
-                .title("title")
-                .content("content")
-                .postTags(postTags)
-                .build();
+        Post post= new Post(postId,"title","content",postTags);
+
 
         given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
         //When
@@ -226,12 +228,8 @@ class PostServiceTest {
         postTags.add(postTag1);
         postTags.add(postTag2);
         postTags.add(postTag3);
-        Post post= Post.builder()
-                .id(postId)
-                .title("title")
-                .content("content")
-                .postTags(postTags)
-                .build();
+        Post post= new Post(postId,"title","content",postTags);
+
         given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
         //When
         ResponsePostRegister result = postService.updatePost(postUpdateDto);
@@ -245,26 +243,50 @@ class PostServiceTest {
     }
 
     @Test
+    @DisplayName("게시물 한개 조회_비로그인 상태")
     void getPostOne() {
+        String username = null;
+        Long postId = 1L;
+        UserEntity user = UserEntity.builder()
+                .name("testName")
+                .build();
+        Post post = Post.builder()
+                .id(postId)
+                .title("title")
+                .content("content")
+                .user(user)
+                .build();
+        given(postRepository.findByIdWithUser(postId)).willReturn(Optional.of(post));
+
+        ResponsePostOne result = postService.getPostOne(postId, username); // 가정: 당신이 테스트하는 메소드
+
+        assertNotNull(result);
+        assertEquals(postId, result.getPostId());
+
+        assertEquals(false, result.isFavorite());
+    }
+    @Test
+    @DisplayName("게시물 한개 조회_로그인 상태")
+    void getPostOne_login() {
+        String username = "testName";
+        Long postId = 1L;
+        UserEntity user = UserEntity.builder()
+                .name(username)
+                .build();
+        Post post = Post.builder()
+                .id(postId)
+                .title("title")
+                .content("content")
+                .user(user)
+                .build();
+        given(postRepository.findByIdWithUser(postId)).willReturn(Optional.of(post));
+        given(favoriteRepository.getPostsFavoritesUsernames(postId)).willReturn(Collections.singletonList(username));
+        ResponsePostOne result = postService.getPostOne(postId, username); // 가정: 당신이 테스트하는 메소드
+
+        assertNotNull(result);
+        assertEquals(postId, result.getPostId());
+
+        assertEquals(true, result.isFavorite());
     }
 
-    @Test
-    void deletePostAndMark() {
-    }
-
-    @Test
-    void getUserPostsOrderByCreatedAt() {
-    }
-
-    @Test
-    void getPosts() {
-    }
-
-    @Test
-    void addViewCntToRedis() {
-    }
-
-    @Test
-    void deleteViewCntCacheFromRedis() {
-    }
 }

@@ -8,7 +8,6 @@ import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.user.model.UserEntity;
 import lombok.Builder;
 import lombok.Getter;
-import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -47,31 +46,32 @@ public class Post extends BaseTimeEntity {
 
     public Post() {}
 
-    @Builder //updatePost 테스트용 생성자
+
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+    }
+
+
+    public Post(Long id) {
+        this.id = id;
+    }
+
+    @Builder
+    public Post(Long id,String title, String content, UserEntity user) {
+        this.id= id;
+        this.views =1L;
+        this.title = title;
+        this.content = content;
+        this.postUser = user;
+    }
+    @Builder //updatePost 테스트용 생성자 위의 생성자랑 충돌함...
     public Post(Long id, String title, String content, List<PostTag> postTags) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.postTags = postTags;
     }
-
-
-    public void setPostUser(UserEntity postUser) {
-        this.postUser = postUser;
-        this.postUser.addPost(this);
-    }
-
-    public void addComment(Comment comment) {
-        this.comments.add(comment);
-    }
-
-    @Builder
-    public Post(String title, String content) {
-        this.views =1L;
-        this.title = title;
-        this.content = content;
-    }
-
     public void addFavorite(Favorite favorite) {
         this.favorites.add(favorite);
     }
