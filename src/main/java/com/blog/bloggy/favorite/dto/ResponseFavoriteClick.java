@@ -8,5 +8,11 @@ import lombok.Data;
 @Builder
 public class ResponseFavoriteClick {
     Long postId;
-    String userId;
+
+    String username;
+
+    public ResponseFavoriteClick(Long postId, String username) {
+        this.postId = postId;
+        this.username = username;
+    }
 }
