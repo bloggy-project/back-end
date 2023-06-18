@@ -1,5 +1,6 @@
 package com.blog.bloggy.user.service;
 
+import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.dto.UserDto;
 import com.blog.bloggy.common.exception.NotFoundException;
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserByUserId(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));;
+                .orElseThrow(() -> new UserNotFoundException());;
 
         if(userEntity==null)
             throw new UsernameNotFoundException("User not found");
@@ -71,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserDetailsByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));;
+                .orElseThrow(() ->  new UsernameNotFoundException(email));
         if(userEntity ==null)
             throw new UsernameNotFoundException(email);
 

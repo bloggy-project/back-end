@@ -32,7 +32,7 @@ class PagingQueryRepositoryTest {
     @Autowired
     private PagingQueryRepository pagingQueryRepository;
     @BeforeEach
-    public void setup() throws InterruptedException {
+    public void setup()  {
     }
 
     @Test
@@ -46,7 +46,7 @@ class PagingQueryRepositoryTest {
     }
 
     @Test
-    void findPostsFromMainTrend() throws InterruptedException {
+    void findPostsFromMainTrend()  {
         int page=0; int size=10;
         Pageable pageable = PageRequest.of(page, size);
         Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(null, pageable);
