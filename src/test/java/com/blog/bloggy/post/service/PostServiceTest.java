@@ -49,9 +49,6 @@ class PostServiceTest {
     @Mock
     private FavoriteRepository favoriteRepository;
 
-    @Mock
-    private PostTagRepository postTagRepository;
-
     @Test
     @DisplayName("게시물 생성")
     void createPost() {

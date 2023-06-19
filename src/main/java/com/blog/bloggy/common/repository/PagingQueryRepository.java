@@ -1,5 +1,6 @@
 package com.blog.bloggy.common.repository;
 
+import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.post.dto.QResponsePostList;
 import com.blog.bloggy.post.dto.ResponsePostList;
 import com.blog.bloggy.post.dto.ResponseUserPagePost;
@@ -45,6 +46,7 @@ public class PagingQueryRepository {
                         getPostFavoriteCount()
                 ))
                 .from(post)
+                .join(post.postUser, userEntity)
                 .where(
                         ltPostId(postId)
                 )
@@ -54,8 +56,7 @@ public class PagingQueryRepository {
         return checkLastPageDto(pageable, posts);
     }
 
-    public Slice<ResponsePostList> findPostsForMainTrend(String date, Pageable pageable) {
-
+    public Slice<ResponsePostList> findPostsForMainTrend(TrendSearchCondition condition, Pageable pageable) {
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
                         post.id,
@@ -70,10 +71,12 @@ public class PagingQueryRepository {
                 .join(post.favorites,favorite) //leftJoin에서 innerJoin으로 변경. 연관관계없는 데이터는 조회x.
                 .join(post.postUser,userEntity) //join명시하지않으면 내부적으로 join on이 아닌 join where로 실행
                 .where(
-                        rangeDate(date)
+                        rangeDate(condition.getDate())
                 )
                 .groupBy(post)
+                .having(loeFavoriteCount(condition.getFavorites()))
                 .orderBy(favorite.count().desc())
+                .orderBy(post.createdAt.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
         return checkLastPageDto(pageable, posts);
@@ -183,6 +186,11 @@ public class PagingQueryRepository {
         if(postId==null)
             return null;
         return post.id.lt(postId);
+    }
+    private BooleanExpression loeFavoriteCount(Long count){
+        if(count==null)
+            return null;
+        return favorite.count().loe(count);
     }
 
     private BooleanExpression rangeDate(String date){
