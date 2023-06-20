@@ -62,6 +62,7 @@ public class PostService {
                 .title(postDto.getTitle())
                 .content(postDto.getTitle())
                 .user(user)
+                .username(user.getName())
                 .build();
         postRepository.save(post);
         List<PostTag> postTags=new ArrayList<>();

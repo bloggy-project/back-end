@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -39,13 +37,13 @@ class PagingQueryRepositoryTest {
     private PostRepository postRepository;
     @Autowired
     private FavoriteRepository favoriteRepository;
+    String username1 = "abcd123";
+    String username2 = "efgh456";
 
     @BeforeEach
     void init() {
-        String userId1 = "abcd123";
-        String userId2 = "efgh456";
-        UserEntity user1 = getUserEntity(userId1);
-        UserEntity user2 = getUserEntity(userId2);
+        UserEntity user1 = getUserEntity(username1);
+        UserEntity user2 = getUserEntity(username2);
         userRepository.save(user1);
         userRepository.save(user2);
         for (int i = 0; i < 30; i++) {
@@ -53,6 +51,7 @@ class PagingQueryRepositoryTest {
                 Post post = Post.builder()
                         .title("test" + i)
                         .user(user1)
+                        .username(user1.getName())
                         .build();
                 postRepository.save(post);
                 post.setCreatedAt(post.getCreatedAt().minusDays(7).plusHours(i));
@@ -69,6 +68,7 @@ class PagingQueryRepositoryTest {
                 Post post = Post.builder()
                         .title("test" + i)
                         .user(user2)
+                        .username(username2)
                         .build();
                 postRepository.save(post);
                 post.setCreatedAt(post.getCreatedAt().minusDays(7).plusHours(i));
@@ -131,7 +131,7 @@ class PagingQueryRepositoryTest {
     @Test
     void findUserPostsOrderByCreatedAtV2() {
         Pageable pageable = PageRequest.of(0, 5);
-        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2("gon1", pageable);
+        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(username1, pageable);
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -147,17 +147,17 @@ class PagingQueryRepositoryTest {
     @Test
     void findUserPostsOrderByCreatedAtV3() {
         Pageable pageable = PageRequest.of(0, 5);
-        Page<ResponseUserPagePost> gon = pagingQueryRepository.findUserPostsOrderByCreatedAtV3("gon1", pageable);
+        Page<ResponseUserPagePost> gon = pagingQueryRepository.findUserPostsOrderByCreatedAtV3(username1, pageable);
         for (ResponseUserPagePost responseUserPagePost : gon) {
             System.out.println("responseUserPagePost = " + responseUserPagePost);
         }
     }
 
-    private static UserEntity getUserEntity(String userId) {
+    private static UserEntity getUserEntity(String username) {
         UserEntity user = UserEntity.builder()
-                .email(userId + "@naver.com")
-                .name("gon" + userId)
-                .userId(userId)
+                .email(username + "@naver.com")
+                .name(username)
+                .userId(username)
                 .build();
         return user;
     }

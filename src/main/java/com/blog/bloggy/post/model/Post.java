@@ -33,6 +33,8 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "users_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private UserEntity postUser;
 
+    private String username; // 인덱스 컨디션 푸쉬다운 사용하여 쿼리 최적화 하기 위해 삽입
+
     @OneToMany(mappedBy = "commentPost")
     private List<Comment> comments = new ArrayList<>();
 
@@ -56,7 +58,8 @@ public class Post extends BaseTimeEntity {
     public Post(Long id) {
         this.id = id;
     }
-
+    /*
+    username추가하여 사용안함
     @Builder
     public Post(Long id,String title, String content, UserEntity user) {
         this.id= id;
@@ -64,6 +67,16 @@ public class Post extends BaseTimeEntity {
         this.title = title;
         this.content = content;
         this.postUser = user;
+    }
+     */
+    @Builder
+    public Post(Long id,String title, String content, UserEntity user,String username) {
+        this.id= id;
+        this.views =1L;
+        this.title = title;
+        this.content = content;
+        this.postUser = user;
+        this.username=username;
     }
     @Builder //updatePost 테스트용 생성자 위의 생성자랑 충돌함...
     public Post(Long id, String title, String content, List<PostTag> postTags) {

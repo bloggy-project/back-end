@@ -82,12 +82,23 @@ public class PagingQueryRepository {
         return checkLastPageDto(pageable, posts);
     }
     public Page<Post> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
-        // 커버링 인덱스 적용
+        // 커버링 인덱스 잘못 적용된 예시. join을 하므로
+        // using index + using where 연산임
+        /*
         List<Long> ids = queryFactory
                 .select(post.id)
                 .from(post)
                 .leftJoin(post.postUser, userEntity)
                 .where(usernameEq(name))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+         */
+        // 커버링 인덱스를 사용하기 위해 Post객체에 username이라는 칼럼을 추가
+        List<Long> ids = queryFactory
+                .select(post.id)
+                .from(post)
+                .where(usernameEq(name))  //인덱스 컨디션 푸시다운
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -174,9 +185,17 @@ public class PagingQueryRepository {
     /*
      *  BooleanExpression 영역
      */
+    /*
+        조인이 필요한 커버링 인덱스를 잘못 적용한 함수
     private BooleanExpression usernameEq(String name) {
         return hasText(name) ? post.postUser.name.eq(name) : null;
     }
+     */
+    private BooleanExpression usernameEq(String name) {
+        return  hasText(name) ? post.username.eq(name) : null;
+    }
+
+
     private BooleanExpression createdAtExpression(LocalDateTime createdAt){
         if(createdAt==null)
             return null;
