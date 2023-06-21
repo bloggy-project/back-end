@@ -249,7 +249,7 @@ public class PagingQueryRepository {
     }
 
 
-
+   //merge문제
     private static JPQLQuery<Long> getPostCommentCount() {
         return JPAExpressions
                 .select(comment.count())
