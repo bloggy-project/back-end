@@ -5,6 +5,7 @@ import com.blog.bloggy.favorite.model.Favorite;
 import com.blog.bloggy.favorite.repository.FavoriteRepository;
 import com.blog.bloggy.post.dto.ResponsePostList;
 import com.blog.bloggy.post.dto.ResponseUserPagePost;
+import com.blog.bloggy.post.dto.ResponseUserPagePostWithPostTags;
 import com.blog.bloggy.post.model.Post;
 import com.blog.bloggy.post.repository.PostRepository;
 import com.blog.bloggy.user.model.UserEntity;
@@ -51,7 +52,6 @@ class PagingQueryRepositoryTest {
                 Post post = Post.builder()
                         .title("test" + i)
                         .user(user1)
-                        .username(user1.getName())
                         .build();
                 postRepository.save(post);
                 post.setCreatedAt(post.getCreatedAt().minusDays(7).plusHours(i));
@@ -68,7 +68,6 @@ class PagingQueryRepositoryTest {
                 Post post = Post.builder()
                         .title("test" + i)
                         .user(user2)
-                        .username(username2)
                         .build();
                 postRepository.save(post);
                 post.setCreatedAt(post.getCreatedAt().minusDays(7).plusHours(i));
@@ -130,14 +129,17 @@ class PagingQueryRepositoryTest {
 
     @Test
     void findUserPostsOrderByCreatedAtV2() {
-        Pageable pageable = PageRequest.of(0, 5);
+        Pageable pageable = PageRequest.of(2, 5);
         Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(username1, pageable);
+        for (Post post : posts) {
+            System.out.println("post.getPostUser().getName() = " + post.getPostUser().getName());
+        }
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
-                .tagNames(post.getPostTags().stream().map(tag -> tag.getTagName()).collect(toList()))
+                //.tagNames(post.getPostTags().stream().map(tag -> tag.getTagName()).collect(toList()))
                 .build());
         for (ResponseUserPagePost responseUserPagePost : toMap) {
             System.out.println("responseUserPagePost = " + responseUserPagePost);

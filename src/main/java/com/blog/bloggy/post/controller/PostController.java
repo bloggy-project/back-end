@@ -74,12 +74,12 @@ public class PostController {
 
 
     @GetMapping("/posts/{name}")
-    public ResponseEntity<Page<ResponseUserPagePost>> getUserPostsOrderByCreatedAt(
+    public ResponseEntity<Page<ResponseUserPagePostWithPostTags>> getUserPostsOrderByCreatedAt(
             @PathVariable(value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<ResponseUserPagePost> result = postService.getUserPostsOrderByCreatedAt(name, pageable);
+        Page<ResponseUserPagePostWithPostTags> result = postService.getUserPostsOrderByCreatedAt(name, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
