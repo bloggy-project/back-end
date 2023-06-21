@@ -12,7 +12,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "users")
+@Table(name = "users",indexes = @Index(name = "name",columnList = "name"))
+//@Table(name = "users")
 public class UserEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

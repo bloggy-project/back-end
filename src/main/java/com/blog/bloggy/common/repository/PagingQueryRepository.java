@@ -1,9 +1,7 @@
 package com.blog.bloggy.common.repository;
 
 import com.blog.bloggy.common.dto.TrendSearchCondition;
-import com.blog.bloggy.post.dto.QResponsePostList;
-import com.blog.bloggy.post.dto.ResponsePostList;
-import com.blog.bloggy.post.dto.ResponseUserPagePost;
+import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.model.Post;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -22,7 +20,6 @@ import java.util.List;
 import static com.blog.bloggy.comment.model.QComment.comment;
 import static com.blog.bloggy.favorite.model.QFavorite.favorite;
 import static com.blog.bloggy.post.model.QPost.post;
-import static com.blog.bloggy.postTag.model.QPostTag.postTag;
 import static com.blog.bloggy.user.model.QUserEntity.userEntity;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.StringUtils.hasText;
@@ -34,8 +31,8 @@ public class PagingQueryRepository {
 
 
     public Slice<ResponsePostList> findPostsForMain(Long postId, Pageable pageable) {
-
-        List<ResponsePostList> posts = queryFactory
+        /*
+        List<ResponsePostList> results = queryFactory
                 .select(new QResponsePostList(
                         post.id,
                         post.title,
@@ -46,14 +43,74 @@ public class PagingQueryRepository {
                         getPostFavoriteCount()
                 ))
                 .from(post)
-                .join(post.postUser, userEntity)
                 .where(
                         ltPostId(postId)
                 )
                 .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
-        return checkLastPageDto(pageable, posts);
+         */
+        /*
+        List<Long> ids = queryFactory
+                .select(post.id)
+                .from(post)
+                .where(
+                        ltPostId(postId)
+                )
+                .orderBy(post.id.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+        List<ResponsePostList> results = queryFactory
+                .select(new QResponsePostList(
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.postUser.name,
+                        post.createdAt,
+                        getPostCommentCount(),
+                        getPostFavoriteCount()
+                ))
+                .from(post)
+                .where(
+                        post.id.in(ids)
+                )
+                .orderBy(post.id.desc())
+                .fetch();
+        */
+        List<Post> posts = queryFactory
+                .select(post)
+                .from(post)
+                .where(
+                        ltPostId(postId)
+                )
+                .orderBy(post.id.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+        List<ResponsePostList> results = posts.stream().map(post -> ResponsePostList.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .username(post.getPostUser().getUserId())
+                .commentCount(post.getComments().size())
+                .favoriteCount(post.getFavorites().size())
+                .build()).collect(toList());
+
+
+        return checkLastPageDto(pageable, results);
+    }
+    public Slice<Post> findPostsForMainPost(Long postId, Pageable pageable) {
+
+        List<Post> posts = queryFactory
+                .select(post)
+                .from(post)
+                .where(
+                        ltPostId(postId)
+                )
+                .orderBy(post.id.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        return checkLastPage(pageable, posts);
     }
 
     public Slice<ResponsePostList> findPostsForMainTrend(TrendSearchCondition condition, Pageable pageable) {
@@ -81,7 +138,7 @@ public class PagingQueryRepository {
                 .fetch();
         return checkLastPageDto(pageable, posts);
     }
-    public Page<Post> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
+    public Page<Post> findUserPostsOrderByCreatedAt(String name, Pageable pageable) {
         // 커버링 인덱스 잘못 적용된 예시. join을 하므로
         // using index + using where 연산임
         /*
@@ -94,21 +151,38 @@ public class PagingQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
          */
-        // 커버링 인덱스를 사용하기 위해 Post객체에 username이라는 칼럼을 추가
+        /*
         List<Long> ids = queryFactory
                 .select(post.id)
                 .from(post)
-                .where(usernameEq(name))  //인덱스 컨디션 푸시다운
+                .innerJoin(post.postUser, userEntity)
+                //.where(usernameEq(name))
+                .orderBy(post.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+         */
+        //0번 방식: 커버링 인덱스에 대한 이해도 없이 join을 사용하여 잘못된 최적화
+        //1번 방식: post에 username을 추가하는 건 결국 using where. full table scan 방식.
+        //2번 방식: user의 name에 index 테이블을 만들어서 name에 대응하는 userId를 가져온 후,
+        //post의 외래키 userId의 값과 비교하여 post.id를 가져온 뒤, 시간순 정렬이 아닌 postId의 역정렬로 join을 제거
 
+        Long userId = queryFactory.select(userEntity.id)
+                .from(userEntity)
+                .where(userEntity.name.eq(name)).fetchOne();
+        List<Long> ids = queryFactory
+                .select(post.id)
+                .from(post)
+                .where(post.postUser.id.eq(userId))
+                .orderBy(post.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
         List<Post> posts = queryFactory
                 .select(post)
                 .from(post)
-                //.join(post.postTags,postTag).fetchJoin() // 일대다 페치조인으로 postId가 중복되서 나옴
                 .where(post.id.in(ids))
-                .orderBy(post.createdAt.desc())
+                .orderBy(post.id.desc())
                 .fetch();
         Long total = queryFactory
                 .select(post.count())
@@ -117,14 +191,18 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(posts, pageable, total);
     }
+    //극도의 최적화를 위해 Post의 PostTags대신 List<String> tagNames를 저장할 생각을 해보았지만,
+    //JPA의 장점인 연관관계를 해치는 것으로 판단하여, 성능을 조금은 포기하고 DTO 반환
     @Transactional
-    public Page<ResponseUserPagePost> findUserPostsOrderByCreatedAtV3(String name, Pageable pageable) {
-        // 1) 커버링 인덱스로 대상 조회
+    public Page<ResponseUserPagePost> findUserPostsOrderByCreatedAtV2(String name, Pageable pageable) {
+        Long userId = queryFactory.select(userEntity.id)
+                .from(userEntity)
+                .where(userEntity.name.eq(name)).fetchOne();
         List<Long> ids = queryFactory
                 .select(post.id)
                 .from(post)
-                .leftJoin(post.postUser, userEntity)
-                .where(usernameEq(name))
+                .where(post.postUser.id.eq(userId))
+                .orderBy(post.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -132,17 +210,15 @@ public class PagingQueryRepository {
                 .select(post)
                 .from(post)
                 .where(post.id.in(ids))
-                .orderBy(post.createdAt.desc())
+                .orderBy(post.id.desc())
                 .fetch();
-        List<ResponseUserPagePost> results= posts.stream()
-                .map(post -> ResponseUserPagePost.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .content(post.getContent())
-                        .createdAt(post.getCreatedAt())
-                        .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
-                        .build()).collect(toList());
-
+        List<ResponseUserPagePost> results = posts.stream().map(post -> ResponseUserPagePost.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .createdAt(post.getCreatedAt())
+                .tagNames(post.getPostTags().stream().map(tag -> tag.getTagName()).collect(toList()))
+                .build()).collect(toList());
         Long total = queryFactory
                 .select(post.count())
                 .from(post)
@@ -150,6 +226,8 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(results, pageable, total);
     }
+
+
 
     private static JPQLQuery<Long> getPostCommentCount() {
         return JPAExpressions
@@ -185,16 +263,17 @@ public class PagingQueryRepository {
     /*
      *  BooleanExpression 영역
      */
-    /*
-        조인이 필요한 커버링 인덱스를 잘못 적용한 함수
+
+    //    조인이 필요한 커버링 인덱스를 잘못 적용한 함수
     private BooleanExpression usernameEq(String name) {
         return hasText(name) ? post.postUser.name.eq(name) : null;
     }
-     */
+
+    /*
     private BooleanExpression usernameEq(String name) {
         return  hasText(name) ? post.username.eq(name) : null;
     }
-
+    */
 
     private BooleanExpression createdAtExpression(LocalDateTime createdAt){
         if(createdAt==null)
@@ -235,30 +314,5 @@ public class PagingQueryRepository {
         return null;
     }
 
-
-    public Page<Post> findUserPagePostAllV1(String name, Pageable pageable) {
-        List<Post> posts = queryFactory
-                .select(post)
-                .from(post)
-                .join(post.postTags,postTag).fetchJoin()
-                .leftJoin(post.postUser, userEntity)
-                .where(
-                        usernameEq(name)
-                )
-                .orderBy(post.createdAt.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-        Long total = queryFactory
-                .select(post.count())
-                .from(post)
-                .leftJoin(post.postUser, userEntity)
-                .where(
-                        usernameEq(name)
-                )
-                .fetchOne();
-        return new PageImpl<>(posts, pageable, total);
-
-    }
 
 }

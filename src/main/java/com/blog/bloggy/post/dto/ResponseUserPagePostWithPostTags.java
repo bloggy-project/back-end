@@ -1,6 +1,7 @@
 package com.blog.bloggy.post.dto;
 
 import com.blog.bloggy.postTag.model.PostTag;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class ResponseUserPagePostForLazy {
+public class ResponseUserPagePostWithPostTags {
     private Long postId;
 
     private String title;
@@ -19,7 +20,9 @@ public class ResponseUserPagePostForLazy {
 
     private List<PostTag> postTags;
 
-    public ResponseUserPagePostForLazy(Long postId, String title, String content, LocalDateTime createdAt, List<PostTag> postTags) {
+    @Builder
+    @QueryProjection
+    public ResponseUserPagePostWithPostTags(Long postId, String title, String content, LocalDateTime createdAt, List<PostTag> postTags) {
         this.postId = postId;
         this.title = title;
         this.content = content;

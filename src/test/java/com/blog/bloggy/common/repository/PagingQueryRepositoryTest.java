@@ -12,22 +12,22 @@ import com.blog.bloggy.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@DataJpaTest //@Transactional 포함
-@Import(PagingQueryRepository.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest
+//@DataJpaTest //@Transactional 포함
+//@Import(PagingQueryRepository.class)
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class PagingQueryRepositoryTest {
     @Autowired
     private PagingQueryRepository pagingQueryRepository;
@@ -40,7 +40,8 @@ class PagingQueryRepositoryTest {
     String username1 = "abcd123";
     String username2 = "efgh456";
 
-    @BeforeEach
+    //@BeforeEach
+    //@Rollback(false)
     void init() {
         UserEntity user1 = getUserEntity(username1);
         UserEntity user2 = getUserEntity(username2);
@@ -51,7 +52,6 @@ class PagingQueryRepositoryTest {
                 Post post = Post.builder()
                         .title("test" + i)
                         .user(user1)
-                        .username(user1.getName())
                         .build();
                 postRepository.save(post);
                 post.setCreatedAt(post.getCreatedAt().minusDays(7).plusHours(i));
@@ -68,7 +68,6 @@ class PagingQueryRepositoryTest {
                 Post post = Post.builder()
                         .title("test" + i)
                         .user(user2)
-                        .username(username2)
                         .build();
                 postRepository.save(post);
                 post.setCreatedAt(post.getCreatedAt().minusDays(7).plusHours(i));
@@ -105,6 +104,27 @@ class PagingQueryRepositoryTest {
             }
         }
     }
+    @Test
+    @Transactional
+    void findPostsForMain_Post(){
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Slice<Post> posts = pagingQueryRepository.findPostsForMainPost(null, pageable);
+        List<ResponsePostList> results = posts.stream().map(post -> ResponsePostList.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .username(post.getPostUser().getUserId())
+                .commentCount(post.getComments().size())
+                .favoriteCount(post.getFavorites().size())
+                .build()).collect(toList());
+        for (ResponsePostList responsePostList : results) {
+            System.out.println("responsePostList = " + responsePostList);
+        }
+        List<UserEntity> collect = posts.stream().map(post -> post.getPostUser()).collect(toList());
+
+    }
 
     @Test
     void findPostsFromMainTrend() {
@@ -129,9 +149,12 @@ class PagingQueryRepositoryTest {
     }
 
     @Test
-    void findUserPostsOrderByCreatedAtV2() {
-        Pageable pageable = PageRequest.of(0, 5);
-        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(username1, pageable);
+    void findUserPostsOrderByCreatedAt() {
+        Pageable pageable = PageRequest.of(2, 5);
+        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAt(username1, pageable);
+        for (Post post : posts) {
+            System.out.println("post.getPostUser().getName() = " + post.getPostUser().getName());
+        }
         Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -145,9 +168,9 @@ class PagingQueryRepositoryTest {
     }
 
     @Test
-    void findUserPostsOrderByCreatedAtV3() {
+    void findUserPostsOrderByCreatedAtV2() {
         Pageable pageable = PageRequest.of(0, 5);
-        Page<ResponseUserPagePost> gon = pagingQueryRepository.findUserPostsOrderByCreatedAtV3(username1, pageable);
+        Page<ResponseUserPagePost> gon = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(username1, pageable);
         for (ResponseUserPagePost responseUserPagePost : gon) {
             System.out.println("responseUserPagePost = " + responseUserPagePost);
         }

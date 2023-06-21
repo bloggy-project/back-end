@@ -62,7 +62,6 @@ public class PostService {
                 .title(postDto.getTitle())
                 .content(postDto.getTitle())
                 .user(user)
-                .username(user.getName())
                 .build();
         postRepository.save(post);
         List<PostTag> postTags=new ArrayList<>();
@@ -198,14 +197,14 @@ public class PostService {
     }
 
     @Transactional
-    public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
-        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAtV2(name,page);
-        Page<ResponseUserPagePost> toMap = posts.map(post -> ResponseUserPagePost.builder()
+    public Page<ResponseUserPagePostWithPostTags> getUserPostsOrderByCreatedAt(String name, Pageable page){
+        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAt(name,page);
+        Page<ResponseUserPagePostWithPostTags> toMap = posts.map(post -> ResponseUserPagePostWithPostTags.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
-                .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
+        //        .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
                 .build());
         return toMap;
     }
