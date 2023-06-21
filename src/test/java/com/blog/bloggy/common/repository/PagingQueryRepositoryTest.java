@@ -106,25 +106,33 @@ class PagingQueryRepositoryTest {
     }
     @Test
     @Transactional
-    void findPostsForMain_Post(){
+    void findPostsForMainV2() {
+
         int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
-        Slice<Post> posts = pagingQueryRepository.findPostsForMainPost(null, pageable);
-        List<ResponsePostList> results = posts.stream().map(post -> ResponsePostList.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .username(post.getPostUser().getUserId())
-                .commentCount(post.getComments().size())
-                .favoriteCount(post.getFavorites().size())
-                .build()).collect(toList());
-        for (ResponsePostList responsePostList : results) {
+        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainV2(null, pageable);
+        for (ResponsePostList responsePostList : postsForMain) {
             System.out.println("responsePostList = " + responsePostList);
         }
-        List<UserEntity> collect = posts.stream().map(post -> post.getPostUser()).collect(toList());
-
+        List<ResponsePostList> collect = postsForMain.get().collect(toList());
+        if(collect.size()!=0){
+            Long lastId = collect.get(collect.size() - 1).getPostId();
+            Slice<ResponsePostList> postsForMain2 = pagingQueryRepository.findPostsForMainV2(lastId, pageable);
+            for (ResponsePostList responsePostList : postsForMain2) {
+                System.out.println("nextResponsePostList = " + responsePostList);
+            }
+        }
+        List<ResponsePostList> collect2 = postsForMain.get().collect(toList());
+        if(collect2.size()!=0){
+            Long lastId = collect2.get(collect2.size() - 1).getPostId();
+            Slice<ResponsePostList> postsForMain2 = pagingQueryRepository.findPostsForMainV2(lastId, pageable);
+            for (ResponsePostList responsePostList : postsForMain2) {
+                System.out.println("nextResponsePostList = " + responsePostList);
+            }
+        }
     }
+
 
     @Test
     void findPostsFromMainTrend() {

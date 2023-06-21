@@ -77,6 +77,7 @@ public class PagingQueryRepository {
                 .orderBy(post.id.desc())
                 .fetch();
         */
+
         List<Post> posts = queryFactory
                 .select(post)
                 .from(post)
@@ -98,10 +99,10 @@ public class PagingQueryRepository {
 
         return checkLastPageDto(pageable, results);
     }
-    public Slice<Post> findPostsForMainPost(Long postId, Pageable pageable) {
+    public Slice<ResponsePostList> findPostsForMainV2(Long postId, Pageable pageable) {
 
-        List<Post> posts = queryFactory
-                .select(post)
+        List<Long> ids = queryFactory
+                .select(post.id)
                 .from(post)
                 .where(
                         ltPostId(postId)
@@ -109,10 +110,30 @@ public class PagingQueryRepository {
                 .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
+        List<ResponsePostListDto> posts = queryFactory
+                .select(new QResponsePostListDto(
+                        post,
+                        getPostCommentCount(),
+                        getPostFavoriteCount()
+                ))
+                .from(post)
+                .where(
+                        post.id.in(ids)
+                )
+                .orderBy(post.id.desc())
+                .fetch();
+        List<ResponsePostList> results = posts.stream().map(post -> ResponsePostList.builder()
+                .postId(post.getPost().getId())
+                .title(post.getPost().getTitle())
+                .content(post.getPost().getContent())
+                .username(post.getPost().getPostUser().getUserId())
+                .commentCount(post.getCommentCount())
+                .favoriteCount(post.getFavoriteCount())
+                .build()).collect(toList());
 
-        return checkLastPage(pageable, posts);
+
+        return checkLastPageDto(pageable, results);
     }
-
     public Slice<ResponsePostList> findPostsForMainTrend(TrendSearchCondition condition, Pageable pageable) {
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
