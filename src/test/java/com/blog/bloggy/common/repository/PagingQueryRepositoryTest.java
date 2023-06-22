@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -166,7 +165,7 @@ class PagingQueryRepositoryTest {
         int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
-        Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMainUsingJoinUser(lastId, pageable);
+        Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMain(lastId, pageable);
     }
 
     //@Test

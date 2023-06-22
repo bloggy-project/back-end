@@ -197,20 +197,13 @@ public class PostService {
     }
 
     @Transactional
-    public Page<ResponseUserPagePostWithPostTags> getUserPostsOrderByCreatedAt(String name, Pageable page){
-        Page<Post> posts = pagingQueryRepository.findUserPostsOrderByCreatedAt(name,page);
-        Page<ResponseUserPagePostWithPostTags> toMap = posts.map(post -> ResponseUserPagePostWithPostTags.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .createdAt(post.getCreatedAt())
-        //        .tagNames(post.getPostTags().stream().map(tag-> tag.getTagName()).collect(toList()))
-                .build());
-        return toMap;
+    public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
+        userRepository.findByName(name).orElseThrow(()-> new UserNotFoundException());
+        return pagingQueryRepository.findUserPostsOrderByCreated(name,page);
     }
 
-    public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
-        return pagingQueryRepository.findPostsForMainNotEagerAll(postId, pageable);
+    public Slice<ResponsePostList> getPosts(Long lastId, Pageable pageable) {
+        return pagingQueryRepository.findPostsForMain(lastId, pageable);
     }
 
     private static void deletePostFavorite(Post post) {

@@ -30,7 +30,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class PagingQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Slice<ResponsePostList> findPostsForMainUsingJoinUser(Long postId, Pageable pageable) {
+    public Slice<ResponsePostList> findPostsForMain(Long postId, Pageable pageable) {
         List<Long> ids = queryFactory
                 .select(post.id)
                 .from(post)

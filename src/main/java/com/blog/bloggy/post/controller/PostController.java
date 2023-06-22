@@ -65,22 +65,22 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<Slice<ResponsePostList>> getPostsALl(
-            @RequestParam(value = "postId")Long postId){
+    public ResponseEntity<Slice<ResponsePostList>> getPostsAll(
+            @RequestParam(value = "lastId", required = false)Long lastId){
         Pageable pageable = PageRequest.of(0,10);
-        Slice<ResponsePostList> result=postService.getPosts(postId, pageable);
+        Slice<ResponsePostList> result=postService.getPosts(lastId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-
     @GetMapping("/posts/{name}")
-    public ResponseEntity<Page<ResponseUserPagePostWithPostTags>> getUserPostsOrderByCreatedAt(
+    public ResponseEntity<Page<ResponseUserPagePost>> getUserPostsOrderByCreatedAt(
             @PathVariable(value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<ResponseUserPagePostWithPostTags> result = postService.getUserPostsOrderByCreatedAt(name, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        Page<ResponseUserPagePost> results = postService.getUserPostsOrderByCreatedAt(name, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(results);
     }
+
 
 }
