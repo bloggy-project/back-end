@@ -3,7 +3,6 @@ package com.blog.bloggy.common.repository;
 import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.model.Post;
-import com.blog.bloggy.postTag.model.QPostTag;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -31,7 +30,6 @@ import static org.springframework.util.StringUtils.hasText;
 public class PagingQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    @Transactional
     public Slice<ResponsePostList> findPostsForMainUsingJoinUser(Long postId, Pageable pageable) {
         List<Long> ids = queryFactory
                 .select(post.id)
@@ -79,43 +77,9 @@ public class PagingQueryRepository {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .username(post.getPostUser().getUserId())
+                .createdAt(post.getCreatedAt())
                 .commentCount(post.getComments().size())
                 .favoriteCount(post.getFavorites().size())
-                .build()).collect(toList());
-
-        return checkLastPageDto(pageable, results);
-    }
-    @Transactional
-    public Slice<ResponsePostList> findPostsForMainUsingUserNotJoin(Long postId, Pageable pageable) {
-
-        List<Long> ids = queryFactory
-                .select(post.id)
-                .from(post)
-                .where(
-                        ltPostId(postId)
-                )
-                .orderBy(post.id.desc())
-                .limit(pageable.getPageSize() + 1)
-                .fetch();
-        List<ResponsePostListDto> posts = queryFactory
-                .select(new QResponsePostListDto(
-                        post,
-                        getPostCommentCount(),
-                        getPostFavoriteCount()
-                ))
-                .from(post)
-                .where(
-                        post.id.in(ids)
-                )
-                .orderBy(post.id.desc())
-                .fetch();
-        List<ResponsePostList> results = posts.stream().map(post -> ResponsePostList.builder()
-                .postId(post.getPost().getId())
-                .title(post.getPost().getTitle())
-                .content(post.getPost().getContent())
-                .username(post.getPost().getPostUser().getUserId())
-                .commentCount(post.getCommentCount())
-                .favoriteCount(post.getFavoriteCount())
                 .build()).collect(toList());
 
         return checkLastPageDto(pageable, results);
@@ -202,7 +166,7 @@ public class PagingQueryRepository {
 
 
     @Transactional
-    public Page<ResponseUserPagePost> findUserPostsOrderByCreatedDTO(String name, Pageable pageable) {
+    public Page<ResponseUserPagePost> findUserPostsOrderByCreated(String name, Pageable pageable) {
         Long userId = queryFactory.select(userEntity.id)
                 .from(userEntity)
                 .where(userEntity.name.eq(name)).fetchOne();

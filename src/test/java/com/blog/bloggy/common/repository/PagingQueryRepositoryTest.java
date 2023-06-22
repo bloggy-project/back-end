@@ -12,27 +12,28 @@ import com.blog.bloggy.postTag.repository.PostTagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.annotation.Rollback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@SpringBootTest
+//@SpringBootTest
 @Slf4j
-//@DataJpaTest //@Transactional 포함
-//@Import(PagingQueryRepository.class)
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DataJpaTest //@Transactional 포함
+@Import(PagingQueryRepository.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class PagingQueryRepositoryTest {
     @Autowired
     private PagingQueryRepository pagingQueryRepository;
@@ -159,34 +160,24 @@ class PagingQueryRepositoryTest {
         }
     }
 
-    //@Test
-    @DisplayName("Post객체를 User와 join하고 commment와 favorite count는 서브쿼리처리")
+   // @Test
+    @DisplayName("User와 join하고 commment와 favorite count는 서브쿼리처리")
     void findPostsForMainUsingJoinUser() {
-        int page = 5000;
+        int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
-        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainUsingJoinUser(lastId, pageable);
-
+        Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMainUsingJoinUser(lastId, pageable);
     }
 
     //@Test
-    @DisplayName("Post객체를 index range 조회 후 comment, favorite user지연로딩 초기화 시간 측정")
+    @DisplayName("comment, favorite, user 지연로딩 초기화")
     void findPostsForMainNotEagerAll() {
-        int page = 5000;
+        int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
-        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainNotEagerAll(lastId, pageable);
-
+        Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMainNotEagerAll(lastId, pageable);
     }
-    //@Test
-    @DisplayName("Post객체를 index range 조회 후 서브쿼리+user는 지연로딩 초기화 시간 측정")
-    void findPostsForMainUsingUserNotJoin() {
 
-        int page = 5000;
-        int size = 10;
-        Pageable pageable = PageRequest.of(page, size);
-        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainUsingUserNotJoin(lastId, pageable);
-    }
 
 
     //@Test
@@ -208,21 +199,19 @@ class PagingQueryRepositoryTest {
                 System.out.println("nextResponsePostList = " + responsePostList);
             }
         }
-
     }
 
     @Test
     @DisplayName("username의 userId를 인덱스로 빠르게 찾고 default batch size로 postTag 가져오는 쿼리")
-    void findUserPostsOrderByCreatedDTO() {
-        Pageable pageable = PageRequest.of(400, 5);
+    void findUserPostsOrderByCreated() {
+        Pageable pageable = PageRequest.of(500, 5);
         Page<ResponseUserPagePost> posts =
-                pagingQueryRepository.findUserPostsOrderByCreatedDTO(username1, pageable);
-
+                pagingQueryRepository.findUserPostsOrderByCreated(username1, pageable);
         for (ResponseUserPagePost post : posts) {
             log.info("post =  {}",post );
         }
     }
-    /*
+
     @Test
     @DisplayName("join을 사용하여 ids를 가져오는 index 미사용 쿼리")
     void findUserPostsOrderByCreatedJoin() {
@@ -234,7 +223,7 @@ class PagingQueryRepositoryTest {
             log.info("post =  {}",post );
         }
     }
-
+    /*
     @Test
     @DisplayName("username의 userId를 인덱스로 빠르게 찾고 fetchJoin으로 postTag를 미리 가져오는 쿼리")
     void findUserPostsOrderByCreatedFetchJoin() {
