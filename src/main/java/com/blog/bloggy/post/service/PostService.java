@@ -210,7 +210,7 @@ public class PostService {
     }
 
     public Slice<ResponsePostList> getPosts(Long postId, Pageable pageable) {
-        return pagingQueryRepository.findPostsForMain(postId, pageable);
+        return pagingQueryRepository.findPostsForMainNotEagerAll(postId, pageable);
     }
 
     private static void deletePostFavorite(Post post) {
