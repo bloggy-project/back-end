@@ -7,6 +7,10 @@
 - git rebase dev
 - git checkout dev
 - git merge feature/token
+- 	
+$ git checkout master
+$ git merge --squash my-branch
+$ git commit -m "your-commit-message"
 
 ### 하위 branch 전략
 - 새로운 기능.
