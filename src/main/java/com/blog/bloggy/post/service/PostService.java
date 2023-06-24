@@ -56,7 +56,7 @@ public class PostService {
     @Transactional
     public ResponsePostRegister createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
-        UserEntity user = userRepository.findById(postDto.getUsersId())
+        UserEntity user = userRepository.findByUserId(postDto.getUserId())
                 .orElseThrow(UserNotFoundException::new);
         Post post = Post.builder()
                 .title(postDto.getTitle())

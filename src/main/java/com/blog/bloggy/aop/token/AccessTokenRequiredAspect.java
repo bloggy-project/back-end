@@ -36,18 +36,17 @@ public class AccessTokenRequiredAspect {
         tokenUtil.isExpired(token);
         tokenUtil.isValidType(token,ACCESS_TOKEN_TYPE);
         String userId = tokenUtil.getUserIdFromToken(token);
-        TokenUserDto user = userService.getTokenUserDtoByUserId(userId);
         Method method = MethodSignature.class.cast(pjp.getSignature()).getMethod();
         Object[] args = pjp.getArgs();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < args.length; i++) {
             for (Annotation parameterAnnotation : parameterAnnotations[i]) {
-                if (parameterAnnotation.annotationType() == Admin.class && method.getParameterTypes()[i] == TokenUserDto.class) {
-                    args[i] = user;
+                if (parameterAnnotation.annotationType() == Admin.class && method.getParameterTypes()[i] == String.class) {
+                    args[i] = userId;
                 }
             }
         }
-        log.info("login User = {} ",user);
+        log.info("login User = {} ",userId);
         return pjp.proceed(args);
     }
 }
