@@ -8,7 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
@@ -23,9 +23,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/users","/test","/home",
                         "/login", "/error","/v1/auth/refresh","/posts");
          */
-
+        /*
         registry.addInterceptor(refreshInterceptor)
                 .addPathPatterns("/v1/auth/refresh");
-
+        */
     }
 }
