@@ -1,8 +1,11 @@
 package com.blog.bloggy.post.controller;
 
 
+import com.blog.bloggy.aop.token.AccessTokenRequired;
+import com.blog.bloggy.aop.token.Admin;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.service.PostService;
+import com.blog.bloggy.user.dto.TokenUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,20 +22,23 @@ import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
 public class PostController {
 
     private final PostService postService;
+
+    @AccessTokenRequired
     @PostMapping("/posts")
     public ResponseEntity<ResponsePostRegister> postRegister(
-            @RequestAttribute(USER_ID_ATTRIBUTE_KEY) String userId,
+            @Admin TokenUserDto user,
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostDto postDto= PostDto.builder()
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
-                .userId(userId)
+                .usersId(user.getUsersId())
                 .tagNames(requestPostRegister.getTagNames())
                 .build();
         ResponsePostRegister responsePostRegister = postService.createPost(postDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responsePostRegister);
     }
+    @AccessTokenRequired
     @PatchMapping("/posts/{postId}")
     public ResponseEntity<ResponsePostRegister> postUpdate(
             @PathVariable Long postId,

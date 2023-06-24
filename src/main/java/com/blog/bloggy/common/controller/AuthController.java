@@ -30,7 +30,6 @@ public class AuthController {
      */
     @GetMapping(value="/refresh")
         public TokenDto refreshToken(@RequestAttribute(USER_ID_ATTRIBUTE_KEY) String userId) {
-        log.info("refreshToken userId ::: {}", userId);
         return authService.reGenerateAccessToken(userId);
     }
 }
