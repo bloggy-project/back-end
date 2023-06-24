@@ -23,7 +23,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/users","/test","/home",
                         "/login", "/error","/v1/auth/refresh","/posts");
          */
+
         registry.addInterceptor(refreshInterceptor)
                 .addPathPatterns("/v1/auth/refresh");
+
     }
 }

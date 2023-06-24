@@ -2,7 +2,6 @@ package com.blog.bloggy.aop.token;
 
 
 import com.blog.bloggy.common.exception.RequiredTokenException;
-import com.blog.bloggy.common.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,13 +10,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static com.blog.bloggy.common.util.TokenUtil.ACCESS_TOKEN_TYPE;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class AccessTokenService {
+public class TokenService {
 
 
     protected String getBearerTokenFromHeader(){

@@ -15,26 +15,25 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import static com.blog.bloggy.common.util.TokenUtil.ACCESS_TOKEN_TYPE;
+import static com.blog.bloggy.common.util.TokenUtil.REFRESH_TOKEN_TYPE;
 
 @Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class AccessTokenRequiredAspect {
+public class RefreshTokenRequiredAspect {
 
     private final TokenUtil tokenUtil;
     private final TokenService tokenService;
-    private final UserService userService;
 
-    @Around(value = "@annotation(accessTokenRequired)")
-    public Object loginCheck(ProceedingJoinPoint pjp, AccessTokenRequired accessTokenRequired) throws Throwable {
+    @Around(value = "@annotation(refreshTokenRequired)")
+    public Object loginCheck(ProceedingJoinPoint pjp, RefreshTokenRequired refreshTokenRequired) throws Throwable {
         String token = tokenService.getBearerTokenFromHeader();
         tokenService.checkTokenExist(token);
 
-        tokenUtil.isExpired(token);
-        tokenUtil.isValidType(token,ACCESS_TOKEN_TYPE);
-
         String userId = tokenUtil.getUserIdFromToken(token);
+        tokenUtil.isValidType(token,REFRESH_TOKEN_TYPE);
+        tokenUtil.validRefreshToken(userId,token);
 
         Method method = MethodSignature.class.cast(pjp.getSignature()).getMethod();
         Object[] args = pjp.getArgs();

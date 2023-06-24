@@ -1,14 +1,13 @@
 package com.blog.bloggy.common.controller;
 
 
+import com.blog.bloggy.aop.token.Admin;
+import com.blog.bloggy.aop.token.RefreshTokenRequired;
 import com.blog.bloggy.common.service.AuthService;
 import com.blog.bloggy.token.dto.TokenDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
 
@@ -28,8 +27,9 @@ public class AuthController {
      * @param userId
      * @return accessToken, refreshToken
      */
+    @RefreshTokenRequired
     @GetMapping(value="/refresh")
-        public TokenDto refreshToken(@RequestAttribute(USER_ID_ATTRIBUTE_KEY) String userId) {
+        public TokenDto refreshToken(@Admin String userId) {
         return authService.reGenerateAccessToken(userId);
     }
 }
