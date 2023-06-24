@@ -17,11 +17,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     //클린 빌드 후 다시 배포
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
+        /* Interceptor 토큰 관리,AOP 관리로 변경
         registry.addInterceptor(accessInterceptor)
                 .excludePathPatterns("/users","/test","/home",
-                        "/login", "/error","/v1/auth/refresh")
-                .excludePathPatterns(String.valueOf(HttpMethod.GET), "/posts");
-
+                        "/login", "/error","/v1/auth/refresh","/posts");
+         */
         registry.addInterceptor(refreshInterceptor)
                 .addPathPatterns("/v1/auth/refresh");
     }
