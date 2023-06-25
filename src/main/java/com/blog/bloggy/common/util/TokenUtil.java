@@ -131,8 +131,8 @@ public class TokenUtil {
          */
         ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
                 .path("/") // 모든 경로에서 쿠키 사용
-                .sameSite("Strict")
-                .secure(true)
+                //.sameSite("Strict")
+                .secure(false)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
