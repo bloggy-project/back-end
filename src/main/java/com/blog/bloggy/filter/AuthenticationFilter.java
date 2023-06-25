@@ -66,7 +66,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = tokenUtil.generateAccessToken(userId);
         String refreshToken = tokenUtil.generateRefreshToken(userId);
 
-        // Refresh Token을 쿠키로 설정하여 응답으로 보내기
+        // Refresh Token을 쿠키로 설정하여 응답
         ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
                 .path("/") // 모든 경로에서 쿠키 사용
                 .sameSite("None")
