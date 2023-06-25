@@ -11,7 +11,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -129,18 +128,23 @@ public class TokenUtil {
         cookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(cookie);
          */
-        ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
-                .path("/") // 모든 경로에서 쿠키 사용
-                //.sameSite("Strict")
-                .secure(false)
-                .httpOnly(true)
-                .maxAge(7 * 24 * 60 * 60)
-                .build();
+
+        ResponseCookie cookie = getResponseCookie(refreshToken);
         response.addHeader("Set-Cookie", cookie.toString());
         //액세스 토큰 재발급 시, 새로운 리프레시 토큰 포함.
         return TokenDto.builder()
                 .accessToken(generateAccessToken(userId))
                 .build();
+    }
+    public ResponseCookie getResponseCookie(String refreshToken) {
+        ResponseCookie cookie=ResponseCookie.from("refreshToken", refreshToken)
+                .path("/") // 모든 경로에서 쿠키 사용
+                .sameSite("None")
+                .secure(false)
+                .httpOnly(true)
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
+        return cookie;
     }
 
 
