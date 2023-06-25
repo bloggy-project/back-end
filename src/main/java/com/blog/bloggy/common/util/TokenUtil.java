@@ -30,8 +30,6 @@ public class TokenUtil {
 
     public static final String ACCESS_TOKEN_TYPE="ACCESS";
     public static final String REFRESH_TOKEN_TYPE="REFRESH";
-    @Value("${aws.ip}")
-    private String awsIp;
 
 
     public String generateToken(String userId,String type){
@@ -142,9 +140,10 @@ public class TokenUtil {
     //test
     public ResponseCookie getResponseCookie(String refreshToken) {
         ResponseCookie cookie=ResponseCookie.from("refreshToken", refreshToken)
-                .domain(awsIp)
+                .domain("")
                 .path("/") // 모든 경로에서 쿠키 사용
-                .secure(false)
+                .sameSite("None")
+                .secure(true)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
