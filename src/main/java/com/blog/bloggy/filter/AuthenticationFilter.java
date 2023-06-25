@@ -6,6 +6,7 @@ import com.blog.bloggy.user.dto.UserDto;
 import com.blog.bloggy.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.servlet.http.Cookie;
 
 
 @Slf4j
@@ -62,7 +65,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         log.info("userId ::: {}",userId);
         String accessToken = tokenUtil.generateAccessToken(userId);
         String refreshToken = tokenUtil.generateRefreshToken(userId);
+
+        // Refresh Token을 쿠키로 설정하여 응답으로 보내기
+        ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
+                .path("/") // 모든 경로에서 쿠키 사용
+                .sameSite("Strict")
+                .httpOnly(true)
+                .maxAge(7 * 24 * 60 * 60)
+                        .build();
+
         response.addHeader("accessToken", accessToken);
-        response.addHeader("refreshToken",refreshToken);
+        response.addHeader("refreshToken",cookie.toString());
     }
 }
