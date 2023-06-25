@@ -3,6 +3,7 @@ package com.blog.bloggy.common.controller;
 
 import com.blog.bloggy.aop.token.RefreshTokenRequired;
 import com.blog.bloggy.common.service.AuthService;
+import com.blog.bloggy.common.util.TokenUtil;
 import com.blog.bloggy.token.dto.TokenDto;
 import com.blog.bloggy.user.dto.TestMaskingDto;
 import com.blog.bloggy.user.dto.TokenUserDto;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 
 
 @RestController
@@ -17,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-    private final AuthService authService;
+    //private final AuthService authService;
+    private final TokenUtil tokenUtil;
 
 
     /**
@@ -29,9 +32,9 @@ public class AuthController {
      */
     @RefreshTokenRequired
     @GetMapping(value="/refresh")
-        public TokenDto refreshToken(TokenUserDto user) {
+        public TokenDto refreshToken(TokenUserDto user, HttpServletResponse response) {
         log.info("do mask?: {}", user);
-        return authService.reGenerateAccessToken(user.getUserId());
+        return tokenUtil.reGenerateAccessToken(user.getUserId(),response);
     }
 
     @RefreshTokenRequired

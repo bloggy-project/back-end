@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -117,11 +119,16 @@ public class TokenUtil {
             return true;
         }
     }
-    public TokenDto reGenerateAccessToken(String userId) {
+    public TokenDto reGenerateAccessToken(String userId, HttpServletResponse response) {
+        String newRefreshToken = generateRefreshToken(userId);
+        Cookie cookie = new Cookie("refreshToken", newRefreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/"); // 모든 경로에서 쿠키 사용
+        cookie.setMaxAge(7 * 24 * 60 * 60);
+        response.addCookie(cookie);
         //액세스 토큰 재발급 시, 새로운 리프레시 토큰 포함.
         return TokenDto.builder()
                 .access_token(generateAccessToken(userId))
-                .refresh_token(generateRefreshToken(userId))
                 .build();
     }
 
