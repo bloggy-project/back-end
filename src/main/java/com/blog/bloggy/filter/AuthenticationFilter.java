@@ -74,6 +74,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .maxAge(7 * 24 * 60 * 60)
                         .build();
         response.addHeader("accessToken", accessToken);
-        response.addHeader("refreshToken",cookie.toString());
+        response.addHeader("Set-Cookie",cookie.toString());
     }
 }
