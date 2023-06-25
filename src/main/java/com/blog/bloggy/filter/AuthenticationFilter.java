@@ -69,11 +69,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         // Refresh Token을 쿠키로 설정하여 응답으로 보내기
         ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
                 .path("/") // 모든 경로에서 쿠키 사용
-                .sameSite("Strict")
+                .sameSite("None")
                 .httpOnly(true)
                 .maxAge(7 * 24 * 60 * 60)
                         .build();
-
         response.addHeader("accessToken", accessToken);
         response.addHeader("refreshToken",cookie.toString());
     }
