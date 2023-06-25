@@ -68,11 +68,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = tokenUtil.generateAccessToken(userId);
         String refreshToken = tokenUtil.generateRefreshToken(userId);
 
+        /*
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(refreshTokenCookie);
+
+         */
 
         Map<String, String> responseJson = new HashMap<>();
         responseJson.put("accessToken", accessToken);
@@ -81,15 +84,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(new ObjectMapper().writeValueAsString(responseJson));
 
-        /*
+
         // Refresh Token을 쿠키로 설정하여 응답
         ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
                 .path("/") // 모든 경로에서 쿠키 사용
                 .sameSite("None")
+                .secure(true)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
-         */
+        response.addHeader("Set-Cookie", cookie.toString());
         //response.addHeader("accessToken", accessToken);
     }
 }

@@ -8,6 +8,7 @@ import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.Cookie;
@@ -120,15 +121,25 @@ public class TokenUtil {
         }
     }
     public TokenDto reGenerateAccessToken(String userId, HttpServletResponse response) {
-        String newRefreshToken = generateRefreshToken(userId);
+        String refreshToken = generateRefreshToken(userId);
+        /*
         Cookie cookie = new Cookie("refreshToken", newRefreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/"); // 모든 경로에서 쿠키 사용
         cookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(cookie);
+         */
+        ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
+                .path("/") // 모든 경로에서 쿠키 사용
+                .sameSite("None")
+                .secure(true)
+                .httpOnly(true)
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
         //액세스 토큰 재발급 시, 새로운 리프레시 토큰 포함.
         return TokenDto.builder()
-                .access_token(generateAccessToken(userId))
+                .accessToken(generateAccessToken(userId))
                 .build();
     }
 
