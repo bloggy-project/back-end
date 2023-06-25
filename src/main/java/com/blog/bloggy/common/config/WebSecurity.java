@@ -57,6 +57,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         configuration.addAllowedOrigin("http://boggy.kro.kr");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
