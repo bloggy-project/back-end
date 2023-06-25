@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +29,11 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-//@SpringBootTest
+@SpringBootTest
 @Slf4j
-@DataJpaTest //@Transactional 포함
-@Import(PagingQueryRepository.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+//@DataJpaTest //@Transactional 포함
+//@Import(PagingQueryRepository.class)
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class PagingQueryRepositoryTest {
     @Autowired
     private PagingQueryRepository pagingQueryRepository;
@@ -159,20 +160,20 @@ class PagingQueryRepositoryTest {
         }
     }
 
-   // @Test
+    @Test
     @DisplayName("User와 join하고 commment와 favorite count는 서브쿼리처리")
     void findPostsForMainUsingJoinUser() {
         int page = 0;
-        int size = 10;
+        int size = 15;
         Pageable pageable = PageRequest.of(page, size);
         Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMain(lastId, pageable);
     }
 
-    //@Test
+    @Test
     @DisplayName("comment, favorite, user 지연로딩 초기화")
     void findPostsForMainNotEagerAll() {
         int page = 0;
-        int size = 10;
+        int size = 15;
         Pageable pageable = PageRequest.of(page, size);
         Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMainNotEagerAll(lastId, pageable);
     }
