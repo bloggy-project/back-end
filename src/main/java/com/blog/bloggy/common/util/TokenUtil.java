@@ -7,6 +7,7 @@ import com.blog.bloggy.token.repository.TokenRepository;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,8 @@ public class TokenUtil {
 
     public static final String ACCESS_TOKEN_TYPE="ACCESS";
     public static final String REFRESH_TOKEN_TYPE="REFRESH";
+    @Value("${aws.ip}")
+    private String awsIp;
 
 
     public String generateToken(String userId,String type){
@@ -138,8 +141,8 @@ public class TokenUtil {
     }
     public ResponseCookie getResponseCookie(String refreshToken) {
         ResponseCookie cookie=ResponseCookie.from("refreshToken", refreshToken)
+                .domain(awsIp)
                 .path("/") // 모든 경로에서 쿠키 사용
-                .sameSite("None")
                 .secure(false)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 60 * 60)
