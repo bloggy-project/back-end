@@ -1,6 +1,7 @@
 package com.blog.bloggy.user.service;
 
 import com.blog.bloggy.common.exception.UserNotFoundException;
+import com.blog.bloggy.user.dto.TestMaskingDto;
 import com.blog.bloggy.user.dto.TokenUserDto;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.dto.UserDto;
@@ -87,9 +88,20 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException());
 
         TokenUserDto userDto = TokenUserDto.builder()
-                .usersId(userEntity.getId())
+                .userId(userEntity.getUserId())
                 .name(userEntity.getName())
                 .email(userEntity.getEmail())
+                .build();
+        return userDto;
+    }
+
+    @Override
+    public TestMaskingDto getTestMaskingDtoByUserId(String userId){
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException());
+        TestMaskingDto userDto=TestMaskingDto.builder()
+                .userId(userEntity.getUserId())
+                .name(userEntity.getName())
                 .build();
         return userDto;
     }

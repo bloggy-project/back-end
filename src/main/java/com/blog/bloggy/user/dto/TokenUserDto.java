@@ -2,27 +2,28 @@ package com.blog.bloggy.user.dto;
 
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 public class TokenUserDto {
-    private Long usersId;
+    private String userId;
     private String name;
     private String email;
+
+    @Builder
+    public TokenUserDto(String userId, String name, String email) {
+        this.userId = userId;
+        this.name = name;
+        this.email = email;
+    }
 
     @Override
     public String toString() {
         return "TokenUserDto{" +
-                "usersId=" + usersId +
+                "usersId=" + userId +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 '}';
-    }
-
-    @Builder
-    public TokenUserDto(Long usersId, String name, String email) {
-        this.usersId = usersId;
-        this.name = name;
-        this.email = email;
     }
 }

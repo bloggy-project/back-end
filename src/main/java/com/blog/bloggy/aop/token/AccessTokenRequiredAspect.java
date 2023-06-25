@@ -1,7 +1,10 @@
 package com.blog.bloggy.aop.token;
 
 
+import com.blog.bloggy.aop.token.dto.AccessTokenDto;
 import com.blog.bloggy.common.util.TokenUtil;
+import com.blog.bloggy.user.dto.TestMaskingDto;
+import com.blog.bloggy.user.dto.TokenUserDto;
 import com.blog.bloggy.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +27,6 @@ public class AccessTokenRequiredAspect {
 
     private final TokenUtil tokenUtil;
     private final TokenService tokenService;
-    private final UserService userService;
 
     @Around(value = "@annotation(accessTokenRequired)")
     public Object loginCheck(ProceedingJoinPoint pjp, AccessTokenRequired accessTokenRequired) throws Throwable {
@@ -36,17 +38,17 @@ public class AccessTokenRequiredAspect {
 
         String userId = tokenUtil.getUserIdFromToken(token);
 
-        Method method = MethodSignature.class.cast(pjp.getSignature()).getMethod();
         Object[] args = pjp.getArgs();
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < args.length; i++) {
-            for (Annotation parameterAnnotation : parameterAnnotations[i]) {
-                if (parameterAnnotation.annotationType() == Admin.class && method.getParameterTypes()[i] == String.class) {
-                    args[i] = userId;
-                }
+            if (args[i] instanceof AccessTokenDto) {
+                AccessTokenDto tokenDto=AccessTokenDto.builder()
+                        .userId(userId)
+                        .build();
+                args[i]=tokenDto;
             }
         }
+
         log.info("login User = {} ",userId);
         return pjp.proceed(args);
-    }
+     }
 }

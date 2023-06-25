@@ -1,15 +1,15 @@
 package com.blog.bloggy.common.controller;
 
 
-import com.blog.bloggy.aop.token.Admin;
 import com.blog.bloggy.aop.token.RefreshTokenRequired;
 import com.blog.bloggy.common.service.AuthService;
 import com.blog.bloggy.token.dto.TokenDto;
+import com.blog.bloggy.user.dto.TestMaskingDto;
+import com.blog.bloggy.user.dto.TokenUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import static com.blog.bloggy.common.util.TokenUtil.USER_ID_ATTRIBUTE_KEY;
 
 
 @RestController
@@ -24,12 +24,20 @@ public class AuthController {
      * 토큰갱신
      *
      * @author gon
-     * @param userId
+     * @param
      * @return accessToken, refreshToken
      */
     @RefreshTokenRequired
     @GetMapping(value="/refresh")
-        public TokenDto refreshToken(@Admin String userId) {
-        return authService.reGenerateAccessToken(userId);
+        public TokenDto refreshToken(TokenUserDto user) {
+        log.info("do mask?: {}", user);
+        return authService.reGenerateAccessToken(user.getUserId());
+    }
+
+    @RefreshTokenRequired
+    @GetMapping(value="/test/masking")
+    public TestMaskingDto testMasking(TestMaskingDto user) {
+        log.info("do mask?: {}", user);
+        return user;
     }
 }

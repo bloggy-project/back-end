@@ -1,5 +1,6 @@
 package com.blog.bloggy.user.service;
 
+import com.blog.bloggy.user.dto.TestMaskingDto;
 import com.blog.bloggy.user.dto.TokenUserDto;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.dto.UserDto;
@@ -16,4 +17,6 @@ public interface UserService extends UserDetailsService {
     UserDto getUserDetailsByEmail(String username);
 
     TokenUserDto getTokenUserDtoByUserId(String userId);
+
+    TestMaskingDto getTestMaskingDtoByUserId(String userId);
 }

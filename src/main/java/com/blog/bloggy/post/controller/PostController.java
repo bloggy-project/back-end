@@ -3,10 +3,12 @@ package com.blog.bloggy.post.controller;
 
 import com.blog.bloggy.aop.token.AccessTokenRequired;
 import com.blog.bloggy.aop.token.Admin;
+import com.blog.bloggy.aop.token.dto.AccessTokenDto;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.service.PostService;
 import com.blog.bloggy.user.dto.TokenUserDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -25,13 +26,13 @@ public class PostController {
     @AccessTokenRequired
     @PostMapping("/posts")
     public ResponseEntity<ResponsePostRegister> postRegister(
-            @Admin String userId,
+            AccessTokenDto tokenDto,
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostDto postDto= PostDto.builder()
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
-                .userId(userId)
+                .userId(tokenDto.getUserId())
                 .tagNames(requestPostRegister.getTagNames())
                 .build();
         ResponsePostRegister responsePostRegister = postService.createPost(postDto);
