@@ -88,7 +88,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         // Refresh Token을 쿠키로 설정하여 응답
         ResponseCookie cookie=ResponseCookie.from("refreshToken",refreshToken)
                 .path("/") // 모든 경로에서 쿠키 사용
-                .sameSite("None")
+                .sameSite("Strict")
                 .secure(true)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 60 * 60)
