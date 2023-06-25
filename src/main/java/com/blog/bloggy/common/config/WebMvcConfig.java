@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
@@ -30,6 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/v1/auth/refresh");
         */
     }
+    /*
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -44,4 +45,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowCredentials(true); // 인증 정보를 사용할 경우 true로 설정
 
     }
+
+     */
 }
