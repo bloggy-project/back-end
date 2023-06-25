@@ -139,6 +139,7 @@ public class TokenUtil {
                 .accessToken(generateAccessToken(userId))
                 .build();
     }
+    //test
     public ResponseCookie getResponseCookie(String refreshToken) {
         ResponseCookie cookie=ResponseCookie.from("refreshToken", refreshToken)
                 .domain(awsIp)
