@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 
 import static com.blog.bloggy.comment.model.QComment.comment;
 import static com.blog.bloggy.favorite.model.QFavorite.favorite;
@@ -69,20 +70,16 @@ public class PagingQueryRepository {
                         post.content,
                         post.postUser.name,
                         post.createdAt,
-                        getPostCommentCount(),
-                        favorite.count()
+                        post.commentCount,
+                        post.favoriteCount
                 ))
                 .from(post)
-                .leftJoin(post.favorites,favorite) //leftJoin에서 innerJoin으로 변경. 연관관계없는 데이터는 조회x.
-                .join(post.postUser,userEntity) //join명시하지않으면 내부적으로 join on이 아닌 join where로 실행
+                .join(post.postUser,userEntity)
                 .where(
-                        //rangeDate(condition.getDate())
+                        mainTrendCondition(condition.getLastId(), condition.getFavorCount()),
+                        rangeDate(condition.getDate())
                 )
-                .groupBy(post)
-                .having(
-                        ltPostId(condition.getLastId()).and(favorCountEq(condition.getFavorCount()))
-                                .or(ltFavoriteCount(condition.getFavorCount())))
-                .orderBy(favorite.count().desc())
+                .orderBy(post.favoriteCount.desc())
                 .orderBy(post.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
@@ -178,16 +175,48 @@ public class PagingQueryRepository {
             return null;
         return post.id.lt(postId);
     }
-    private BooleanExpression ltFavoriteCount(Long count){
+    private BooleanExpression ltFavorCount(Long count){
         if(count==null)
             return null;
-        return favorite.count().lt(count);
+        return post.favoriteCount.lt(count);
     }
     private BooleanExpression favorCountEq(Long count){
         if(count==null)
             return null;
-        return favorite.count().eq(count);
+        return post.favoriteCount.eq(count);
     }
+    private BooleanExpression favorCountEqAndLtPostId(Long postId,Long count){
+        BooleanExpression favorCountCondition = favorCountEq(count);
+        BooleanExpression ltPostIdCondition = ltPostId(postId);
+
+        if(favorCountCondition != null && ltPostIdCondition != null) {
+            return (favorCountCondition)
+                    .and(ltPostIdCondition);
+        }
+        if(favorCountCondition == null && ltPostIdCondition !=null){
+            return ltPostIdCondition;
+        }
+        if(favorCountCondition!=null && ltPostIdCondition==null){
+            return favorCountCondition;
+        }
+        return null;
+    }
+    private BooleanExpression mainTrendCondition(Long postId,Long count){
+        BooleanExpression pfCondition = favorCountEqAndLtPostId(postId, count);
+        BooleanExpression ltFavorCountCondition = ltFavorCount(count);
+        if (pfCondition != null && ltFavorCountCondition != null) {
+            return pfCondition.or(ltFavorCountCondition);
+        }
+        if (pfCondition == null && ltFavorCountCondition != null) {
+            return ltFavorCountCondition;
+        }
+        if(pfCondition!=null && ltFavorCountCondition==null){
+            return pfCondition;
+        }
+        return null;
+    }
+
+
 
     private BooleanExpression rangeDate(String date){
         LocalDate now=LocalDate.now();
