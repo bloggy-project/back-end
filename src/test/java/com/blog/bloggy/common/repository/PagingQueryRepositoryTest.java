@@ -156,7 +156,7 @@ class PagingQueryRepositoryTest {
 
     @Test
     @DisplayName("User와 join하고 commment와 favorite count는 서브쿼리처리")
-    void findPostsForMainUsingJoinUser() {
+    void findPostsForMain() {
         int page = 0;
         int size = 15;
         Pageable pageable = PageRequest.of(page, size);
@@ -178,8 +178,6 @@ class PagingQueryRepositoryTest {
         int size = 80;
         Pageable pageable = PageRequest.of(page, size);
         TrendSearchCondition condition = TrendSearchCondition.builder()
-                .favorCount(8L)
-                .lastId(441L)
                 .build();
         Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(condition, pageable);
         for (ResponsePostList responsePostList : postsForMain) {
