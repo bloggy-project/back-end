@@ -12,17 +12,16 @@ import com.blog.bloggy.postTag.repository.PostTagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.test.annotation.Rollback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +81,7 @@ class PagingQueryRepositoryTest {
                     PostTag.updatePostTag(post,tagName);
                 }
                 PostTag.updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, user3, user4, user5, user6, i, post);
+                getFavorites(user1, user2, i, post);
             }
             else if(i%3==0) {
                 Post post = makeTest(user2, i);
@@ -90,7 +89,7 @@ class PagingQueryRepositoryTest {
                     PostTag.updatePostTag(post,tagName);
                 }
                 PostTag.updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, user3, user4, user5, user6, i, post);
+                getFavorites(user1, user2, i, post);
 
             }
             else if(i%5==0) {
@@ -99,7 +98,7 @@ class PagingQueryRepositoryTest {
                     PostTag.updatePostTag(post,tagName);
                 }
                 PostTag.updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, user3, user4, user5, user6, i, post);
+                getFavorites(user1, user2, i, post);
             }
             else if(i%7==0){
                 Post post = makeTest(user4, i);
@@ -107,7 +106,7 @@ class PagingQueryRepositoryTest {
                     PostTag.updatePostTag(post,tagName);
                 }
                 PostTag.updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, user3, user4, user5, user6, i, post);
+                getFavorites(user1, user2, i, post);
             }
             else if(i%11==0){
                 Post post = makeTest(user5, i);
@@ -115,7 +114,7 @@ class PagingQueryRepositoryTest {
                     PostTag.updatePostTag(post,tagName);
                 }
                 PostTag.updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, user3, user4, user5, user6, i, post);
+                getFavorites(user1, user2, i, post);
             }
             else if(i%13==0){
                 Post post = makeTest(user6, i);
@@ -123,12 +122,10 @@ class PagingQueryRepositoryTest {
                     PostTag.updatePostTag(post,tagName);
                 }
                 PostTag.updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, user3, user4, user5, user6, i, post);
+                getFavorites(user1, user2, i, post);
             }
         }
     }
-
-
 
     private Post makeTest(UserEntity user1, int i) {
         Post post = Post.builder()
@@ -140,13 +137,9 @@ class PagingQueryRepositoryTest {
         return post;
     }
 
-    private void getFavorites(UserEntity user1, UserEntity user2, UserEntity user3, UserEntity user4, UserEntity user5, UserEntity user6, int i, Post post) {
+    private void getFavorites(UserEntity user1, UserEntity user2, int i, Post post) {
         getFavorite(user1, i, post);
         getFavorite(user2, i, post);
-        getFavorite(user3, i, post);
-        getFavorite(user4, i, post);
-        getFavorite(user5, i, post);
-        getFavorite(user6, i, post);
     }
 
     private void getFavorite(UserEntity user, int i, Post post) {
@@ -160,6 +153,7 @@ class PagingQueryRepositoryTest {
         }
     }
 
+
     @Test
     @DisplayName("User와 join하고 commment와 favorite count는 서브쿼리처리")
     void findPostsForMainUsingJoinUser() {
@@ -170,22 +164,23 @@ class PagingQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("comment, favorite, user 지연로딩 초기화")
-    void findPostsForMainNotEagerAll() {
-        int page = 0;
-        int size = 15;
-        Pageable pageable = PageRequest.of(page, size);
-        Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMainNotEagerAll(lastId, pageable);
+    @DisplayName("User의 게시물 최신순으로 정렬하는 쿼리")
+    void findUserPostsOrderByCreated() {
+        Pageable pageable = PageRequest.of(500, 5);
+        Page<ResponseUserPagePost> posts =
+                pagingQueryRepository.findUserPostsOrderByCreated(1L, pageable);
     }
 
 
-
-    //@Test
+    @Test
     void findPostsFromMainTrend() {
         int page = 0;
-        int size = 15;
+        int size = 80;
         Pageable pageable = PageRequest.of(page, size);
-        TrendSearchCondition condition = new TrendSearchCondition();
+        TrendSearchCondition condition = TrendSearchCondition.builder()
+                .favorCount(8L)
+                .lastId(441L)
+                .build();
         Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(condition, pageable);
         for (ResponsePostList responsePostList : postsForMain) {
             System.out.println("responsePostList = " + responsePostList);
@@ -193,7 +188,9 @@ class PagingQueryRepositoryTest {
         List<ResponsePostList> collect = postsForMain.get().collect(toList());
         if(collect.size()!=0){
             Long cnt = collect.get(collect.size() - 1).getFavoriteCount();
-            condition.setFavorites(cnt);
+            Long postId = collect.get(collect.size() - 1).getPostId();
+            condition.setFavorCount(cnt);
+            condition.setLastId(postId);
             Slice<ResponsePostList> postsForMain2 = pagingQueryRepository.findPostsForMainTrend(condition, pageable);
             for (ResponsePostList responsePostList : postsForMain2) {
                 System.out.println("nextResponsePostList = " + responsePostList);
@@ -201,17 +198,42 @@ class PagingQueryRepositoryTest {
         }
     }
 
+
+    private static UserEntity getUserEntity(String username) {
+        UserEntity user = UserEntity.builder()
+                .email(username + "@naver.com")
+                .name(username)
+                .userId(username)
+                .build();
+        return user;
+    }
+
+    // 테스트 끝난 미사용 코드
+    /*
     @Test
     @DisplayName("username의 userId를 인덱스로 빠르게 찾고 default batch size로 postTag 가져오는 쿼리")
     void findUserPostsOrderByCreated() {
         Pageable pageable = PageRequest.of(500, 5);
         Page<ResponseUserPagePost> posts =
-                pagingQueryRepository.findUserPostsOrderByCreated(username1, pageable);
+                pagingQueryRepository.findUserPostsOrderByCreatedOld(username1, pageable);
         for (ResponseUserPagePost post : posts) {
             log.info("post =  {}",post );
         }
     }
+     */
 
+    /*
+    @Test
+    @DisplayName("comment, favorite, user 지연로딩 초기화")
+    void findPostsForMainNotEagerAll() {
+        int page = 0;
+        int size = 15;
+        Pageable pageable = PageRequest.of(page, size);
+        Slice<ResponsePostList> posts = pagingQueryRepository.findPostsForMainNotEagerAll(lastId, pageable);
+    }
+     */
+
+    /*
     @Test
     @DisplayName("join을 사용하여 ids를 가져오는 index 미사용 쿼리")
     void findUserPostsOrderByCreatedJoin() {
@@ -223,6 +245,9 @@ class PagingQueryRepositoryTest {
             log.info("post =  {}",post );
         }
     }
+
+    */
+
     /*
     @Test
     @DisplayName("username의 userId를 인덱스로 빠르게 찾고 fetchJoin으로 postTag를 미리 가져오는 쿼리")
@@ -235,13 +260,4 @@ class PagingQueryRepositoryTest {
         }
     }
     */
-
-    private static UserEntity getUserEntity(String username) {
-        UserEntity user = UserEntity.builder()
-                .email(username + "@naver.com")
-                .name(username)
-                .userId(username)
-                .build();
-        return user;
-    }
 }

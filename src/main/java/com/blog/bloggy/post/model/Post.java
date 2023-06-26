@@ -26,6 +26,10 @@ public class Post extends BaseTimeEntity {
 
     private String content;
 
+    private long favoriteCount=0;
+
+    private long commentCount=0;
+
     //Redis 캐시에서는 primitive type 권장?
     private Long views;
 
@@ -85,6 +89,7 @@ public class Post extends BaseTimeEntity {
     }
     public void addFavorite(Favorite favorite) {
         this.favorites.add(favorite);
+        favoriteCount++;
     }
 
     public void removeComment(Comment comment){
@@ -93,6 +98,7 @@ public class Post extends BaseTimeEntity {
 
     public void removeFavorite(Favorite favorite) {
         favorites.remove(favorite);
+        favoriteCount--;
     }
 
     public void addPostTag(PostTag postTag) {

@@ -198,8 +198,8 @@ public class PostService {
 
     @Transactional
     public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
-        userRepository.findByName(name).orElseThrow(()-> new UserNotFoundException());
-        return pagingQueryRepository.findUserPostsOrderByCreated(name,page);
+        Long usersId = userRepository.findIdByName(name).orElseThrow(() -> new UserNotFoundException());
+        return pagingQueryRepository.findUserPostsOrderByCreated(usersId,page);
     }
 
     public Slice<ResponsePostList> getPosts(Long lastId, Pageable pageable) {
