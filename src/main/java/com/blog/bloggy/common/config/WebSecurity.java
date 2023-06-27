@@ -36,6 +36,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                     .antMatchers("/**").permitAll()
                     .anyRequest().authenticated()
                 .and()
+                .formLogin().disable()
                 .addFilter(getAuthenticationFilter());
 
         http.headers().frameOptions().disable();
@@ -44,6 +45,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
         AuthenticationFilter authenticationFilter =
                 new AuthenticationFilter(authenticationManager(),userService,tokenUtil);
+        authenticationFilter.setFilterProcessesUrl("/api/login");
 //        authenticationFilter.setAuthenticationManager(authenticationManager());
         return authenticationFilter;
     }
