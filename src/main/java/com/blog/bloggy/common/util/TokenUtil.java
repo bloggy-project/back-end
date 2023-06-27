@@ -140,7 +140,7 @@ public class TokenUtil {
     //test
     public ResponseCookie getResponseCookie(String refreshToken) {
         ResponseCookie cookie=ResponseCookie.from("refreshToken", refreshToken)
-                .domain("")
+                .domain(".kro.kr")
                 .path("/") // 모든 경로에서 쿠키 사용
                 .sameSite("None")
                 .secure(true)

@@ -84,7 +84,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(new ObjectMapper().writeValueAsString(responseJson));
 
-
         // Refresh Token을 쿠키로 설정하여 응답
         ResponseCookie cookie = tokenUtil.getResponseCookie(refreshToken);
         response.addHeader("Set-Cookie", cookie.toString());
