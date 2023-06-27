@@ -5,7 +5,6 @@ import com.blog.bloggy.user.dto.TestMaskingDto;
 import com.blog.bloggy.user.dto.TokenUserDto;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.dto.UserDto;
-import com.blog.bloggy.common.exception.NotFoundException;
 import com.blog.bloggy.token.repository.TokenRepository;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +46,7 @@ public class UserServiceImpl implements UserService {
                 .name(userDto.getName())
                 .userId(userDto.getUserId())
                 .build();
-        userEntity.setEncryptedPwd(passwordEncoder.encode(userDto.getPwd()));
+        userEntity.setEncryptedPwd(passwordEncoder.encode(userDto.getPassword()));
         userRepository.save(userEntity);
 
         UserDto returnUserDto = mapper.map(userEntity, UserDto.class);

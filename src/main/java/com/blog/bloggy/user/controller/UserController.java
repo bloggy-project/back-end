@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
+@RestController(value = "/api")
 @RequiredArgsConstructor
 public class UserController {
     ModelMapper mapper = new ModelMapper();

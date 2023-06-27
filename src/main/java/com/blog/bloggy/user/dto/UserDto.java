@@ -8,15 +8,15 @@ import lombok.Data;
 public class UserDto {
     private String email;
     private String name;
-    private String pwd;
+    private String password;
     private String userId;
     public UserDto() {
     }
     @Builder
-    public UserDto(String email, String name, String pwd) {
+    public UserDto(String email, String name, String password) {
         this.email = email;
         this.name = name;
-        this.pwd = pwd;
+        this.password = password;
     }
 
     private String encryptedPwd;
