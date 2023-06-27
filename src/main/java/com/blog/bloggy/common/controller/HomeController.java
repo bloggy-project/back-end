@@ -14,8 +14,7 @@ public class HomeController {
         return "home";
     }
 
-    @AccessTokenRequired
-    @GetMapping(value="/test")
+    @GetMapping(value="/api/test")
     @ResponseBody
     public Test test(){
         Test test=new Test();
