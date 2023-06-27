@@ -15,7 +15,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(indexes = @Index(name = "fk_post_user",columnList = "users_id"))
+@Table(indexes = {@Index(name = "fk_post_user",columnList = "users_id"),@Index(name="idx_favorite_count",columnList = "favorite_count")})
 public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue
@@ -26,12 +26,15 @@ public class Post extends BaseTimeEntity {
 
     private String content;
 
+    @Column(name = "favorite_count")
     private long favoriteCount=0;
 
     private long commentCount=0;
 
+    private String thumnail;
     //Redis 캐시에서는 primitive type 권장?
     private Long views;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "users_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

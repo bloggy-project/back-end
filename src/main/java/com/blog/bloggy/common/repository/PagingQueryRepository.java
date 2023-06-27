@@ -63,6 +63,16 @@ public class PagingQueryRepository {
     }
 
     public Slice<ResponsePostList> findPostsForMainTrend(TrendSearchCondition condition, Pageable pageable) {
+        List<Long> ids = queryFactory.select(post.id)
+                .from(post)
+                .where(
+                        mainTrendCondition(condition.getLastId(), condition.getFavorCount())
+                )
+                .orderBy(post.favoriteCount.desc())
+                .orderBy(post.id.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
                         post.id,
@@ -76,12 +86,9 @@ public class PagingQueryRepository {
                 .from(post)
                 .join(post.postUser,userEntity)
                 .where(
-                        mainTrendCondition(condition.getLastId(), condition.getFavorCount()),
+                        post.id.in(ids),
                         rangeDate(condition.getDate())
                 )
-                .orderBy(post.favoriteCount.desc())
-                .orderBy(post.id.desc())
-                .limit(pageable.getPageSize() + 1)
                 .fetch();
         return checkLastPageDto(pageable, posts);
     }

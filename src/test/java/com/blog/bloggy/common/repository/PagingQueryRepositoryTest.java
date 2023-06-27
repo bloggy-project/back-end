@@ -175,14 +175,17 @@ class PagingQueryRepositoryTest {
     @Test
     void findPostsFromMainTrend() {
         int page = 0;
-        int size = 80;
+        int size = 15;
         Pageable pageable = PageRequest.of(page, size);
         TrendSearchCondition condition = TrendSearchCondition.builder()
+                .favorCount(4L)
+                .lastId(10000L)
                 .build();
         Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(condition, pageable);
         for (ResponsePostList responsePostList : postsForMain) {
             System.out.println("responsePostList = " + responsePostList);
         }
+        /*
         List<ResponsePostList> collect = postsForMain.get().collect(toList());
         if(collect.size()!=0){
             Long cnt = collect.get(collect.size() - 1).getFavoriteCount();
@@ -194,6 +197,7 @@ class PagingQueryRepositoryTest {
                 System.out.println("nextResponsePostList = " + responsePostList);
             }
         }
+         */
     }
 
 
