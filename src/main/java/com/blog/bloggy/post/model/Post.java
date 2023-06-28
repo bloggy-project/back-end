@@ -4,6 +4,7 @@ package com.blog.bloggy.post.model;
 import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.model.BaseTimeEntity;
 import com.blog.bloggy.favorite.model.Favorite;
+import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.user.model.UserEntity;
 import lombok.Builder;
@@ -12,6 +13,8 @@ import lombok.Getter;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Entity
 @Getter
@@ -120,6 +123,12 @@ public class Post extends BaseTimeEntity {
         if(this.postTags==null)
             this.postTags=new ArrayList<>();
         this.postTags.add(postTag);
+    }
+
+    public List<PostTag> getRegPostTags() {
+        return postTags.stream()
+                .filter(postTag -> postTag.getStatus() != PostTagStatus.DELETED)
+                .collect(toList());
     }
 
     public void removePostTag(PostTag postTag) {

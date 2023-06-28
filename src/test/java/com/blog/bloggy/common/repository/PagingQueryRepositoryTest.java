@@ -7,8 +7,10 @@ import com.blog.bloggy.post.dto.ResponsePostList;
 import com.blog.bloggy.post.dto.ResponseUserPagePost;
 import com.blog.bloggy.post.model.Post;
 import com.blog.bloggy.post.repository.PostRepository;
+import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.postTag.repository.PostTagRepository;
+import com.blog.bloggy.tag.model.Tag;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.Rollback;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,50 +81,50 @@ class PagingQueryRepositoryTest {
             if(i%2==0) {
                 Post post = makeTest(user1, i);
                 for (String tagName : tagNames) {
-                    PostTag.updatePostTag(post,tagName);
+                    updatePostTag(post,tagName);
                 }
-                PostTag.updatePostTag(post,"tag"+i);
+                updatePostTag(post,"tag"+i);
                 getFavorites(user1, user2, i, post);
             }
             else if(i%3==0) {
                 Post post = makeTest(user2, i);
                 for (String tagName : tagNames) {
-                    PostTag.updatePostTag(post,tagName);
+                    updatePostTag(post,tagName);
                 }
-                PostTag.updatePostTag(post,"tag"+i);
+                updatePostTag(post,"tag"+i);
                 getFavorites(user1, user2, i, post);
 
             }
             else if(i%5==0) {
                 Post post = makeTest(user3, i);
                 for (String tagName : tagNames) {
-                    PostTag.updatePostTag(post,tagName);
+                    updatePostTag(post,tagName);
                 }
-                PostTag.updatePostTag(post,"tag"+i);
+                updatePostTag(post,"tag"+i);
                 getFavorites(user1, user2, i, post);
             }
             else if(i%7==0){
                 Post post = makeTest(user4, i);
                 for (String tagName : tagNames) {
-                    PostTag.updatePostTag(post,tagName);
+                    updatePostTag(post,tagName);
                 }
-                PostTag.updatePostTag(post,"tag"+i);
+                updatePostTag(post,"tag"+i);
                 getFavorites(user1, user2, i, post);
             }
             else if(i%11==0){
                 Post post = makeTest(user5, i);
                 for (String tagName : tagNames) {
-                    PostTag.updatePostTag(post,tagName);
+                    updatePostTag(post,tagName);
                 }
-                PostTag.updatePostTag(post,"tag"+i);
+                updatePostTag(post,"tag"+i);
                 getFavorites(user1, user2, i, post);
             }
             else if(i%13==0){
                 Post post = makeTest(user6, i);
                 for (String tagName : tagNames) {
-                    PostTag.updatePostTag(post,tagName);
+                    updatePostTag(post,tagName);
                 }
-                PostTag.updatePostTag(post,"tag"+i);
+                updatePostTag(post,"tag"+i);
                 getFavorites(user1, user2, i, post);
             }
         }
@@ -262,4 +265,26 @@ class PagingQueryRepositoryTest {
         }
     }
     */
+
+    private PostTag updatePostTag(Post post, String tagName) {
+        PostTag postTag=PostTag.builder()
+                .tagName(tagName)
+                .tagPost(post)
+                .status(PostTagStatus.UPDATED)
+                .build();
+
+        post.addPostTag(postTag);
+        return postTag;
+    }
+    private PostTag createPostTag(Post post, Tag tag, String tagName) {
+        PostTag postTag = PostTag.builder()
+                .tagPost(post)
+                .tag(tag)
+                .tagName(tagName)
+                .status(PostTagStatus.REGISTERED)
+                .build();
+        post.addPostTag(postTag);
+        tag.addPostTag(postTag);
+        return postTag;
+    }
 }

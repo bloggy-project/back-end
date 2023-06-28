@@ -21,6 +21,8 @@ import com.blog.bloggy.tag.model.Tag;
 import com.blog.bloggy.tag.repository.TagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -89,29 +92,66 @@ public class PostService {
                 .tagNames(tags)
                 .build();
     }
+    @Transactional
+    public PostTag updatePostTag(Post post, String tagName) {
+        PostTag postTag=PostTag.builder()
+                .tagName(tagName)
+                .tagPost(post)
+                .status(PostTagStatus.UPDATED)
+                .build();
 
-    private PostTag updatePostTag(Post post, String tagName) {
-        return PostTag.updatePostTag(post,tagName);
+        post.addPostTag(postTag);
+        return postTag;
     }
-
-    private PostTag createPostTag(Post post, Tag tag,String tagName) {
-        return PostTag.createPostTag(post, tag,tagName);
+    @Transactional
+    public PostTag createPostTag(Post post, Tag tag,String tagName) {
+        PostTag postTag = PostTag.builder()
+                .tagPost(post)
+                .tag(tag)
+                .tagName(tagName)
+                .status(PostTagStatus.REGISTERED)
+                .build();
+        post.addPostTag(postTag);
+        tag.addPostTag(postTag);
+        return postTag;
     }
     /*
         UPDATED: Tag 생성 전
         DELETED: 연관관계를 모두 지운, 삭제할 예정. (벌크 연산으로 한번에 삭제 예정)
         REGISTERED: 이미 Tag 객체가 존재하는 경우.
     */
+    @Transactional
     public ResponsePostRegister updatePost(PostUpdateDto postUpdateDto){
         Long postId = postUpdateDto.getPostId();
-        Post post = postRepository.findByIdWithPostTag(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
         String thumbnail = postUpdateDto.getThumbnail();
         String title = postUpdateDto.getTitle();
         String content = postUpdateDto.getContent();
         post.updatePost(thumbnail,title,content);
-        //default batch size로 지연로딩 미리 초기화. (쿼리 테스트 before)
+
         List<Tag> init_tag = post.getPostTags().stream().map(postTag -> postTag.getTag()).collect(toList());
+        List<PostTag> postTags = post.getPostTags();
+        List<PostTagPair> newTags = postUpdateDto.getTagNames().stream().map(postTag -> PostTagPair.builder()
+                .tagName(postTag)
+                .status(PostTagStatus.UPDATED)
+                .build()).collect(toList());
+        for (PostTag postTag : postTags) {
+            if(postTag.getStatus()==PostTagStatus.DELETED)
+                continue;
+            String oldTag=postTag.getTagName();
+            Boolean check=false;
+            for (PostTagPair newTag : newTags) {
+                if(oldTag.equals(newTag.tagName)){
+                    check=true;
+                    newTag.setStatus(PostTagStatus.DELETED);
+                }
+            }
+            if(check==false){
+                postTag.setStatus(PostTagStatus.DELETED);
+            }
+        }
+        /*
         Iterator<PostTag> iterator = post.getPostTags().iterator();
         while(iterator.hasNext()){
             PostTag postTag = iterator.next();
@@ -143,10 +183,7 @@ public class PostService {
                 }
             }
         }
-        List<String> tagNames = postUpdateDto.getTagNames();
-        List<PostTag> postTags = post.getPostTags();
-
-        for (String tagName : tagNames) {
+         for (String tagName : tagNames) {
             tagRepository.findByName(tagName).ifPresentOrElse(
                     (tag)->{
                         createPostTag(post, tag, tagName);
@@ -156,8 +193,27 @@ public class PostService {
                     }
             );
         }
-        postTagRepository.saveAll(postTags);
-        List<String> tags = postTags.stream().map((pt) -> pt.getTagName()).collect(toList());
+         */
+
+        List<String> tags = newTags.stream()
+                .filter(pair -> pair.status != PostTagStatus.DELETED)
+                .map(pair -> pair.tagName)
+                .collect(toList());
+
+        for (String tagName : tags) {
+            tagRepository.findByName(tagName).ifPresentOrElse(
+                    (tag)->{
+                        createPostTag(post, tag, tagName);
+                    },
+                    ()->{
+                        updatePostTag(post, tagName);
+                    }
+            );
+        }
+        List<String> responseTags = post.getRegPostTags().stream()
+                .map(postTag -> postTag.getTagName())
+                .collect(toList());
+        //postTagRepository.saveAll(postTags);
 
         return ResponsePostRegister.builder()
                 .thumbnail(thumbnail)
@@ -165,7 +221,7 @@ public class PostService {
                 .userId(postUpdateDto.getUserId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .tagNames(tags)
+                .tagNames(responseTags)
                 .build();
     }
     // 이 포스트를 클릭했을 때 Favorite을 누른 User는 하트가 색깔이 차있도록 보여야 한다.
@@ -276,6 +332,17 @@ public class PostService {
             postQueryRepository.addViewCntFromRedis(postId,views);
             redisTemplate.delete(key);
             redisTemplate.delete("post:"+postId+"views");
+        }
+    }
+    @Data
+    private static class PostTagPair{
+        String tagName;
+
+        PostTagStatus status;
+        @Builder
+        public PostTagPair(String tagName, PostTagStatus status) {
+            this.tagName = tagName;
+            this.status = status;
         }
     }
 }

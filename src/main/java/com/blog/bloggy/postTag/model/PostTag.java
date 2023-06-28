@@ -39,30 +39,6 @@ public class PostTag {
     @Enumerated(EnumType.STRING)
     private PostTagStatus status;
 
-
-    public static PostTag createPostTag(Post tagPost , Tag tag, String tagName) {
-        PostTag postTag = PostTag.builder()
-                .tagPost(tagPost)
-                .tag(tag)
-                .tagName(tagName)
-                .status(PostTagStatus.REGISTERED)
-                .build();
-        tagPost.addPostTag(postTag);
-        tag.addPostTag(postTag);
-        return postTag;
-    }
-
-    public static PostTag updatePostTag(Post tagPost, String tagName) {
-        PostTag postTag=PostTag.builder()
-                .tagName(tagName)
-                .tagPost(tagPost)
-                .status(PostTagStatus.UPDATED)
-                .build();
-
-        tagPost.addPostTag(postTag);
-        return postTag;
-    }
-
     public void setPost(Post tagPost) {
         this.tagPost=tagPost;
     }

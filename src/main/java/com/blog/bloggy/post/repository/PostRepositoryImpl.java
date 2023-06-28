@@ -37,15 +37,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         );
     }
 
-    @Override
-    public Optional<Post> findByIdWithPostTag(Long id) {
-        return Optional.ofNullable(
-                queryFactory
-                        .selectFrom(post)
-                        .join(post.postTags,postTag).fetchJoin()
-                        .where(post.id.eq(id))
-                        .fetchOne()
-        );
-    }
+
 
 }

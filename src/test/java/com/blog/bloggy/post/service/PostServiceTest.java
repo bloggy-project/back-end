@@ -178,18 +178,18 @@ class PostServiceTest {
         Post post= new Post(postId,"title","content",postTags);
 
 
-        given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
         //When
         ResponsePostRegister result = postService.updatePost(postUpdateDto);
-        List<String> newTagNames = post.getPostTags().stream().map(postTag -> postTag.getTagName())
+        List<String> newTagNames = post.getRegPostTags().stream().map(postTag -> postTag.getTagName())
                 .collect(Collectors.toList());
 
         assertEquals(postId, result.getPostId());
         assertEquals(postUpdateDto.getTitle(), result.getTitle());
         assertEquals(postUpdateDto.getContent(), result.getContent());
-        assertEquals(postTag1.getStatus(),PostTagStatus.UPDATED);
-        assertEquals(postTag2.getStatus(),PostTagStatus.UPDATED);
-        assertEquals(postTag3.getStatus(),PostTagStatus.DELETED);
+        assertEquals(PostTagStatus.UPDATED,postTag1.getStatus());
+        assertEquals(PostTagStatus.UPDATED,postTag2.getStatus());
+        assertEquals(PostTagStatus.DELETED,postTag3.getStatus());
         assertEquals(newTagNames.size(),2);
         assertEquals(newTagNames, result.getTagNames());
     }
@@ -226,10 +226,10 @@ class PostServiceTest {
         postTags.add(postTag3);
         Post post= new Post(postId,"title","content",postTags);
 
-        given(postRepository.findByIdWithPostTag(postId)).willReturn(Optional.of(post));
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
         //When
         ResponsePostRegister result = postService.updatePost(postUpdateDto);
-        List<String> newTagNames = post.getPostTags().stream().map(postTag -> postTag.getTagName())
+        List<String> newTagNames = post.getRegPostTags().stream().map(postTag -> postTag.getTagName())
                 .collect(Collectors.toList());
         assertEquals(newTagNames.size(),4);
         assertEquals(postId, result.getPostId());
