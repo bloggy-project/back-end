@@ -2,6 +2,7 @@ package com.blog.bloggy.post.service;
 
 
 import com.blog.bloggy.comment.model.Comment;
+import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.common.exception.PostNotFoundException;
 import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.common.repository.PagingQueryRepository;
@@ -209,6 +210,10 @@ public class PostService {
         return pagingQueryRepository.findPostsForMain(lastId, pageable);
     }
 
+    public Slice<ResponsePostList> getPostsOrderByTrend(TrendSearchCondition condition, Pageable pageable) {
+        return pagingQueryRepository.findPostsForMainTrend(condition,pageable);
+    }
+
     private static void deletePostFavorite(Post post) {
         Iterator<Favorite> iterator = post.getFavorites().iterator();
         //favorite 부분은 service와 연계해서 어떻게 구현할 지 고민 중 수정 예정
@@ -249,10 +254,10 @@ public class PostService {
         log.info("value:{}",valueOperations.get(key));
     }
 
-
     private static String getKey(Long postId) {
         return "post:" + postId + ":views";
     }
+
     //3분마다 자동 실행해주는 스케쥴러
 
     @Scheduled(cron = "0 0/3 * * * ?")
@@ -271,5 +276,4 @@ public class PostService {
             redisTemplate.delete("post:"+postId+"views");
         }
     }
-
 }

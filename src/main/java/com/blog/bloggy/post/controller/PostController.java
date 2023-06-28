@@ -2,11 +2,10 @@ package com.blog.bloggy.post.controller;
 
 
 import com.blog.bloggy.aop.token.AccessTokenRequired;
-import com.blog.bloggy.aop.token.Admin;
 import com.blog.bloggy.aop.token.dto.AccessTokenDto;
+import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.service.PostService;
-import com.blog.bloggy.user.dto.TokenUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private static final int pageSize=15;
 
     @AccessTokenRequired
     @PostMapping("/posts")
@@ -76,8 +76,23 @@ public class PostController {
     @GetMapping("/posts")
     public ResponseEntity<Slice<ResponsePostList>> getPostsAll(
             @RequestParam(value = "lastId", required = false)Long lastId){
-        Pageable pageable = PageRequest.of(0,10);
+        Pageable pageable = PageRequest.of(0,pageSize);
         Slice<ResponsePostList> result=postService.getPosts(lastId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+    @GetMapping("/posts/popular")
+    public ResponseEntity<Slice<ResponsePostList>> getPostsAllOrderByTrend(
+            @RequestParam(value = "lastId", required = false)Long lastId,
+            @RequestParam(value = "date", required = false)String date,
+            @RequestParam(value = "favorCount", required = false)Long favorCount
+    ){
+        Pageable pageable = PageRequest.of(0,pageSize);
+        TrendSearchCondition condition = TrendSearchCondition.builder()
+                .lastId(lastId)
+                .date(date)
+                .favorCount(favorCount)
+                .build();
+        Slice<ResponsePostList> result=postService.getPostsOrderByTrend(condition, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -85,7 +100,7 @@ public class PostController {
     public ResponseEntity<Page<ResponseUserPagePost>> getUserPostsOrderByCreatedAt(
             @PathVariable(value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size){
+            @RequestParam(defaultValue = "15") int size){
         Pageable pageable = PageRequest.of(page, size);
         Page<ResponseUserPagePost> results = postService.getUserPostsOrderByCreatedAt(name, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(results);
