@@ -19,5 +19,7 @@ public interface UserService extends UserDetailsService {
 
     TestMaskingDto getTestMaskingDtoByUserId(String userId);
 
-    ResponseThumbnailDto updateThumbnail(AccessTokenDto accessTokenDto,RequestThumbnailDto requestThumbnailDto);
+    ResponseThumbnailDto updateThumbnail(AccessTokenDto accessTokenDto, RequestThumbnailDto requestThumbnailDto);
+
+    String checkValidUsername(String name);
 }

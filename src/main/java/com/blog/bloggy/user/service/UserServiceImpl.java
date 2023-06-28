@@ -1,6 +1,7 @@
 package com.blog.bloggy.user.service;
 
 import com.blog.bloggy.aop.token.dto.AccessTokenDto;
+import com.blog.bloggy.common.exception.DataAlreadyExistException;
 import com.blog.bloggy.common.exception.InvalidTokenException;
 import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.user.dto.*;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -79,6 +81,11 @@ public class UserServiceImpl implements UserService {
 
         UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
         return userDto;
+    }
+    @Override
+    public String checkValidUsername(String name){
+        userRepository.findByName(name).ifPresent((u)->new DataAlreadyExistException());
+        return "ok";
     }
 
     @Override

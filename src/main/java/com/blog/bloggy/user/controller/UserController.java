@@ -59,6 +59,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(registeredComment);
     }
 
+    @GetMapping("/users/check/{name}")
+    public ResponseEntity<String> checkName(@PathVariable String name){
+        String s = userService.checkValidUsername(name);
+        return ResponseEntity.status(HttpStatus.OK).body(s);
+    }
+
     @AccessTokenRequired
     @PostMapping("/thumbnail")
     public ResponseEntity<ResponseThumbnailDto> updateThumbnail(
@@ -68,4 +74,5 @@ public class UserController {
                 userService.updateThumbnail(accessTokenDto,requestThumbnailDto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
 }
