@@ -59,6 +59,7 @@ public class PostService {
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
                 .orElseThrow(UserNotFoundException::new);
         Post post = Post.builder()
+                .thumbnail(postDto.getThumbnail())
                 .title(postDto.getTitle())
                 .content(postDto.getTitle())
                 .user(user)
@@ -80,6 +81,7 @@ public class PostService {
         return ResponsePostRegister.builder()
                 .postId(post.getId())
                 .userId(post.getPostUser().getUserId())
+                .thumbnail(post.getThumbnail())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .tagNames(tags)
@@ -102,9 +104,10 @@ public class PostService {
         Long postId = postUpdateDto.getPostId();
         Post post = postRepository.findByIdWithPostTag(postId)
                 .orElseThrow(PostNotFoundException::new);
+        String thumbnail = postUpdateDto.getThumbnail();
         String title = postUpdateDto.getTitle();
         String content = postUpdateDto.getContent();
-        post.updatePost(title,content);
+        post.updatePost(thumbnail,title,content);
         //default batch size로 지연로딩 미리 초기화. (쿼리 테스트 before)
         List<Tag> init_tag = post.getPostTags().stream().map(postTag -> postTag.getTag()).collect(toList());
         Iterator<PostTag> iterator = post.getPostTags().iterator();

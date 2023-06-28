@@ -9,6 +9,7 @@ import java.util.List;
 
 @Data
 public class RequestPostRegister {
+    private String thumbnail;
 
     @NotNull(message = "Title cannot be null")
     @Size(min=2, message = "Title not be less than 2 characters")

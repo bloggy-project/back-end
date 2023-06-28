@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class PostDto extends BaseTimeEntity {
+    private String thumbnail;
     private String title;
     private String content;
     private String userId;

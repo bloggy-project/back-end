@@ -45,12 +45,13 @@ public class PagingQueryRepository {
         List<ResponsePostList> results = queryFactory
                 .select(new QResponsePostList(
                         post.id,
+                        post.thumbnail,
                         post.title,
                         post.content,
                         post.postUser.name,
                         post.createdAt,
-                        getPostCommentCount(),
-                        getPostFavoriteCount()
+                        post.commentCount,
+                        post.favoriteCount
                 ))
                 .from(post)
                 .where(
@@ -76,6 +77,7 @@ public class PagingQueryRepository {
         List<ResponsePostList> posts = queryFactory
                 .select(new QResponsePostList(
                         post.id,
+                        post.thumbnail,
                         post.title,
                         post.content,
                         post.postUser.name,

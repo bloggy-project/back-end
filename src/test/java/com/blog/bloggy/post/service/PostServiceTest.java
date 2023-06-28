@@ -246,12 +246,7 @@ class PostServiceTest {
         UserEntity user = UserEntity.builder()
                 .name("testName")
                 .build();
-        Post post = Post.builder()
-                .id(postId)
-                .title("title")
-                .content("content")
-                .user(user)
-                .build();
+        Post post = new Post(postId,"title","content",user);
         given(postRepository.findByIdWithUser(postId)).willReturn(Optional.of(post));
 
         ResponsePostOne result = postService.getPostOne(postId, username); // 가정: 당신이 테스트하는 메소드
@@ -269,12 +264,7 @@ class PostServiceTest {
         UserEntity user = UserEntity.builder()
                 .name(username)
                 .build();
-        Post post = Post.builder()
-                .id(postId)
-                .title("title")
-                .content("content")
-                .user(user)
-                .build();
+        Post post = new Post(postId,"title","content",user);
         given(postRepository.findByIdWithUser(postId)).willReturn(Optional.of(post));
         given(favoriteRepository.getPostsFavoritesUsernames(postId)).willReturn(Collections.singletonList(username));
         ResponsePostOne result = postService.getPostOne(postId, username); // 가정: 당신이 테스트하는 메소드

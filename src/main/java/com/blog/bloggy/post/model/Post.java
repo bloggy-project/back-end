@@ -22,6 +22,8 @@ public class Post extends BaseTimeEntity {
     @Column(name = "post_id")
     private Long id;
 
+    private String thumbnail;
+
     private String title;
 
     private String content;
@@ -31,10 +33,9 @@ public class Post extends BaseTimeEntity {
 
     private long commentCount=0;
 
-    private String thumnail;
     //Redis 캐시에서는 primitive type 권장?
-    private Long views;
 
+    private Long views;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "users_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -65,6 +66,7 @@ public class Post extends BaseTimeEntity {
     public Post(Long id) {
         this.id = id;
     }
+
     /*
     username추가하여 사용안함
     @Builder
@@ -77,6 +79,15 @@ public class Post extends BaseTimeEntity {
     }
      */
     @Builder
+    public Post(String thumbnail, String title, String content, UserEntity user) {
+        this.thumbnail = thumbnail;
+        this.title = title;
+        this.content = content;
+        this.views = 1L;
+        this.postUser = user;
+    }
+
+    //PostServiceTest용 생성자
     public Post(Long id,String title, String content, UserEntity user) {
         this.id= id;
         this.views =1L;
@@ -115,9 +126,10 @@ public class Post extends BaseTimeEntity {
         postTags.remove(postTag);
     }
 
-    public void updatePost(String title, String content) {
-        this.title=title;
-        this.content=content;
+    public void updatePost(String thumbnail, String title, String content) {
+        this.thumbnail=thumbnail;
+        this.title = title;
+        this.content = content;
     }
 
     @Override

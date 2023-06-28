@@ -13,6 +13,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponsePostRegister extends BaseTimeEntity {
 
+    private String thumbnail;
+
     private Long postId;
 
 
@@ -24,8 +26,8 @@ public class ResponsePostRegister extends BaseTimeEntity {
 
     private List<String> tagNames;
 
-    public ResponsePostRegister(Long postId, String title,
-                                String content, String userId, List<String> tagNames) {
+    public ResponsePostRegister(String thumbnail, Long postId, String title, String content, String userId, List<String> tagNames) {
+        this.thumbnail = thumbnail;
         this.postId = postId;
         this.title = title;
         this.content = content;

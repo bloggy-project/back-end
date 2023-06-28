@@ -9,16 +9,21 @@ import java.time.LocalDateTime;
 @Data
 public class ResponsePostList {
     private Long postId;
+    private String thumbnail;
+
     private String title;
+
     private String content;
     private String username;
     private LocalDateTime createdAt;
     private long commentCount;
     private long favoriteCount;
+
     @Builder
     @QueryProjection
-    public ResponsePostList(Long postId, String title, String content, String username, LocalDateTime createdAt, long commentCount, long favoriteCount) {
+    public ResponsePostList(Long postId, String thumbnail, String title, String content, String username, LocalDateTime createdAt, long commentCount, long favoriteCount) {
         this.postId = postId;
+        this.thumbnail = thumbnail;
         this.title = title;
         this.content = content;
         this.username = username;

@@ -31,6 +31,7 @@ public class PostController {
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostDto postDto= PostDto.builder()
+                .thumbnail(requestPostRegister.getThumbnail())
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
                 .userId(tokenDto.getUserId())
@@ -46,6 +47,7 @@ public class PostController {
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostUpdateDto postDto= PostUpdateDto.builder()
+                .thumbnail(requestPostRegister.getThumbnail())
                 .postId(postId)
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())

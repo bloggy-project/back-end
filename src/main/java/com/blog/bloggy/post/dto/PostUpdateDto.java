@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class PostUpdateDto {
+    private String thumbnail;
     private Long postId;
     private String title;
     private String content;
