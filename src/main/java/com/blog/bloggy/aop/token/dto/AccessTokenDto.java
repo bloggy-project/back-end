@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 @Data
 public class AccessTokenDto {
-    String userId;
+    private String userId;
 
     public AccessTokenDto() {
     }

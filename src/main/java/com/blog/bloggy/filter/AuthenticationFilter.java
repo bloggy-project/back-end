@@ -79,6 +79,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         Map<String, String> responseJson = new HashMap<>();
         responseJson.put("accessToken", accessToken);
+        responseJson.put("thumbnail", userDetails.getThumbnail());
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

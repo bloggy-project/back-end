@@ -28,6 +28,7 @@ public class UserEntity extends BaseTimeEntity {
 
     private String encryptedPwd;
 
+    private String thumbnail;
     @OneToMany(mappedBy = "postUser")
     private List<Post> posts=new ArrayList<>();
 
@@ -56,5 +57,7 @@ public class UserEntity extends BaseTimeEntity {
     }
 
 
-
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail=thumbnail;
+    }
 }

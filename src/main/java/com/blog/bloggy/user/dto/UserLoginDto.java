@@ -7,4 +7,5 @@ public class UserLoginDto {
     private String name;
     private String email;
     private String password;
+    private String thumbnail;
 }

@@ -1,11 +1,11 @@
 package com.blog.bloggy.user.controller;
 
 
+import com.blog.bloggy.aop.token.AccessTokenRequired;
+import com.blog.bloggy.aop.token.dto.AccessTokenDto;
+import com.blog.bloggy.user.dto.*;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.comment.dto.ResponseUserComment;
-import com.blog.bloggy.user.dto.RequestUser;
-import com.blog.bloggy.user.dto.ResponseUser;
-import com.blog.bloggy.user.dto.UserDto;
 import com.blog.bloggy.user.service.UserQueryService;
 import com.blog.bloggy.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +59,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(registeredComment);
     }
 
-
+    @AccessTokenRequired
+    @PostMapping("/thumbnail")
+    public ResponseEntity<ResponseThumbnailDto> updateThumbnail(
+            AccessTokenDto accessTokenDto,
+            @RequestBody RequestThumbnailDto requestThumbnailDto){
+        ResponseThumbnailDto response =
+                userService.updateThumbnail(accessTokenDto,requestThumbnailDto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

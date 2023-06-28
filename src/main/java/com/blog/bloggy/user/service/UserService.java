@@ -1,9 +1,8 @@
 package com.blog.bloggy.user.service;
 
-import com.blog.bloggy.user.dto.TestMaskingDto;
-import com.blog.bloggy.user.dto.TokenUserDto;
+import com.blog.bloggy.aop.token.dto.AccessTokenDto;
+import com.blog.bloggy.user.dto.*;
 import com.blog.bloggy.user.model.UserEntity;
-import com.blog.bloggy.user.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
@@ -19,4 +18,6 @@ public interface UserService extends UserDetailsService {
     TokenUserDto getTokenUserDtoByUserId(String userId);
 
     TestMaskingDto getTestMaskingDtoByUserId(String userId);
+
+    ResponseThumbnailDto updateThumbnail(AccessTokenDto accessTokenDto,RequestThumbnailDto requestThumbnailDto);
 }

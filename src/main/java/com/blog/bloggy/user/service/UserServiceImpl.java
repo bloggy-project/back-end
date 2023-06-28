@@ -1,10 +1,10 @@
 package com.blog.bloggy.user.service;
 
+import com.blog.bloggy.aop.token.dto.AccessTokenDto;
+import com.blog.bloggy.common.exception.InvalidTokenException;
 import com.blog.bloggy.common.exception.UserNotFoundException;
-import com.blog.bloggy.user.dto.TestMaskingDto;
-import com.blog.bloggy.user.dto.TokenUserDto;
+import com.blog.bloggy.user.dto.*;
 import com.blog.bloggy.user.model.UserEntity;
-import com.blog.bloggy.user.dto.UserDto;
 import com.blog.bloggy.token.repository.TokenRepository;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -103,5 +103,19 @@ public class UserServiceImpl implements UserService {
                 .name(userEntity.getName())
                 .build();
         return userDto;
+    }
+
+    @Override
+    public ResponseThumbnailDto updateThumbnail(AccessTokenDto accessTokenDto,RequestThumbnailDto requestThumbnailDto) {
+        UserEntity user = userRepository.findByName(requestThumbnailDto.getName())
+                .orElseThrow(() -> new UserNotFoundException());
+        if(!user.getUserId().equals(accessTokenDto.getUserId())){
+            throw new InvalidTokenException();
+        }
+        user.updateThumbnail(requestThumbnailDto.getThumbnail());
+        return ResponseThumbnailDto.builder()
+                .thumbnail(user.getThumbnail())
+                .name(user.getName())
+                .build();
     }
 }

@@ -10,14 +10,10 @@ public class UserDto {
     private String name;
     private String password;
     private String userId;
+    private String thumbnail;
     public UserDto() {
     }
-    @Builder
-    public UserDto(String email, String name, String password) {
-        this.email = email;
-        this.name = name;
-        this.password = password;
-    }
+
 
     private String encryptedPwd;
 
