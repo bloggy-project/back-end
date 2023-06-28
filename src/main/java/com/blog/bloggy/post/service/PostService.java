@@ -80,6 +80,7 @@ public class PostService {
         postTagRepository.saveAll(postTags);
         List<String> tags = post.getPostTags().stream().map((pt) -> pt.getTagName()).collect(toList());
         return ResponsePostRegister.builder()
+                .thumbnail(post.getThumbnail())
                 .postId(post.getId())
                 .userId(post.getPostUser().getUserId())
                 .thumbnail(post.getThumbnail())
@@ -159,6 +160,7 @@ public class PostService {
         List<String> tags = postTags.stream().map((pt) -> pt.getTagName()).collect(toList());
 
         return ResponsePostRegister.builder()
+                .thumbnail(thumbnail)
                 .postId(post.getId())
                 .userId(postUpdateDto.getUserId())
                 .title(post.getTitle())
