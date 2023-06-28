@@ -117,7 +117,7 @@ public class PagingQueryRepository {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
-                .tagNames(post.getPostTags().stream().map(postTag -> postTag.getTagName()).collect(toList()))
+                .tagNames(post.getRegPostTags().stream().map(postTag -> postTag.getTagName()).collect(toList()))
                 .build()).collect(toList());
         Long total = queryFactory
                 .select(post.count())
