@@ -82,12 +82,13 @@ public class Post extends BaseTimeEntity {
     }
      */
     @Builder
-    public Post(String thumbnail, String title, String content, UserEntity user) {
+    public Post(String thumbnail, String title, String content, UserEntity user,long favoriteCount) {
         this.thumbnail = thumbnail;
         this.title = title;
         this.content = content;
         this.views = 1L;
         this.postUser = user;
+        this.favoriteCount=favoriteCount;
     }
 
     //PostServiceTest용 생성자

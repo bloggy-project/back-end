@@ -28,6 +28,7 @@ import org.springframework.test.annotation.Rollback;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static java.util.stream.Collectors.toList;
 
@@ -84,7 +85,7 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, i, post);
+                //getFavorites(user1, user2, i, post);
             }
             else if(i%3==0) {
                 Post post = makeTest(user2, i);
@@ -92,7 +93,7 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, i, post);
+                //getFavorites(user1, user2, i, post);
 
             }
             else if(i%5==0) {
@@ -101,7 +102,7 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, i, post);
+                //getFavorites(user1, user2, i, post);
             }
             else if(i%7==0){
                 Post post = makeTest(user4, i);
@@ -109,7 +110,7 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, i, post);
+                //getFavorites(user1, user2, i, post);
             }
             else if(i%11==0){
                 Post post = makeTest(user5, i);
@@ -117,7 +118,7 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, i, post);
+                //getFavorites(user1, user2, i, post);
             }
             else if(i%13==0){
                 Post post = makeTest(user6, i);
@@ -125,18 +126,20 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                getFavorites(user1, user2, i, post);
+                //getFavorites(user1, user2, i, post);
             }
         }
     }
 
     private Post makeTest(UserEntity user1, int i) {
+        Random random = new Random();
         Post post = Post.builder()
                 .title("test" + i)
                 .user(user1)
+                .favoriteCount(random.nextInt(9))
                 .build();
         postRepository.save(post);
-        post.setCreatedAt(post.getCreatedAt().minusDays(7).plusSeconds(i));
+        post.setCreatedAt(post.getCreatedAt().minusDays(7).plusSeconds(i+random.nextInt(10000)));
         return post;
     }
 
