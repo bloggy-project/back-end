@@ -18,7 +18,10 @@ import static java.util.stream.Collectors.toList;
 
 @Entity
 @Getter
-@Table(indexes = {@Index(name = "fk_post_user",columnList = "users_id"),@Index(name="idx_favorite_count",columnList = "favorite_count")})
+@Table(indexes = {
+        @Index(name = "fk_post_user",columnList = "users_id")
+        ,@Index(name = "idx_favorite_count_post_id", columnList = "favorite_count, post_id")
+        })
 public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue
