@@ -231,11 +231,14 @@ public class PostService {
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(PostNotFoundException::new);
         boolean isFavorite=false;
-        if(username!=null){
-            List<String> usernames = favoriteRepository.getPostsFavoritesUsernames(postId);
-            for(String favoriteName : usernames){
-                if(username.equals(favoriteName))
-                    isFavorite=true;
+        // 비로그인 상태면 확인할 필요 없음
+        if(username==null) {
+            Long usersId = userRepository.findIdByName(username).orElseThrow(UserNotFoundException::new);
+            List<Favorite> favorites = post.getFavorites();
+            for (Favorite favorite : favorites) {
+                if (favorite.getFavoriteUser().getId().equals(usersId)) {
+                    isFavorite = true;
+                }
             }
         }
         ResponsePostOne responsePostOne= ResponsePostOne.builder()
