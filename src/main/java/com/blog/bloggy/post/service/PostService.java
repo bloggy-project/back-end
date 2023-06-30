@@ -234,12 +234,8 @@ public class PostService {
         // 비로그인 상태면 확인할 필요 없음
         if(username==null) {
             Long usersId = userRepository.findIdByName(username).orElseThrow(UserNotFoundException::new);
-            List<Favorite> favorites = post.getFavorites();
-            for (Favorite favorite : favorites) {
-                if (favorite.getFavoriteUser().getId().equals(usersId)) {
-                    isFavorite = true;
-                }
-            }
+            isFavorite=post.getFavorites().stream()
+                    .anyMatch(favorite -> favorite.getFavoriteUser().getId() == usersId);
         }
         ResponsePostOne responsePostOne= ResponsePostOne.builder()
                 .postId(post.getId())

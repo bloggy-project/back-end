@@ -68,7 +68,7 @@ public class PostController {
     public ResponseEntity<ResponsePostOne> getPostOne(
             @PathVariable Long postId,
             @RequestParam(value = "username",required = false) String username) {
-        postService.addViewCntToRedis(postId);
+        //postService.addViewCntToRedis(postId); 조회수 기능 필요한지 의문
         ResponsePostOne postOne = postService.getPostOne(postId,username);
         return ResponseEntity.status(HttpStatus.OK).body(postOne);
     }
