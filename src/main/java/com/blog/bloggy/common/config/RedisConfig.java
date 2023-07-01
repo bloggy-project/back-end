@@ -1,10 +1,9 @@
 package com.blog.bloggy.common.config;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
@@ -17,15 +16,14 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.blog.bloggy.common.config.CacheExpireConfig.POST_CACHE_EXPIRE_TIME;
@@ -57,18 +55,23 @@ public class RedisConfig extends CachingConfigurerSupport {
                 ObjectMapper.DefaultTyping.NON_FINAL
         );
         mapper.registerModule(new JavaTimeModule());    //LocaldateTime 저장을 위해 등록
-        mapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS); //LocaldateTime을 Day까지 반환해줌
+
+        mapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);	//LocaldateTime을 Day까지 반환해줌
         GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(mapper);
 
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
+                .serializeKeysWith(
+                        RedisSerializationContext.SerializationPair
+                                .fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(redisSerializer));
+                        .fromSerializer(redisSerializer))
+                .entryTtl(POST_CACHE_EXPIRE_TIME);
         Map<String, RedisCacheConfiguration> configurations = new HashMap<>();
 
         configurations.put(POST, cacheConfiguration.entryTtl(POST_CACHE_EXPIRE_TIME));
+
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(cacheConfiguration)
                 .withInitialCacheConfigurations(configurations)
                 .build();
     }

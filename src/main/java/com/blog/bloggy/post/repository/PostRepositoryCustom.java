@@ -10,7 +10,5 @@ public interface PostRepositoryCustom {
 
     Optional<Post> findByIdWithUserComment(Long id);
 
-    Optional<Post> findByIdWithPostTags(Long id);
-
 
 }

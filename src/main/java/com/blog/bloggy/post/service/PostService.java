@@ -21,28 +21,27 @@ import com.blog.bloggy.tag.model.Tag;
 import com.blog.bloggy.tag.repository.TagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.blog.bloggy.common.config.CacheKeyConfig.POST;
 import static java.util.stream.Collectors.*;
@@ -51,6 +50,7 @@ import static java.util.stream.Collectors.*;
 @Slf4j
 @RequiredArgsConstructor
 public class PostService {
+
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostQueryRepository postQueryRepository;
@@ -144,7 +144,7 @@ public class PostService {
         DataDto dataDto=new DataDto();
         for (ResponsePost postDto : postDtos) {
             Long postId = postDto.getPostId();
-            Post post = postRepository.findByIdWithPostTags(postId)
+            Post post = postRepository.findById(postId)
                     .orElseThrow(PostNotFoundException::new);
             String thumbnail = postDto.getThumbnail();
             String title = postDto.getTitle();
@@ -194,19 +194,55 @@ public class PostService {
         }
         return dataDto;
     }
+    public Set<String> getKeysWithPattern(String pattern) {
+        Set<String> keys = new HashSet<>();
+        redisTemplate.execute((RedisCallback<Void>) connection -> {
+            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match(pattern).build())) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next()));
+                }
+            }catch (Exception e){
+                throw new IllegalStateException();
+            }
+            return null;
+        });
+        return keys;
+    }
 
-    @Scheduled(fixedDelay = 60000) // 일정 시간마다 실행될 수 있도록 스케줄링 설정 1000, 1초
+    @Scheduled(fixedDelay = 20000) // 일정 시간마다 실행될 수 있도록 스케줄링 설정 1000, 1초
     @Transactional
     public void saveUpdatedPostsToDB() {
-        Set<String> redisKeys = redisTemplate.keys("POST::*");
-        log.info("redisKeys : {}",redisTemplate.keys("POST::*"));
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.activateDefaultTyping(
+                BasicPolymorphicTypeValidator
+                        .builder()
+                        .allowIfSubType(Object.class)   //모든 객체의 타입정보를 저장할 수 있도록 설정
+                        .build(),
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
+        mapper.registerModule(new JavaTimeModule());    //LocaldateTime 저장을 위해 등록
+        Set<String> redisKeys = getKeysWithPattern("POST::*");
         List<ResponsePost> postsToUpdate = new ArrayList<>();
         if (redisKeys != null && !redisKeys.isEmpty()) {
             for (String redisKey : redisKeys) {
                 log.info("redisKey == {}", redisKey);
-                ResponsePost post = (ResponsePost) redisTemplate.opsForValue().get(redisKey);
+                ResponsePost post = (ResponsePost) redisTemplate.execute((RedisCallback<Object>) connection -> {
+                    byte[] valueBytes = connection.get(redisKey.getBytes());
+                    // byte[]를 적절한 방식으로 역직렬화하여 Object로 변환 후 반환
+                    log.info("valueBytes = {}", valueBytes);
+                    if (valueBytes != null) {
+                        String json = new String(valueBytes);
+                        log.info("json {} ", json);
+                        try {
+                            return mapper.readValue(json, ResponsePost.class);
+                        } catch (IOException e) {
+                            log.error("Error deserializing JSON from Redis: {}", e.getMessage());
+                        }
+                    }
+                    return null;
+                });
+
                 if (post != null && post.isModified()) { // 수정 여부를 확인하여 수정된 Post만 DB에 저장
-                    log.info("ResponsePostDto == {} ", post);
                     postsToUpdate.add(post);
                 }
             }
@@ -214,6 +250,9 @@ public class PostService {
             redisTemplate.delete(redisKeys);
         }
         DataDto dataDto = postsUpdate(postsToUpdate);
+        for (ResponsePost post : postsToUpdate) {
+            System.out.println("post = " + post);
+        }
         if(!dataDto.posts.isEmpty()) {
             postRepository.saveAll(dataDto.getPosts());
         }
