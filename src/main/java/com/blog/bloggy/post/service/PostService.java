@@ -139,9 +139,10 @@ public class PostService {
         DELETED: 연관관계를 모두 지운, 삭제할 예정. (벌크 연산으로 한번에 삭제 예정)
         REGISTERED: 이미 Tag 객체가 존재하는 경우.
     */
-    @Transactional(readOnly = true)
-    public DataDto postsUpdate(List<ResponsePost> postDtos){
-        DataDto dataDto=new DataDto();
+    @Transactional
+    public void postsUpdate(List<ResponsePost> postDtos){
+        List<Post> posts = new ArrayList<>();
+        List<PostTag> bulkTags = new ArrayList<>();
         for (ResponsePost postDto : postDtos) {
             Long postId = postDto.getPostId();
             Post post = postRepository.findById(postId)
@@ -179,20 +180,20 @@ public class PostService {
                 tagRepository.findByName(tagName).ifPresentOrElse(
                         (tag) -> {
                             PostTag postTag = createPostTag(post, tag, tagName);
-                            dataDto.tags.add(tag);
-                            dataDto.postTags.add(postTag);
+                            bulkTags.add(postTag);
                         },
                         () -> {
                             PostTag postTag = updatePostTag(post, tagName);
-                            dataDto.postTags.add(postTag);
+                            bulkTags.add(postTag);
                             log.info("postTag {}", postTag);
                         }
                 );
             }
-            dataDto.posts.add(post);
             log.info("updatePost = {}", post);
+            posts.add(post);
         }
-        return dataDto;
+        postRepository.saveAll(posts);
+        postTagRepository.saveAll(bulkTags);
     }
     public Set<String> getKeysWithPattern(String pattern) {
         Set<String> keys = new HashSet<>();
@@ -249,19 +250,10 @@ public class PostService {
             //postRepository.saveAll(postsToUpdate);
             redisTemplate.delete(redisKeys);
         }
-        DataDto dataDto = postsUpdate(postsToUpdate);
-        for (ResponsePost post : postsToUpdate) {
-            System.out.println("post = " + post);
-        }
-        if(!dataDto.posts.isEmpty()) {
-            postRepository.saveAll(dataDto.getPosts());
-        }
-        if(!dataDto.postTags.isEmpty()) {
-            postTagRepository.saveAll(dataDto.getPostTags());
-        }
-        if(!dataDto.tags.isEmpty()) {
-            tagRepository.saveAll(dataDto.getTags());
-        }
+        postsUpdate(postsToUpdate);
+
+
+
     }
 
     private String postRedisKey(Long postId) {
@@ -399,10 +391,5 @@ public class PostService {
             this.status = status;
         }
     }
-    @Data
-    private static class DataDto{
-        private List<Post> posts;
-        private List<Tag> tags;
-        private List<PostTag> postTags;
-    }
+
 }
