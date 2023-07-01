@@ -25,22 +25,24 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.blog.bloggy.common.config.CacheKeyConfig.POST;
 import static java.util.stream.Collectors.*;
@@ -87,14 +89,13 @@ public class PostService {
         return ResponsePostRegister.builder()
                 .thumbnail(post.getThumbnail())
                 .postId(post.getId())
-                .userId(post.getPostUser().getUserId())
                 .thumbnail(post.getThumbnail())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .tagNames(tags)
                 .build();
     }
-    @Transactional
+    //@Transactional
     public PostTag updatePostTag(Post post, String tagName) {
         PostTag postTag=PostTag.builder()
                 .tagName(tagName)
@@ -105,7 +106,7 @@ public class PostService {
         post.addPostTag(postTag);
         return postTag;
     }
-    @Transactional
+    //@Transactional
     public PostTag createPostTag(Post post, Tag tag,String tagName) {
         PostTag postTag = PostTag.builder()
                 .tagPost(post)
@@ -117,119 +118,120 @@ public class PostService {
         tag.addPostTag(postTag);
         return postTag;
     }
+
+    @CachePut(cacheNames = POST, key = "#post.getPostId()")
+    public ResponsePost updatePost(PostUpdateDto post){
+        String redisKey = postRedisKey(post.getPostId());
+        // 업데이트된 정보 반환
+        ResponsePost response = ResponsePost.builder()
+                .thumbnail(post.getThumbnail())
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .tagNames(post.getTagNames())
+                .modified(true)
+                .build();
+        log.info("redisKey : {}", redisKey);
+        return response;
+    }
     /*
         UPDATED: Tag 생성 전
         DELETED: 연관관계를 모두 지운, 삭제할 예정. (벌크 연산으로 한번에 삭제 예정)
         REGISTERED: 이미 Tag 객체가 존재하는 경우.
     */
+    @Transactional(readOnly = true)
+    public DataDto postsUpdate(List<ResponsePost> postDtos){
+        DataDto dataDto=new DataDto();
+        for (ResponsePost postDto : postDtos) {
+            Long postId = postDto.getPostId();
+            Post post = postRepository.findByIdWithPostTags(postId)
+                    .orElseThrow(PostNotFoundException::new);
+            String thumbnail = postDto.getThumbnail();
+            String title = postDto.getTitle();
+            String content = postDto.getContent();
+            post.updatePost(thumbnail, title, content);
+            List<PostTag> postTags = post.getPostTags();
+            List<PostTagPair> newTags = postDto.getTagNames().stream().map(postTag -> PostTagPair.builder()
+                    .tagName(postTag)
+                    .status(PostTagStatus.UPDATED)
+                    .build()).collect(toList());
+            for (PostTag postTag : postTags) {
+                if (postTag.getStatus() == PostTagStatus.DELETED)
+                    continue;
+                String oldTag = postTag.getTagName();
+                Boolean check = false;
+                for (PostTagPair newTag : newTags) {
+                    if (oldTag.equals(newTag.tagName)) {
+                        check = true;
+                        newTag.setStatus(PostTagStatus.DELETED);
+                    }
+                }
+                if (check == false) {
+                    postTag.setStatus(PostTagStatus.DELETED);
+                }
+            }
+            List<String> tags = newTags.stream()
+                    .filter(pair -> pair.status != PostTagStatus.DELETED)
+                    .map(pair -> pair.tagName)
+                    .collect(toList());
+
+            for (String tagName : tags) {
+                tagRepository.findByName(tagName).ifPresentOrElse(
+                        (tag) -> {
+                            PostTag postTag = createPostTag(post, tag, tagName);
+                            dataDto.tags.add(tag);
+                            dataDto.postTags.add(postTag);
+                        },
+                        () -> {
+                            PostTag postTag = updatePostTag(post, tagName);
+                            dataDto.postTags.add(postTag);
+                            log.info("postTag {}", postTag);
+                        }
+                );
+            }
+            dataDto.posts.add(post);
+            log.info("updatePost = {}", post);
+        }
+        return dataDto;
+    }
+
+    @Scheduled(fixedDelay = 60000) // 일정 시간마다 실행될 수 있도록 스케줄링 설정 1000, 1초
     @Transactional
-    public ResponsePostRegister updatePost(PostUpdateDto postUpdateDto){
-        Long postId = postUpdateDto.getPostId();
-        Post post = postRepository.findById(postId)
-                .orElseThrow(PostNotFoundException::new);
-        String thumbnail = postUpdateDto.getThumbnail();
-        String title = postUpdateDto.getTitle();
-        String content = postUpdateDto.getContent();
-        post.updatePost(thumbnail,title,content);
-
-        List<Tag> init_tag = post.getPostTags().stream().map(postTag -> postTag.getTag()).collect(toList());
-        List<PostTag> postTags = post.getPostTags();
-        List<PostTagPair> newTags = postUpdateDto.getTagNames().stream().map(postTag -> PostTagPair.builder()
-                .tagName(postTag)
-                .status(PostTagStatus.UPDATED)
-                .build()).collect(toList());
-        for (PostTag postTag : postTags) {
-            if(postTag.getStatus()==PostTagStatus.DELETED)
-                continue;
-            String oldTag=postTag.getTagName();
-            Boolean check=false;
-            for (PostTagPair newTag : newTags) {
-                if(oldTag.equals(newTag.tagName)){
-                    check=true;
-                    newTag.setStatus(PostTagStatus.DELETED);
+    public void saveUpdatedPostsToDB() {
+        Set<String> redisKeys = redisTemplate.keys("POST::*");
+        log.info("redisKeys : {}",redisTemplate.keys("POST::*"));
+        List<ResponsePost> postsToUpdate = new ArrayList<>();
+        if (redisKeys != null && !redisKeys.isEmpty()) {
+            for (String redisKey : redisKeys) {
+                log.info("redisKey == {}", redisKey);
+                ResponsePost post = (ResponsePost) redisTemplate.opsForValue().get(redisKey);
+                if (post != null && post.isModified()) { // 수정 여부를 확인하여 수정된 Post만 DB에 저장
+                    log.info("ResponsePostDto == {} ", post);
+                    postsToUpdate.add(post);
                 }
             }
-            if(check==false){
-                postTag.setStatus(PostTagStatus.DELETED);
-            }
+            //postRepository.saveAll(postsToUpdate);
+            redisTemplate.delete(redisKeys);
         }
-        /*
-        Iterator<PostTag> iterator = post.getPostTags().iterator();
-        while(iterator.hasNext()){
-            PostTag postTag = iterator.next();
-            if(postTag.getStatus()==PostTagStatus.DELETED)
-                continue;
-            String oldName=postTag.getTagName();
-            Boolean check=false;
-            //일치하는 이름이 없는지 체크
-            Iterator<String> iteratorNewNames =  postUpdateDto.getTagNames().iterator();
-            while(iteratorNewNames.hasNext()){
-                String newName = iteratorNewNames.next();
-                if (oldName.equals(newName)) {
-                    check=true;
-                    iteratorNewNames.remove();
-                }
-            }
-            if(check==false) {
-                if (postTag.getStatus() == PostTagStatus.REGISTERED) {
-                    //이 부분은 fetch join으로 최적화 할 수 있을 것 같음.
-                    //추후 수정
-                    Tag tag = postTag.getTag();
-                    tag.removePostTag(postTag);
-                    iterator.remove();
-                    postTag.setStatus(PostTagStatus.DELETED);
-                } else if (postTag.getStatus() == PostTagStatus.UPDATED) {
-                    //UPDATED는 아직 Tag생성되지 않았으므로, 연관관계도 없음.
-                    iterator.remove();
-                    postTag.setStatus(PostTagStatus.DELETED);
-                }
-            }
+        DataDto dataDto = postsUpdate(postsToUpdate);
+        if(!dataDto.posts.isEmpty()) {
+            postRepository.saveAll(dataDto.getPosts());
         }
-         for (String tagName : tagNames) {
-            tagRepository.findByName(tagName).ifPresentOrElse(
-                    (tag)->{
-                        createPostTag(post, tag, tagName);
-                    },
-                    ()->{
-                        updatePostTag(post, tagName);
-                    }
-            );
+        if(!dataDto.postTags.isEmpty()) {
+            postTagRepository.saveAll(dataDto.getPostTags());
         }
-         */
+        if(!dataDto.tags.isEmpty()) {
+            tagRepository.saveAll(dataDto.getTags());
+        }
+    }
 
-        List<String> tags = newTags.stream()
-                .filter(pair -> pair.status != PostTagStatus.DELETED)
-                .map(pair -> pair.tagName)
-                .collect(toList());
-
-        for (String tagName : tags) {
-            tagRepository.findByName(tagName).ifPresentOrElse(
-                    (tag)->{
-                        createPostTag(post, tag, tagName);
-                    },
-                    ()->{
-                        updatePostTag(post, tagName);
-                    }
-            );
-        }
-        List<String> responseTags = post.getRegPostTags().stream()
-                .map(postTag -> postTag.getTagName())
-                .collect(toList());
-        //postTagRepository.saveAll(postTags);
-
-        return ResponsePostRegister.builder()
-                .thumbnail(thumbnail)
-                .postId(post.getId())
-                .userId(postUpdateDto.getUserId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .tagNames(responseTags)
-                .build();
+    private String postRedisKey(Long postId) {
+        return "POST::" + postId;
     }
     // 이 포스트를 클릭했을 때 Favorite을 누른 User는 하트가 색깔이 차있도록 보여야 한다.
     // 그렇다면 필요한 정보는? 현재 로그인한 User의 정보 Post가 보유한 Favorite중에 User에 대한 정보가 있는경우
     // isFavorite은 true로 반환. User는 로그인을 했을 수도 있고, 안했을 수도 있다.
-    public ResponsePostOne getPostOne(Long postId,String username){
+    public ResponsePost getPostOne(Long postId, String username){
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(PostNotFoundException::new);
         boolean isFavorite=false;
@@ -239,30 +241,29 @@ public class PostService {
             isFavorite=post.getFavorites().stream()
                     .anyMatch(favorite -> favorite.getFavoriteUser().getId() == usersId);
         }
-        ResponsePostOne responsePostOne= ResponsePostOne.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .name(post.getPostUser().getName())
-                .build();
-        return responsePostOne;
+        return getResponsePostOne(post);
     }
 
     @Cacheable(cacheNames = POST, key = "#postId")
-    public ResponsePostOne getPostById(Long postId) {
+    public ResponsePost getPostById(Long postId) {
         // DB에서 데이터를 조회하는 부분
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new PostNotFoundException());
-        ResponsePostOne responsePostOne= ResponsePostOne.builder()
+        ResponsePost responsePost = getResponsePostOne(post);
+        return responsePost; // 존재하지 않는 경우
+    }
+    @Transactional
+    public ResponsePost getResponsePostOne(Post post) {
+        ResponsePost responsePost = ResponsePost.builder()
                 .postId(post.getId())
+                .thumbnail(post.getThumbnail())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .name(post.getPostUser().getName())
+                .tagNames(post.getRegPostTags().stream().map(postTag -> postTag.getTagName()).collect(toList()))
                 .build();
-        return responsePostOne; // 존재하지 않는 경우
+        return responsePost;
     }
-
-
 
     public void deletePostAndMark(Long postId){
         Post post = postRepository.findById(postId)
@@ -307,8 +308,6 @@ public class PostService {
         }
     }
 
-
-
     public void addViewCntToRedis(Long postId) {
         String key = getKey(postId);
         //hint 캐시에 값이 없으면 레포지토리에서 조회 있으면 값을 증가시킨다.
@@ -334,7 +333,7 @@ public class PostService {
 
     //3분마다 자동 실행해주는 스케쥴러
 
-    @Scheduled(cron = "0 0/3 * * * ?")
+    //@Scheduled(cron = "0 0/3 * * * ?")
     public void deleteViewCntCacheFromRedis() {
         Set<String> redisKeys = redisTemplate.keys("post:*:views");
         Iterator<String> it = redisKeys.iterator();
@@ -360,5 +359,11 @@ public class PostService {
             this.tagName = tagName;
             this.status = status;
         }
+    }
+    @Data
+    private static class DataDto{
+        private List<Post> posts;
+        private List<Tag> tags;
+        private List<PostTag> postTags;
     }
 }

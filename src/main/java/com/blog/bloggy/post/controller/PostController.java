@@ -7,7 +7,6 @@ import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.service.PostService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,8 +41,9 @@ public class PostController {
     }
     @AccessTokenRequired
     @PatchMapping("/posts/{postId}")
-    public ResponseEntity<ResponsePostRegister> postUpdate(
+    public ResponseEntity<ResponsePost> postUpdate(
             @PathVariable Long postId,
+            AccessTokenDto tokenDto,
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostUpdateDto postDto= PostUpdateDto.builder()
@@ -52,10 +52,11 @@ public class PostController {
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
                 .tagNames(requestPostRegister.getTagNames())
+                .userId(tokenDto.getUserId())
                 .build();
-        ResponsePostRegister responsePostRegister = postService.updatePost(postDto);
+        ResponsePost response = postService.updatePost(postDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responsePostRegister);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/posts/{postId}")
@@ -65,12 +66,12 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ResponsePostOne> getPostOne(
+    public ResponseEntity<ResponsePost> getPostOne(
             @PathVariable Long postId,
             @RequestParam(value = "username",required = false) String username) {
         //postService.addViewCntToRedis(postId); 조회수 기능 필요한지 의문
         //ResponsePostOne postOne = postService.getPostOne(postId,username);
-        ResponsePostOne postOne = postService.getPostById(postId);
+        ResponsePost postOne = postService.getPostById(postId);
         return ResponseEntity.status(HttpStatus.OK).body(postOne);
     }
 

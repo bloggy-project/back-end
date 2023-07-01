@@ -14,5 +14,6 @@ public class PostUpdateDto {
     private String title;
     private String content;
     private String userId;
+    private String name;
     private List<String> tagNames;
 }
