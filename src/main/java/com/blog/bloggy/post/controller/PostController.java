@@ -69,7 +69,8 @@ public class PostController {
             @PathVariable Long postId,
             @RequestParam(value = "username",required = false) String username) {
         //postService.addViewCntToRedis(postId); 조회수 기능 필요한지 의문
-        ResponsePostOne postOne = postService.getPostOne(postId,username);
+        //ResponsePostOne postOne = postService.getPostOne(postId,username);
+        ResponsePostOne postOne = postService.getPostById(postId);
         return ResponseEntity.status(HttpStatus.OK).body(postOne);
     }
 
@@ -96,7 +97,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @GetMapping("/posts/{name}")
+    @GetMapping("/posts/users/{name}")
     public ResponseEntity<Page<ResponseUserPagePost>> getUserPostsOrderByCreatedAt(
             @PathVariable(value = "name") String name,
             @RequestParam(defaultValue = "0") int page,

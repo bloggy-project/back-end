@@ -42,7 +42,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     private int port;
 
     @Bean(name = "redisCacheConnectionFactory")
-    public RedisConnectionFactory redisCacheConnectionFactory(RedisConnectionFactory connectionFactory) {
+    public RedisConnectionFactory redisCacheConnectionFactory() {
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
     }
     @Bean

@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.blog.bloggy.common.config.CacheKeyConfig.POST;
 import static java.util.stream.Collectors.*;
 
 @Service
@@ -243,43 +244,24 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .name(post.getPostUser().getName())
-                .isFavorite(isFavorite)
                 .build();
         return responsePostOne;
     }
 
-    @Cacheable(value = "postCache", key = "#postId", cacheManager = "redisCacheManager")
+    @Cacheable(cacheNames = POST, key = "#postId")
     public ResponsePostOne getPostById(Long postId) {
-        // 캐시 스토어에서 데이터를 가져오는 부분
-        // 캐시에 데이터가 존재하면 이 부분은 실행되지 않음
-        Post cachedPost = fetchPostFromCache(postId);
-        if (cachedPost != null) {
-            return cachedPost;
-        }
         // DB에서 데이터를 조회하는 부분
-        Post dbPost = fetchPostFromDB(postId);
-        if (dbPost != null) {
-            // DB에서 조회한 데이터를 캐시 스토어에 저장
-            storePostInCache(dbPost);
-            return dbPost;
-        }
-        return null; // 존재하지 않는 경우
-    }
-    private Post fetchPostFromCache(Long postId) {
-        // 캐시 스토어에서 데이터를 가져와 반환하는 로직
-        // Redis 등의 캐시 스토어에서 데이터 조회
-        // 캐시 스토어에 존재하지 않는 경우 null 반환
+        Post post = postRepository.findByIdWithUser(postId)
+                .orElseThrow(() -> new PostNotFoundException());
+        ResponsePostOne responsePostOne= ResponsePostOne.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .name(post.getPostUser().getName())
+                .build();
+        return responsePostOne; // 존재하지 않는 경우
     }
 
-    private Post fetchPostFromDB(Long postId) {
-        // DB에서 데이터를 조회하는 로직
-        // 예를 들어, postRepository.findById(postId)와 같은 방식으로 데이터 조회
-    }
-
-    private void storePostInCache(Post post) {
-        // 캐시 스토어에 데이터를 저장하는 로직
-        // Redis 등의 캐시 스토어에 데이터 저장
-    }
 
 
     public void deletePostAndMark(Long postId){
