@@ -23,7 +23,6 @@ import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Builder;
 import lombok.Data;
@@ -59,7 +58,7 @@ public class PostService {
     private final FavoriteRepository favoriteRepository;
     private final PostTagRepository postTagRepository;
     private final TagRepository tagRepository;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String,ResponsePost> redisTemplate;
 
     @Transactional
     public ResponsePostRegister createPost(PostDto postDto) {
@@ -213,47 +212,29 @@ public class PostService {
     @Scheduled(fixedDelay = 20000) // 일정 시간마다 실행될 수 있도록 스케줄링 설정 1000, 1초
     @Transactional
     public void saveUpdatedPostsToDB() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.activateDefaultTyping(
-                BasicPolymorphicTypeValidator
-                        .builder()
-                        .allowIfSubType(Object.class)   //모든 객체의 타입정보를 저장할 수 있도록 설정
-                        .build(),
-                ObjectMapper.DefaultTyping.NON_FINAL
-        );
-        mapper.registerModule(new JavaTimeModule());    //LocaldateTime 저장을 위해 등록
+
         Set<String> redisKeys = getKeysWithPattern("POST::*");
         List<ResponsePost> postsToUpdate = new ArrayList<>();
         if (redisKeys != null && !redisKeys.isEmpty()) {
             for (String redisKey : redisKeys) {
-                log.info("redisKey == {}", redisKey);
-                ResponsePost post = (ResponsePost) redisTemplate.execute((RedisCallback<Object>) connection -> {
-                    byte[] valueBytes = connection.get(redisKey.getBytes());
-                    // byte[]를 적절한 방식으로 역직렬화하여 Object로 변환 후 반환
-                    log.info("valueBytes = {}", valueBytes);
-                    if (valueBytes != null) {
-                        String json = new String(valueBytes);
-                        log.info("json {} ", json);
-                        try {
-                            return mapper.readValue(json, ResponsePost.class);
-                        } catch (IOException e) {
-                            log.error("Error deserializing JSON from Redis: {}", e.getMessage());
-                        }
-                    }
-                    return null;
-                });
 
+                log.info("redisKey == {}", redisKey);
+                ResponsePost post = redisTemplate.opsForValue().get(redisKey);
+                log.info("redisTemplate Response Post :  {}", post);
                 if (post != null && post.isModified()) { // 수정 여부를 확인하여 수정된 Post만 DB에 저장
                     postsToUpdate.add(post);
                 }
             }
             //postRepository.saveAll(postsToUpdate);
-            redisTemplate.delete(redisKeys);
+            // 삭제할 키들을 String 형식으로 변환
+            String[] keysToDelete = redisKeys.toArray(new String[0]);
+            for (String s : keysToDelete) {
+                System.out.println("s = " + s);
+            }
+            // 키 삭제
+            redisTemplate.delete(Arrays.asList(keysToDelete));
         }
         postsUpdate(postsToUpdate);
-
-
-
     }
 
     private String postRedisKey(Long postId) {
@@ -364,6 +345,7 @@ public class PostService {
 
     //3분마다 자동 실행해주는 스케쥴러
 
+    /*
     //@Scheduled(cron = "0 0/3 * * * ?")
     public void deleteViewCntCacheFromRedis() {
         Set<String> redisKeys = redisTemplate.keys("post:*:views");
@@ -380,6 +362,7 @@ public class PostService {
             redisTemplate.delete("post:"+postId+"views");
         }
     }
+     */
     @Data
     private static class PostTagPair{
         String tagName;

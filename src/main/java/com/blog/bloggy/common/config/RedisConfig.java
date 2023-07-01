@@ -1,5 +1,6 @@
 package com.blog.bloggy.common.config;
 
+import com.blog.bloggy.post.dto.ResponsePost;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -43,8 +45,24 @@ public class RedisConfig extends CachingConfigurerSupport {
     public RedisConnectionFactory redisCacheConnectionFactory() {
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
     }
+
     @Bean
-    public CacheManager cacheManager(
+    public RedisTemplate<String, ResponsePost> responsePostDtoRedisTemplate(
+            @Qualifier("redisCacheConnectionFactory") RedisConnectionFactory redisConnectionFactory
+    ){
+        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer =
+                new GenericJackson2JsonRedisSerializer();
+
+        RedisTemplate<String, ResponsePost> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer);
+
+        return redisTemplate;
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(
             @Qualifier("redisCacheConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(
