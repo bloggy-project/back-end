@@ -40,6 +40,10 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserDto createUser(UserDto userDto) {
+        userRepository.findByEmail(userDto.getEmail()).ifPresent(
+                user-> {
+                    throw new DataAlreadyExistException();
+                });
         userDto.setUserId(UUID.randomUUID().toString());
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
