@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -29,6 +30,22 @@ public class TokenService {
         }
         return token;
     }
+    protected String getTokenFromCookie(){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        Cookie[] cookies = request.getCookies();
+        String refreshToken =null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                // 쿠키 정보 처리
+                if (cookie.getName().equals("refreshToken")) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return refreshToken;
+    }
+
     protected void checkTokenExist(String token) {
         if (isEmpty(token)) {
             throw new RequiredTokenException();

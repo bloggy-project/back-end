@@ -35,7 +35,7 @@ public class RefreshTokenRequiredAspect {
 
     @Around(value = "@annotation(refreshTokenRequired)")
     public Object loginCheck(ProceedingJoinPoint pjp, RefreshTokenRequired refreshTokenRequired) throws Throwable {
-        String token = tokenService.getBearerTokenFromHeader();
+        String token = tokenService.getTokenFromCookie();
         tokenService.checkTokenExist(token);
 
         String userId = tokenUtil.getUserIdFromToken(token);
