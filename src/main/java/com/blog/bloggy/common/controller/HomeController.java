@@ -14,22 +14,6 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping(value="/api/test")
-    @ResponseBody
-    public Test test(){
-        Test test=new Test();
-        test.setName("테스트 성공");
-        return test;
-    }
-    public class Test{
-        String name;
-        public String getName() {
-            return name;
-        }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
 
 }
