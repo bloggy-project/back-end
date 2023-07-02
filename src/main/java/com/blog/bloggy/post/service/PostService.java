@@ -21,9 +21,6 @@ import com.blog.bloggy.tag.model.Tag;
 import com.blog.bloggy.tag.repository.TagRepository;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.blog.bloggy.common.config.CacheKeyConfig.POST;
@@ -58,10 +54,10 @@ public class PostService {
     private final FavoriteRepository favoriteRepository;
     private final PostTagRepository postTagRepository;
     private final TagRepository tagRepository;
-    private final RedisTemplate<String,ResponsePost> redisTemplate;
+    private final RedisTemplate<String,Object> redisTemplate;
 
     @Transactional
-    public ResponsePostRegister createPost(PostDto postDto) {
+    public ResponsePost createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
         UserEntity user = userRepository.findByUserId(postDto.getUserId())
                 .orElseThrow(UserNotFoundException::new);
@@ -85,13 +81,14 @@ public class PostService {
         }
         postTagRepository.saveAll(postTags);
         List<String> tags = post.getPostTags().stream().map((pt) -> pt.getTagName()).collect(toList());
-        return ResponsePostRegister.builder()
-                .thumbnail(post.getThumbnail())
+        return ResponsePost.builder()
                 .postId(post.getId())
                 .thumbnail(post.getThumbnail())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .name(user.getName())
                 .tagNames(tags)
+                .updatedAt(post.getUpdatedAt())
                 .build();
     }
     //@Transactional
@@ -114,7 +111,7 @@ public class PostService {
                 .status(PostTagStatus.REGISTERED)
                 .build();
         post.addPostTag(postTag);
-        tag.addPostTag(postTag);
+        //tag.addPostTag(postTag);
         return postTag;
     }
 
@@ -129,6 +126,7 @@ public class PostService {
                 .content(post.getContent())
                 .tagNames(post.getTagNames())
                 .modified(true)
+                .updatedAt(LocalDateTime.now())
                 .build();
         log.info("redisKey : {}", redisKey);
         return response;
@@ -141,63 +139,68 @@ public class PostService {
     @Transactional
     public void postsUpdate(List<ResponsePost> postDtos){
         List<Post> posts = new ArrayList<>();
-        List<PostTag> bulkTags = new ArrayList<>();
-        for (ResponsePost postDto : postDtos) {
+        List<PostTag> bulkPostTags = new ArrayList<>();
+        postDtos.forEach(postDto -> {
             Long postId = postDto.getPostId();
             Post post = postRepository.findById(postId)
                     .orElseThrow(PostNotFoundException::new);
+
             String thumbnail = postDto.getThumbnail();
             String title = postDto.getTitle();
             String content = postDto.getContent();
-            post.updatePost(thumbnail, title, content);
+            LocalDateTime updatedAt = postDto.getUpdatedAt();
+            post.updatePost(thumbnail, title, content, updatedAt);
+
             List<PostTag> postTags = post.getPostTags();
-            List<PostTagPair> newTags = postDto.getTagNames().stream().map(postTag -> PostTagPair.builder()
-                    .tagName(postTag)
-                    .status(PostTagStatus.UPDATED)
-                    .build()).collect(toList());
-            for (PostTag postTag : postTags) {
-                if (postTag.getStatus() == PostTagStatus.DELETED)
-                    continue;
-                String oldTag = postTag.getTagName();
-                Boolean check = false;
-                for (PostTagPair newTag : newTags) {
-                    if (oldTag.equals(newTag.tagName)) {
-                        check = true;
-                        newTag.setStatus(PostTagStatus.DELETED);
-                    }
-                }
-                if (check == false) {
-                    postTag.setStatus(PostTagStatus.DELETED);
-                }
-            }
-            List<String> tags = newTags.stream()
-                    .filter(pair -> pair.status != PostTagStatus.DELETED)
-                    .map(pair -> pair.tagName)
+            List<PostTagPair> newTags = postDto.getTagNames().stream()
+                    .map(postTag -> PostTagPair.builder()
+                            .tagName(postTag)
+                            .status(PostTagStatus.UPDATED)
+                            .build())
                     .collect(toList());
 
-            for (String tagName : tags) {
+            postTags.forEach(postTag -> {
+                if (postTag.getStatus() == PostTagStatus.DELETED) {
+                    return;
+                }
+                String oldTag = postTag.getTagName();
+                Boolean check = newTags.stream()
+                        .anyMatch(newTag -> oldTag.equals(newTag.getTagName()));
+
+                if (!check) {
+                    postTag.setStatus(PostTagStatus.DELETED);
+                }
+            });
+
+            List<String> tags = newTags.stream()
+                    .filter(pair -> pair.getStatus() != PostTagStatus.DELETED)
+                    .map(PostTagPair::getTagName)
+                    .collect(toList());
+
+            tags.forEach(tagName -> {
                 tagRepository.findByName(tagName).ifPresentOrElse(
-                        (tag) -> {
+                        tag -> {
                             PostTag postTag = createPostTag(post, tag, tagName);
-                            bulkTags.add(postTag);
+                            bulkPostTags.add(postTag);
                         },
                         () -> {
                             PostTag postTag = updatePostTag(post, tagName);
-                            bulkTags.add(postTag);
+                            bulkPostTags.add(postTag);
                             log.info("postTag {}", postTag);
                         }
                 );
-            }
+            });
+
             log.info("updatePost = {}", post);
             posts.add(post);
-        }
+        });
         postRepository.saveAll(posts);
-        postTagRepository.saveAll(bulkTags);
+        postTagRepository.saveAll(bulkPostTags);
     }
     public Set<String> getKeysWithPattern(String pattern) {
         Set<String> keys = new HashSet<>();
         redisTemplate.execute((RedisCallback<Void>) connection -> {
-            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match(pattern).build())) {
+            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match(pattern).count(200).build())) {
                 while (cursor.hasNext()) {
                     keys.add(new String(cursor.next()));
                 }
@@ -219,18 +222,14 @@ public class PostService {
             for (String redisKey : redisKeys) {
 
                 log.info("redisKey == {}", redisKey);
-                ResponsePost post = redisTemplate.opsForValue().get(redisKey);
+                ResponsePost post = (ResponsePost) redisTemplate.opsForValue().get(redisKey);
                 log.info("redisTemplate Response Post :  {}", post);
                 if (post != null && post.isModified()) { // 수정 여부를 확인하여 수정된 Post만 DB에 저장
                     postsToUpdate.add(post);
                 }
             }
-            //postRepository.saveAll(postsToUpdate);
             // 삭제할 키들을 String 형식으로 변환
             String[] keysToDelete = redisKeys.toArray(new String[0]);
-            for (String s : keysToDelete) {
-                System.out.println("s = " + s);
-            }
             // 키 삭제
             redisTemplate.delete(Arrays.asList(keysToDelete));
         }
@@ -272,6 +271,7 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .name(post.getPostUser().getName())
+                .updatedAt(post.getUpdatedAt())
                 .tagNames(post.getRegPostTags().stream().map(postTag -> postTag.getTagName()).collect(toList()))
                 .build();
         return responsePost;
@@ -320,49 +320,6 @@ public class PostService {
         }
     }
 
-    public void addViewCntToRedis(Long postId) {
-        String key = getKey(postId);
-        //hint 캐시에 값이 없으면 레포지토리에서 조회 있으면 값을 증가시킨다.
-        ValueOperations valueOperations = redisTemplate.opsForValue();
-        if(valueOperations.get(key)==null){
-            valueOperations.set( key,
-                    String.valueOf(postRepository.findById(postId)
-                    .orElseThrow(PostNotFoundException::new).getViews()),
-                    Duration.ofMinutes(10));
-            valueOperations.increment(key);
-        }
-        /*
-        else {
-            valueOperations.increment(key); //만료시간 지나기 전까진 동일한 key에 대해 중복으로 increment 되지 않는다.
-        }
-        */
-        log.info("value:{}",valueOperations.get(key));
-    }
-
-    private static String getKey(Long postId) {
-        return "post:" + postId + ":views";
-    }
-
-    //3분마다 자동 실행해주는 스케쥴러
-
-    /*
-    //@Scheduled(cron = "0 0/3 * * * ?")
-    public void deleteViewCntCacheFromRedis() {
-        Set<String> redisKeys = redisTemplate.keys("post:*:views");
-        Iterator<String> it = redisKeys.iterator();
-        while (it.hasNext()) {
-            String key = it.next();
-            String numericPart = key.substring(key.indexOf(":") + 1, key.lastIndexOf(":"));
-            Long postId = Long.parseLong(numericPart);
-            String s = (String) redisTemplate.opsForValue().get(key);
-            Long views = Long.parseLong(s);
-            //
-            postQueryRepository.addViewCntFromRedis(postId,views);
-            redisTemplate.delete(key);
-            redisTemplate.delete("post:"+postId+"views");
-        }
-    }
-     */
     @Data
     private static class PostTagPair{
         String tagName;

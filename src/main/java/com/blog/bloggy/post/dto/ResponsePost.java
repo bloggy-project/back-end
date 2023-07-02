@@ -6,12 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
-public class ResponsePost extends BaseTimeEntity  implements Serializable {
+public class ResponsePost implements Serializable {
     private Long postId;
 
     private String thumbnail;
@@ -26,19 +27,12 @@ public class ResponsePost extends BaseTimeEntity  implements Serializable {
 
     private boolean modified=false;
 
+    private LocalDateTime updatedAt;
+
     public ResponsePost() {
     }
 
-    public ResponsePost(Long postId, String thumbnail, String title, String content, String name, List<String> tagNames) {
-        this.postId = postId;
-        this.thumbnail = thumbnail;
-        this.title = title;
-        this.content = content;
-        this.name = name;
-        this.tagNames = tagNames;
-    }
-
-    public ResponsePost(Long postId, String thumbnail, String title, String content, String name, List<String> tagNames, boolean modified) {
+    public ResponsePost(Long postId, String thumbnail, String title, String content, String name, List<String> tagNames, boolean modified, LocalDateTime updatedAt) {
         this.postId = postId;
         this.thumbnail = thumbnail;
         this.title = title;
@@ -46,6 +40,6 @@ public class ResponsePost extends BaseTimeEntity  implements Serializable {
         this.name = name;
         this.tagNames = tagNames;
         this.modified = modified;
+        this.updatedAt = updatedAt;
     }
-
 }

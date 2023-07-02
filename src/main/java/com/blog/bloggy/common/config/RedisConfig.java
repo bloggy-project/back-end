@@ -1,13 +1,10 @@
 package com.blog.bloggy.common.config;
 
-import com.blog.bloggy.post.dto.ResponsePost;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.blog.bloggy.common.config.CacheExpireConfig.POST_CACHE_EXPIRE_TIME;
@@ -47,16 +43,16 @@ public class RedisConfig extends CachingConfigurerSupport {
     }
 
     @Bean
-    public RedisTemplate<String, ResponsePost> responsePostDtoRedisTemplate(
+    public RedisTemplate<String, Object> responsePostDtoRedisTemplate(
             @Qualifier("redisCacheConnectionFactory") RedisConnectionFactory redisConnectionFactory
     ){
-        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer =
-                new GenericJackson2JsonRedisSerializer();
+        ObjectMapper mapper = getObjectMapper();
+        GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(mapper);
 
-        RedisTemplate<String, ResponsePost> redisTemplate = new RedisTemplate<>();
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer);
+        redisTemplate.setValueSerializer(redisSerializer);
 
         return redisTemplate;
     }
@@ -64,17 +60,8 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Bean
     public RedisCacheManager cacheManager(
             @Qualifier("redisCacheConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.activateDefaultTyping(
-                BasicPolymorphicTypeValidator
-                        .builder()
-                        .allowIfSubType(Object.class)   //모든 객체의 타입정보를 저장할 수 있도록 설정
-                        .build(),
-                ObjectMapper.DefaultTyping.NON_FINAL
-        );
-        mapper.registerModule(new JavaTimeModule());    //LocaldateTime 저장을 위해 등록
+        ObjectMapper mapper = getObjectMapper();
 
-        mapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);	//LocaldateTime을 Day까지 반환해줌
         GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(mapper);
 
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
@@ -92,5 +79,19 @@ public class RedisConfig extends CachingConfigurerSupport {
         return RedisCacheManager.builder(redisConnectionFactory)
                 .withInitialCacheConfigurations(configurations)
                 .build();
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.activateDefaultTyping(
+                BasicPolymorphicTypeValidator
+                        .builder()
+                        .allowIfSubType(Object.class)   //모든 객체의 타입정보를 저장할 수 있도록 설정
+                        .build(),
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
+        mapper.registerModule(new JavaTimeModule());    //LocaldateTime 저장을 위해 등록
+        mapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);	//LocaldateTime을 Day까지 반환해줌
+        return mapper;
     }
 }

@@ -19,9 +19,10 @@ public class Tag {
     @Column(name = "tag_id")
     private Long id;
 
+    /*
     @OneToMany(mappedBy = "tag")
     private List<PostTag> postTags=new ArrayList<>();
-
+    */
     private String name;
 
 
@@ -32,6 +33,7 @@ public class Tag {
         this.name = name;
     }
 
+    /*
     public void addPostTag(PostTag postTag) {
         this.postTags.add(postTag);
     }
@@ -39,4 +41,5 @@ public class Tag {
     public void removePostTag(PostTag postTag) {
         postTags.remove(postTag);
     }
+    */
 }

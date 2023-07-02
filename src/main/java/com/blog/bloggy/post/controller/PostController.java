@@ -25,7 +25,7 @@ public class PostController {
 
     @AccessTokenRequired
     @PostMapping("/posts")
-    public ResponseEntity<ResponsePostRegister> postRegister(
+    public ResponseEntity<ResponsePost> postRegister(
             AccessTokenDto tokenDto,
             @RequestBody RequestPostRegister requestPostRegister) {
 
@@ -36,8 +36,8 @@ public class PostController {
                 .userId(tokenDto.getUserId())
                 .tagNames(requestPostRegister.getTagNames())
                 .build();
-        ResponsePostRegister responsePostRegister = postService.createPost(postDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responsePostRegister);
+        ResponsePost response = postService.createPost(postDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @AccessTokenRequired
     @PatchMapping("/posts/{postId}")

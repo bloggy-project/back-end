@@ -69,7 +69,7 @@ class PostServiceTest {
         }
 
         //when
-        ResponsePostRegister response = postService.createPost(postDto);
+        ResponsePost response = postService.createPost(postDto);
 
         //then
         assertEquals(response.getTagNames().size(),tagNames.size());
@@ -98,14 +98,13 @@ class PostServiceTest {
             given(tagRepository.findByName(tagName)).willReturn(Optional.of(tag1));
         }
         //when
-        ResponsePostRegister response = postService.createPost(postDto);
+        ResponsePost response = postService.createPost(postDto);
 
         //then
         assertEquals(response.getTagNames().size(),tagNames.size());
         //assertEquals(userId,response.getUserId());
         assertEquals(title, response.getTitle());
         assertEquals(content, response.getContent());
-        assertEquals(tag1.getPostTags().get(0).getStatus(),PostTagStatus.REGISTERED);
         assertEquals(tagNames, response.getTagNames());
     }
 
