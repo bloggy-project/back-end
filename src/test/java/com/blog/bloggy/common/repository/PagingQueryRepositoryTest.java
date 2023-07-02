@@ -287,7 +287,7 @@ class PagingQueryRepositoryTest {
                 .status(PostTagStatus.REGISTERED)
                 .build();
         post.addPostTag(postTag);
-        tag.addPostTag(postTag);
+        //tag.addPostTag(postTag);
         return postTag;
     }
 }

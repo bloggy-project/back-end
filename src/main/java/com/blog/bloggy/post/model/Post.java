@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,8 +41,6 @@ public class Post extends BaseTimeEntity {
     private long commentCount=0;
 
     //Redis 캐시에서는 primitive type 권장?
-
-    private Long views;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "users_id",foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -73,23 +72,12 @@ public class Post extends BaseTimeEntity {
         this.id = id;
     }
 
-    /*
-    username추가하여 사용안함
-    @Builder
-    public Post(Long id,String title, String content, UserEntity user) {
-        this.id= id;
-        this.views =1L;
-        this.title = title;
-        this.content = content;
-        this.postUser = user;
-    }
-     */
+
     @Builder
     public Post(String thumbnail, String title, String content, UserEntity user,long favoriteCount) {
         this.thumbnail = thumbnail;
         this.title = title;
         this.content = content;
-        this.views = 1L;
         this.postUser = user;
         this.favoriteCount=favoriteCount;
     }
@@ -97,7 +85,6 @@ public class Post extends BaseTimeEntity {
     //PostServiceTest용 생성자
     public Post(Long id,String title, String content, UserEntity user) {
         this.id= id;
-        this.views =1L;
         this.title = title;
         this.content = content;
         this.postUser = user;
@@ -139,10 +126,11 @@ public class Post extends BaseTimeEntity {
         postTags.remove(postTag);
     }
 
-    public void updatePost(String thumbnail, String title, String content) {
+    public void updatePost(String thumbnail, String title, String content, LocalDateTime updatedAt) {
         this.thumbnail=thumbnail;
         this.title = title;
         this.content = content;
+        this.setUpdatedAt(updatedAt);
     }
 
     @Override
@@ -151,7 +139,6 @@ public class Post extends BaseTimeEntity {
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
-                ", views=" + views +
                 ", createdAt "+this.getCreatedAt()+'\''+
                 '}';
     }

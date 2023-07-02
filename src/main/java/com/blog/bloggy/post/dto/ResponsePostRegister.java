@@ -17,21 +17,17 @@ public class ResponsePostRegister extends BaseTimeEntity {
 
     private Long postId;
 
-
     private String title;
 
     private String content;
 
-    private String userId;
-
     private List<String> tagNames;
 
-    public ResponsePostRegister(String thumbnail, Long postId, String title, String content, String userId, List<String> tagNames) {
+    public ResponsePostRegister(String thumbnail, Long postId, String title, String content, List<String> tagNames) {
         this.thumbnail = thumbnail;
         this.postId = postId;
         this.title = title;
         this.content = content;
-        this.userId = userId;
         this.tagNames = tagNames;
     }
 

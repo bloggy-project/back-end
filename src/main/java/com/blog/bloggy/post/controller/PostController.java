@@ -7,7 +7,6 @@ import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.service.PostService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +25,7 @@ public class PostController {
 
     @AccessTokenRequired
     @PostMapping("/posts")
-    public ResponseEntity<ResponsePostRegister> postRegister(
+    public ResponseEntity<ResponsePost> postRegister(
             AccessTokenDto tokenDto,
             @RequestBody RequestPostRegister requestPostRegister) {
 
@@ -37,13 +36,14 @@ public class PostController {
                 .userId(tokenDto.getUserId())
                 .tagNames(requestPostRegister.getTagNames())
                 .build();
-        ResponsePostRegister responsePostRegister = postService.createPost(postDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responsePostRegister);
+        ResponsePost response = postService.createPost(postDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @AccessTokenRequired
     @PatchMapping("/posts/{postId}")
-    public ResponseEntity<ResponsePostRegister> postUpdate(
+    public ResponseEntity<ResponsePost> postUpdate(
             @PathVariable Long postId,
+            AccessTokenDto tokenDto,
             @RequestBody RequestPostRegister requestPostRegister) {
 
         PostUpdateDto postDto= PostUpdateDto.builder()
@@ -52,10 +52,11 @@ public class PostController {
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
                 .tagNames(requestPostRegister.getTagNames())
+                .userId(tokenDto.getUserId())
                 .build();
-        ResponsePostRegister responsePostRegister = postService.updatePost(postDto);
+        ResponsePost response = postService.updatePost(postDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responsePostRegister);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/posts/{postId}")
@@ -65,11 +66,12 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ResponsePostOne> getPostOne(
+    public ResponseEntity<ResponsePost> getPostOne(
             @PathVariable Long postId,
             @RequestParam(value = "username",required = false) String username) {
-        postService.addViewCntToRedis(postId);
-        ResponsePostOne postOne = postService.getPostOne(postId,username);
+        //postService.addViewCntToRedis(postId); 조회수 기능 필요한지 의문
+        //ResponsePostOne postOne = postService.getPostOne(postId,username);
+        ResponsePost postOne = postService.getPostById(postId);
         return ResponseEntity.status(HttpStatus.OK).body(postOne);
     }
 
@@ -96,7 +98,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @GetMapping("/posts/{name}")
+    @GetMapping("/posts/users/{name}")
     public ResponseEntity<Page<ResponseUserPagePost>> getUserPostsOrderByCreatedAt(
             @PathVariable(value = "name") String name,
             @RequestParam(defaultValue = "0") int page,
