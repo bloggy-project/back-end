@@ -91,6 +91,7 @@ public class PagingQueryRepository {
                         post.id.in(ids),
                         rangeDate(condition.getDate())
                 )
+                .orderBy(post.id.desc())
                 .fetch();
         return checkLastPageDto(pageable, posts);
     }

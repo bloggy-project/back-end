@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 @Getter
 @Table(indexes = {
         @Index(name = "fk_post_user",columnList = "users_id")
-        ,@Index(name = "idx_favorite_count_post_id", columnList = "favorite_count, post_id")
+        ,@Index(name = "idx_favorite_count_post_id", columnList = "favorite_count DESC, post_id DESC")
         })
 public class Post extends BaseTimeEntity {
     @Id
