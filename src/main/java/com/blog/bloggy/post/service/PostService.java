@@ -14,7 +14,6 @@ import com.blog.bloggy.post.model.Post;
 import com.blog.bloggy.comment.repository.CommentRepository;
 import com.blog.bloggy.postTag.model.PostTag;
 import com.blog.bloggy.favorite.repository.FavoriteRepository;
-import com.blog.bloggy.post.repository.PostQueryRepository;
 import com.blog.bloggy.post.repository.PostRepository;
 import com.blog.bloggy.postTag.repository.PostTagRepository;
 import com.blog.bloggy.tag.model.Tag;
@@ -48,7 +47,6 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final PostQueryRepository postQueryRepository;
     private final PagingQueryRepository pagingQueryRepository;
     private final CommentRepository commentRepository;
     private final FavoriteRepository favoriteRepository;

@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.Optional;
 
 import static com.blog.bloggy.comment.model.QComment.comment;
 import static com.blog.bloggy.favorite.model.QFavorite.favorite;
