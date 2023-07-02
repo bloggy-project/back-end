@@ -37,7 +37,8 @@ public enum ResultType {
 
     DATA_ALREADY_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "500001", "Data already exist"),
     DATA_ALREADY_REMOVE(HttpStatus.INTERNAL_SERVER_ERROR, "500002", "Data already remove"),
-    NOT_ALLOWED_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "500003", "Not allowed operation");
+    NOT_ALLOWED_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "500003", "Not allowed operation"),
+    SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "500004", "Service unavailable");
 
     private final HttpStatus status;
     private final String code;

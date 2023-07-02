@@ -5,7 +5,6 @@ import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.comment.dto.ResponseUserComment;
-import com.blog.bloggy.common.exception.NotFoundException;
 import com.blog.bloggy.comment.repository.CommentRepository;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
