@@ -1,7 +1,7 @@
 package com.blog.bloggy.kafka.config;
 
 
-import com.blog.bloggy.kafka.dto.Alarm;
+import com.blog.bloggy.alarm.model.Alarm;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;

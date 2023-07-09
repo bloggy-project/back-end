@@ -1,6 +1,7 @@
 package com.blog.bloggy.kafka.service;
 
-import com.blog.bloggy.kafka.dto.Alarm;
+import com.blog.bloggy.alarm.dto.AlarmDto;
+import com.blog.bloggy.alarm.model.Alarm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -14,13 +15,13 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerService {
-    private final KafkaTemplate<String, Alarm> kafkaTemplate;
+    private final KafkaTemplate<String, AlarmDto> kafkaTemplate;
 
-    public void deliverAlarmToKafka(String topic, Alarm alarm) {
-        ListenableFuture<SendResult<String, Alarm>> sendResult = kafkaTemplate.send(topic, alarm);
-        sendResult.addCallback(new ListenableFutureCallback<SendResult<String, Alarm>>() {
+    public void deliverAlarmToKafka(String topic, AlarmDto alarm) {
+        ListenableFuture<SendResult<String, AlarmDto>> sendResult = kafkaTemplate.send(topic, alarm);
+        sendResult.addCallback(new ListenableFutureCallback<SendResult<String, AlarmDto>>() {
             @Override
-            public void onSuccess(SendResult<String, Alarm> result) {
+            public void onSuccess(SendResult<String, AlarmDto> result) {
                 log.info("successfully sent a message {} with offset {}", alarm, result.getRecordMetadata().offset());
             }
 

@@ -1,6 +1,6 @@
 package com.blog.bloggy.kafka.config;
 
-import com.blog.bloggy.kafka.dto.Alarm;
+import com.blog.bloggy.alarm.model.Alarm;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +10,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.RecoveringBatchErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;

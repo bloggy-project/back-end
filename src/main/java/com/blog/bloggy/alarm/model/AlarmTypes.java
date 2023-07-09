@@ -1,4 +1,4 @@
-package com.blog.bloggy.kafka.dto;
+package com.blog.bloggy.alarm.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
