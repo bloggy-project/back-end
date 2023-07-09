@@ -1,6 +1,9 @@
 package com.blog.bloggy.post.service;
 
 
+import com.blog.bloggy.alarm.dto.AlarmDto;
+import com.blog.bloggy.alarm.model.Alarm;
+import com.blog.bloggy.alarm.service.AlarmService;
 import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.common.exception.PostNotFoundException;
@@ -37,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.blog.bloggy.alarm.model.AlarmTypes.FRIEND_CREATE_POST;
 import static com.blog.bloggy.common.config.CacheKeyConfig.POST;
 import static java.util.stream.Collectors.*;
 
@@ -53,7 +57,7 @@ public class PostService {
     private final PostTagRepository postTagRepository;
     private final TagRepository tagRepository;
     private final RedisTemplate<String,Object> redisTemplate;
-
+    private final AlarmService alarmService;
     @Transactional
     public ResponsePost createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
@@ -78,6 +82,7 @@ public class PostService {
             );
         }
         postTagRepository.saveAll(postTags);
+        sendAlaram(user.getName());
         List<String> tags = post.getPostTags().stream().map((pt) -> pt.getTagName()).collect(toList());
         return ResponsePost.builder()
                 .postId(post.getId())
@@ -89,6 +94,12 @@ public class PostService {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
+
+    private void sendAlaram(String name) {
+        Alarm alarm = Alarm.createAlarm(name);
+        alarmService.sendChat(alarm);
+    }
+
     //@Transactional
     public PostTag updatePostTag(Post post, String tagName) {
         PostTag postTag=PostTag.builder()

@@ -15,13 +15,13 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Service
 @RequiredArgsConstructor
 public class KafkaProducerService {
-    private final KafkaTemplate<String, AlarmDto> kafkaTemplate;
+    private final KafkaTemplate<String, Alarm> kafkaTemplate;
 
-    public void deliverAlarmToKafka(String topic, AlarmDto alarm) {
-        ListenableFuture<SendResult<String, AlarmDto>> sendResult = kafkaTemplate.send(topic, alarm);
-        sendResult.addCallback(new ListenableFutureCallback<SendResult<String, AlarmDto>>() {
+    public void deliverAlarmToKafka(String topic, Alarm alarm) {
+        ListenableFuture<SendResult<String, Alarm>> sendResult = kafkaTemplate.send(topic, alarm);
+        sendResult.addCallback(new ListenableFutureCallback<SendResult<String, Alarm>>() {
             @Override
-            public void onSuccess(SendResult<String, AlarmDto> result) {
+            public void onSuccess(SendResult<String, Alarm> result) {
                 log.info("successfully sent a message {} with offset {}", alarm, result.getRecordMetadata().offset());
             }
 
