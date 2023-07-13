@@ -23,6 +23,7 @@ public class AlarmService {
     public void sendChat(Alarm alarm) {
         log.info("알람 서비스 메시지 발행: {}", alarm);
         kafkaProducerService.deliverAlarmToKafka(kafkaTopic, alarm);
+
     }
 
 }
