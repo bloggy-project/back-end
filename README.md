@@ -25,7 +25,7 @@
 ![img.png](img.png)
 
 ## 🗺️ Technical Issue
-<a href="  https://velog.io/@gon109/Tag%EA%B8%B0%EB%8A%A5-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0-1-%EA%B8%B0%EC%A1%B4%EC%9D%98-%ED%83%9C%EA%B7%B8-%EA%B8%B0%EB%8A%A5-%EA%B5%AC%ED%98%84">[#1-1] Post의 Tag기능 구현하기, iterator 사용 방식</a> <br>
+<a href="https://velog.io/@gon109/Tag%EA%B8%B0%EB%8A%A5-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0-1-%EA%B8%B0%EC%A1%B4%EC%9D%98-%ED%83%9C%EA%B7%B8-%EA%B8%B0%EB%8A%A5-%EA%B5%AC%ED%98%84">[#1-1] Post의 Tag기능 구현하기, iterator 사용 방식</a> <br>
 <a href="https://velog.io/@gon109/Tag%EA%B8%B0%EB%8A%A5-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0-2-iterator-%EC%82%AC%EC%9A%A9-%EC%A0%9C%EA%B1%B0-%EB%B0%8F-%EB%B9%88%EB%B2%88%ED%95%9C-%EC%82%AD%EC%A0%9C%EB%A5%BC-status%EB%A1%9C-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0">[#1-2] Post의 Tag기능 구현하기, iterator 사용하지 않고, status로 빈번한 삭제 개선</a> <br>
 <a href="https://velog.io/@gon109/Refresh-Token-%EC%A0%81%EC%9A%A9%EA%B3%BC%EC%A0%95-%EC%9E%91%EC%84%B1%EC%A4%91">[#2-1] Redis를 이용한 Token 적용, Interceptor</a> <br>
 <a href="https://velog.io/@gon109/AccessToken-%EA%B2%80%EC%A6%9D-%EB%B0%A9%EC%8B%9D-Interceptor%EC%97%90%EC%84%9C-AOP%EB%B0%A9%EC%8B%9D%EC%9C%BC%EB%A1%9C-%EB%B3%80%EA%B2%BD">[#2-2] Redis를 이용한 Token 적용, AOP방식으로 변경</a> <br>
