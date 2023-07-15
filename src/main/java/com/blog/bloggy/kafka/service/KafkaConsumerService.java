@@ -25,7 +25,6 @@ public class KafkaConsumerService {
         alarms.stream()
                 .forEach(alarm -> log.info("saveAlarm: {}", alarm));
 
-
         alarmRepository.saveAll(alarms);
     }
 }

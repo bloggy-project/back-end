@@ -12,16 +12,14 @@ import java.time.LocalDateTime;
 
 import static com.blog.bloggy.alarm.model.AlarmTypes.FRIEND_CREATE_POST;
 
-@Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 public class Alarm {
+
     @Id
-    @GeneratedValue
-    @Column(name = "alarm_id")
     private Long id;
     private String sender;
     private String message;
