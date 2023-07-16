@@ -36,4 +36,5 @@
 - <a href="https://velog.io/@gon109/%EC%8A%A4%ED%86%A0%EB%A6%AC%EC%A7%80-%EC%97%94%EC%A7%84-%EB%B6%88%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-Transactional-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%A1%A4%EB%B0%B1-%EC%A0%81%EC%9A%A9-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0">[#6] MyISAM 스토리지 엔진 사용으로 인해 생긴 문제점</a> <br><br>
 - <a href="https://velog.io/@gon109/QueryDsl-%EC%9D%B8%EB%8D%B1%EC%8A%A4%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%BF%BC%EB%A6%AC-%EC%B5%9C%EC%A0%81%ED%99%94%ED%95%98%EA%B8%B0">[#7] 인덱스 및 비정규화를 통한 QueryDSL 페이징 쿼리 최적화 및 테스트 (1)~(6)</a><br><br>
 - <a href="https://velog.io/@gon109/CORS%EC%99%80-Preflight-Cross-Site-%ED%99%98%EA%B2%BD-%EC%BF%A0%ED%82%A4-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EA%B1%B0%EB%B6%80-%EB%AC%B8%EC%A0%9C">[#8] CORS와 Preflight, Cross-Site 환경 쿠키 브라우저 거부 문제</a>
+- <a href="https://velog.io/@gon109/Ec2-Ubuntu%EC%84%9C%EB%B2%84%EC%97%90-Nginx-%EC%A0%81%EC%9A%A9">[#9] Ec2 Ubuntu서버에 Nginx 적용</a>
 
