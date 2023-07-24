@@ -26,13 +26,18 @@ public class UserController {
     private final UserQueryService userQueryService;
 
     @PostMapping("/users")
-    public ResponseEntity<ResponseUser> createUser(@RequestBody RequestUser user){
+    public ResponseEntity<ResponseUser> createUser(@RequestBody UpdateUser user){
         UserDto userDto = mapper.map(user, UserDto.class);
-        userService.createUser(userDto);
+
         ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
     }
-
+    @AccessTokenRequired
+    @PatchMapping ("/users")
+    public ResponseEntity<ResponseUpdateUser> updateUser(AccessTokenDto accessTokenDto,@RequestBody UpdateUser user){
+        ResponseUpdateUser response = userService.updateUser(accessTokenDto,user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @GetMapping("/users")
     public ResponseEntity<List<ResponseUser>> getUsers(){

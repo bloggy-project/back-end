@@ -22,4 +22,6 @@ public interface UserService extends UserDetailsService {
     ResponseThumbnailDto updateThumbnail(AccessTokenDto accessTokenDto, RequestThumbnailDto requestThumbnailDto);
 
     String checkValidUsername(String name);
+
+    ResponseUpdateUser updateUser(AccessTokenDto accessTokenDto,UpdateUser user);
 }

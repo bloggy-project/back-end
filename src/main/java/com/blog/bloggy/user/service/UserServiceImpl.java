@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -90,6 +91,21 @@ public class UserServiceImpl implements UserService {
     public String checkValidUsername(String name){
         userRepository.findByName(name).ifPresent((u)->new DataAlreadyExistException());
         return "ok";
+    }
+
+    @Override
+    @Transactional
+    public ResponseUpdateUser updateUser(AccessTokenDto accessTokenDto,UpdateUser userDto) {
+        UserEntity user = userRepository.findByUserId(accessTokenDto.getUserId()).orElseThrow(() -> new UserNotFoundException());
+        user.updateInfo(userDto.getEmail(),userDto.getThumbnail(),userDto.getBlogName(),userDto.getDescription());
+        ResponseUpdateUser response= ResponseUpdateUser.builder()
+                .name(user.getName())
+                .blogName(user.getBlogName())
+                .email(user.getEmail())
+                .thumbnail(user.getThumbnail())
+                .description(user.getDescription())
+                .build();
+        return response;
     }
 
     @Override

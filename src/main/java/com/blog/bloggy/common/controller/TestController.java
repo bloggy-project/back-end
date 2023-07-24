@@ -23,7 +23,7 @@ public class TestController {
     }
 
     @AccessTokenRequired
-    @PostMapping(value = "/test")
+    @GetMapping(value = "/userinfo")
     public TestUserDto test(AccessTokenDto accessTokenDto){
         UserEntity user = userRepository.findByUserId(accessTokenDto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException());
@@ -31,6 +31,7 @@ public class TestController {
                 .email(user.getEmail())
                 .name(user.getName())
                 .thumbnail(user.getThumbnail())
+                .blogName(user.getBlogName())
                 .build();
         return response;
     }
