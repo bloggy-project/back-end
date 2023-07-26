@@ -46,7 +46,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         try {
             RequestLogin creds = new ObjectMapper().readValue(request.getInputStream(), RequestLogin.class);
-            log.info("로그인 시도 ******************************************** ::: ");
+            log.info("로그인 시도 ********************************************");
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(), new ArrayList<>())
             );
