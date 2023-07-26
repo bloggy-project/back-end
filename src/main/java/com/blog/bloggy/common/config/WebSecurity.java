@@ -48,7 +48,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         AuthenticationFilter authenticationFilter =
                 new AuthenticationFilter(authenticationManager(),userService,tokenUtil);
         authenticationFilter.setFilterProcessesUrl("/api/login");
-//        authenticationFilter.setAuthenticationManager(authenticationManager());
+        authenticationFilter.setAuthenticationManager(authenticationManager());
         return authenticationFilter;
     }
     @Override
