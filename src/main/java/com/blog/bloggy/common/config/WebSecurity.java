@@ -43,7 +43,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.headers().frameOptions().disable();
     }
-
+    //api/login 문제 확인
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
         AuthenticationFilter authenticationFilter =
                 new AuthenticationFilter(authenticationManager(),userService,tokenUtil);
