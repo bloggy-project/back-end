@@ -26,9 +26,9 @@ public class UserController {
     private final UserQueryService userQueryService;
 
     @PostMapping("/users")
-    public ResponseEntity<ResponseUser> createUser(@RequestBody UpdateUser user){
+    public ResponseEntity<ResponseUser> createUser(@RequestBody RequestUser user){
         UserDto userDto = mapper.map(user, UserDto.class);
-
+        userService.createUser(userDto);
         ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
     }
