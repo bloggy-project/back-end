@@ -38,3 +38,6 @@
 - <a href="https://velog.io/@gon109/CORS%EC%99%80-Preflight-Cross-Site-%ED%99%98%EA%B2%BD-%EC%BF%A0%ED%82%A4-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EA%B1%B0%EB%B6%80-%EB%AC%B8%EC%A0%9C">[#8] CORS와 Preflight, Cross-Site 환경 쿠키 브라우저 거부 문제</a>
 - <a href="https://velog.io/@gon109/Ec2-Ubuntu%EC%84%9C%EB%B2%84%EC%97%90-Nginx-%EC%A0%81%EC%9A%A9">[#9] Ec2 Ubuntu서버에 Nginx 적용</a>
 
+## 🗺️ 프로젝트 개선 시나리오
+
+- <a href="https://velog.io/@gon109/%EB%B6%84%EC%82%B0-%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%97%90%EC%84%9C%EC%9D%98-Unique-ID-%EC%83%9D%EC%84%B1%EA%B8%B0-%EC%84%A4%EA%B3%84">[#1] 분산 환경에서 사용할 수 없는 Auto_increment 속성을 해결하기 위한 스노플레이크 기법</a> <br>
