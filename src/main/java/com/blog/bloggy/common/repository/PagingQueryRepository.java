@@ -96,7 +96,7 @@ public class PagingQueryRepository {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<ResponseUserPagePost> findUserPostsOrderByCreated(Long userId, Pageable pageable) {
         List<Long> ids = queryFactory
                 .select(post.id)

@@ -261,7 +261,7 @@ public class PostService {
         ResponsePost responsePost = getResponsePostOne(post);
         return responsePost; // 존재하지 않는 경우
     }
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponsePost getResponsePostOne(Post post) {
         ResponsePost responsePost = ResponsePost.builder()
                 .postId(post.getId())
@@ -285,7 +285,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<ResponseUserPagePost> getUserPostsOrderByCreatedAt(String name, Pageable page){
         Long usersId = userRepository.findIdByName(name).orElseThrow(() -> new UserNotFoundException());
         return pagingQueryRepository.findUserPostsOrderByCreated(usersId,page);
