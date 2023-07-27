@@ -19,7 +19,9 @@
 - Kafka(~ing)
 - MongoDB(~ing)
 
-## 🗺️ Architecture
+## 🗺️ bloggy 서버 아키텍쳐
+![image](https://github.com/bloggy-project/back-end/assets/45483116/0f14d38d-b22d-4aec-b902-06bac0abdc42)
+
 
 ## 🗺️ DB ERD
 ![img.png](img.png)
