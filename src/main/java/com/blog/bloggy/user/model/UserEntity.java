@@ -66,10 +66,19 @@ public class UserEntity extends BaseTimeEntity {
         this.thumbnail=thumbnail;
     }
 
-    public void updateInfo(String email, String thumbnail, String blogName, String description) {
-        this.email=email;
-        this.thumbnail=thumbnail;
-        this.blogName=blogName;
-        this.description=description;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void setBlogName(String blogName) {
+        this.blogName = blogName;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

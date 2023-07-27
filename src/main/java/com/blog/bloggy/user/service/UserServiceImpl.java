@@ -97,7 +97,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public ResponseUpdateUser updateUser(AccessTokenDto accessTokenDto,UpdateUser userDto) {
         UserEntity user = userRepository.findByUserId(accessTokenDto.getUserId()).orElseThrow(() -> new UserNotFoundException());
-        user.updateInfo(userDto.getEmail(),userDto.getThumbnail(),userDto.getBlogName(),userDto.getDescription());
+
+        Optional.ofNullable(userDto.getEmail()).ifPresent(user::setEmail);
+        Optional.ofNullable(userDto.getThumbnail()).ifPresent(user::setThumbnail);
+        Optional.ofNullable(userDto.getBlogName()).ifPresent(user::setBlogName);
+        Optional.ofNullable(userDto.getDescription()).ifPresent(user::setDescription);
+
         ResponseUpdateUser response= ResponseUpdateUser.builder()
                 .name(user.getName())
                 .blogName(user.getBlogName())
