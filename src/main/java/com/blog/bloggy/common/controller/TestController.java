@@ -32,6 +32,7 @@ public class TestController {
                 .name(user.getName())
                 .thumbnail(user.getThumbnail())
                 .blogName(user.getBlogName())
+                .description(user.getDescription())
                 .build();
         return response;
     }
