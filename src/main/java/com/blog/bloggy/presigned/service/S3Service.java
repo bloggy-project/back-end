@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.blog.bloggy.aop.token.dto.AccessTokenDto;
 import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.presigned.config.S3Config;
+import com.blog.bloggy.presigned.dto.FileDto;
 import com.blog.bloggy.user.model.UserEntity;
 import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String getGeneratePreSignedUrlRequest(AccessTokenDto accessTokenDto) {
+    public String getGeneratePreSignedUrlRequest(AccessTokenDto accessTokenDto, FileDto fileDto) {
         UserEntity user = userRepository.findByUserId(accessTokenDto.getUserId()).orElseThrow(() -> new UserNotFoundException());
-        String key = user.getName() + "/" + "image.png";
+        String key = user.getName() + "/" + fileDto.getFileName();
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucket, key)
