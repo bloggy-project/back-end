@@ -7,7 +7,10 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.blog.bloggy.aop.token.dto.AccessTokenDto;
+import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.presigned.config.S3Config;
+import com.blog.bloggy.user.model.UserEntity;
+import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,17 +24,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Service
 public class S3Service {
-
+    private final UserRepository userRepository;
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
     public String getGeneratePreSignedUrlRequest(AccessTokenDto accessTokenDto) {
-        String folderName = accessTokenDto.getUserId();
-        String objectKey = folderName;
+        UserEntity user = userRepository.findByUserId(accessTokenDto.getUserId()).orElseThrow(() -> new UserNotFoundException());
+        String key = user.getName() + "/" + "image.png";
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, objectKey)
+                new GeneratePresignedUrlRequest(bucket, key)
                         .withMethod(HttpMethod.GET)
                         .withExpiration(getPreSignedUrlExpiration());
         generatePresignedUrlRequest.addRequestParameter(
