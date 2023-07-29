@@ -28,7 +28,7 @@ public class S3Service {
 
     public String getGeneratePreSignedUrlRequest(AccessTokenDto accessTokenDto) {
         String folderName = accessTokenDto.getUserId()+"/";
-        String objectKey = folderName+"image.png";
+        String objectKey = folderName;
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucket, objectKey)
