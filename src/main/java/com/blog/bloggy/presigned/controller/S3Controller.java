@@ -20,7 +20,7 @@ public class S3Controller {
 
     @AccessTokenRequired
     @PostMapping("/pre-signed")
-    public ResponseEntity<String> createPresignedURL(AccessTokenDto accessTokenDto, FileDto fileDto){
+    public ResponseEntity<String> createPresignedURL(AccessTokenDto accessTokenDto, @RequestBody FileDto fileDto){
         String response = s3Service.getGeneratePreSignedUrlRequest(accessTokenDto,fileDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
