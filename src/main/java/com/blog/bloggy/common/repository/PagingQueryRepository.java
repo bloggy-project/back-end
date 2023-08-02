@@ -62,7 +62,7 @@ public class PagingQueryRepository {
         return checkLastPageDto(pageable, results);
     }
 
-    public Slice<ResponsePostList> findPostsForMainTrend(TrendSearchCondition condition, Pageable pageable) {
+    public Slice<ResponsePostList> findPostsForMainTrendV1(TrendSearchCondition condition, Pageable pageable) {
         List<Long> ids = queryFactory.select(post.id)
                 .from(post)
                 .where(
@@ -94,7 +94,44 @@ public class PagingQueryRepository {
                 .fetch();
         return checkLastPageDto(pageable, posts);
     }
+    public Slice<ResponsePostList> findPostsForMainTrendV2(TrendSearchCondition condition, Pageable pageable) {
+        List<Long> dateIds = queryFactory.select(post.id)
+                .from(post)
+                .where(
+                        rangeDate(condition.getDate())
+                )
+                .fetch();
+        List<Long> ids = queryFactory.select(post.id)
+                .from(post)
+                .where(
+                        post.id.in(dateIds),
+                        mainTrendCondition(condition.getLastId(), condition.getFavorCount())
+                )
+                .orderBy(post.favoriteCount.desc())
+                .orderBy(post.id.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
 
+        List<ResponsePostList> posts = queryFactory
+                .select(new QResponsePostList(
+                        post.id,
+                        post.thumbnail,
+                        post.title,
+                        post.content,
+                        post.postUser.name,
+                        post.createdAt,
+                        post.commentCount,
+                        post.favoriteCount
+                ))
+                .from(post)
+                .join(post.postUser,userEntity)
+                .where(
+                        post.id.in(ids)
+                )
+                .orderBy(post.id.desc())
+                .fetch();
+        return checkLastPageDto(pageable, posts);
+    }
 
     @Transactional(readOnly = true)
     public Page<ResponseUserPagePost> findUserPostsOrderByCreated(Long userId, Pageable pageable) {

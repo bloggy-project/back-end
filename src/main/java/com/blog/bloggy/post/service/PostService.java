@@ -296,7 +296,7 @@ public class PostService {
     }
 
     public Slice<ResponsePostList> getPostsOrderByTrend(TrendSearchCondition condition, Pageable pageable) {
-        return pagingQueryRepository.findPostsForMainTrend(condition,pageable);
+        return pagingQueryRepository.findPostsForMainTrendV1(condition,pageable);
     }
 
     private static void deletePostFavorite(Post post) {

@@ -25,12 +25,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.Rollback;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static java.util.stream.Collectors.toList;
 
 @SpringBootTest
 @Slf4j
@@ -187,7 +184,7 @@ class PagingQueryRepositoryTest {
                 .favorCount(4L)
                 .lastId(10000L)
                 .build();
-        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrend(condition, pageable);
+        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrendV1(condition, pageable);
         for (ResponsePostList responsePostList : postsForMain) {
             System.out.println("responsePostList = " + responsePostList);
         }
@@ -205,6 +202,22 @@ class PagingQueryRepositoryTest {
         }
          */
     }
+    @Test
+    void findPostsFromMainTrendV2() {
+        int page = 0;
+        int size = 15;
+        Pageable pageable = PageRequest.of(page, size);
+        TrendSearchCondition condition = TrendSearchCondition.builder()
+                .favorCount(4L)
+                .lastId(10000L)
+                .build();
+        Slice<ResponsePostList> postsForMain = pagingQueryRepository.findPostsForMainTrendV2(condition, pageable);
+        for (ResponsePostList responsePostList : postsForMain) {
+            System.out.println("responsePostList = " + responsePostList);
+        }
+
+    }
+
 
 
     private static UserEntity getUserEntity(String username) {
