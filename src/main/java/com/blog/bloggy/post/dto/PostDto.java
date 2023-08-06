@@ -11,6 +11,7 @@ import java.util.List;
 public class PostDto extends BaseTimeEntity {
     private String thumbnail;
     private String title;
+    private String subContent;
     private String content;
     private String userId;
     private List<String> tagNames;

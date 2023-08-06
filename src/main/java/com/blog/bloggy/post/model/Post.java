@@ -35,6 +35,8 @@ public class Post extends BaseTimeEntity {
 
     private String content;
 
+    private String subContent;
+
     @Column(name = "favorite_count")
     private long favoriteCount=0;
 
@@ -74,9 +76,10 @@ public class Post extends BaseTimeEntity {
 
 
     @Builder
-    public Post(String thumbnail, String title, String content, UserEntity user,long favoriteCount) {
+    public Post(String thumbnail, String title,String subContent, String content, UserEntity user,long favoriteCount) {
         this.thumbnail = thumbnail;
         this.title = title;
+        this.subContent=subContent;
         this.content = content;
         this.postUser = user;
         this.favoriteCount=favoriteCount;

@@ -32,6 +32,7 @@ public class PostController {
         PostDto postDto= PostDto.builder()
                 .thumbnail(requestPostRegister.getThumbnail())
                 .title(requestPostRegister.getTitle())
+                .subContent(requestPostRegister.getSubContent())
                 .content(requestPostRegister.getContent())
                 .userId(tokenDto.getUserId())
                 .tagNames(requestPostRegister.getTagNames())

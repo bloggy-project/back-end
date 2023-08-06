@@ -62,7 +62,8 @@ public class PostService {
         Post post = Post.builder()
                 .thumbnail(postDto.getThumbnail())
                 .title(postDto.getTitle())
-                .content(postDto.getTitle())
+                .subContent(postDto.getSubContent())
+                .content(postDto.getContent())
                 .user(user)
                 .build();
         postRepository.save(post);
@@ -83,6 +84,7 @@ public class PostService {
                 .postId(post.getId())
                 .thumbnail(post.getThumbnail())
                 .title(post.getTitle())
+                .subContent(post.getSubContent())
                 .content(post.getContent())
                 .name(user.getName())
                 .tagNames(tags)
