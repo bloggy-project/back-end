@@ -13,7 +13,7 @@ public class ResponseUserPagePost {
 
     private String title;
 
-    private String content;
+    private String subContent;
 
     private LocalDateTime createdAt;
 
@@ -22,7 +22,7 @@ public class ResponseUserPagePost {
     public ResponseUserPagePost(Long postId, String title, String subContent, LocalDateTime createdAt, List<String> tagNames) {
         this.postId = postId;
         this.title = title;
-        this.content = subContent;
+        this.subContent = subContent;
         this.createdAt = createdAt;
         this.tagNames = tagNames;
     }
