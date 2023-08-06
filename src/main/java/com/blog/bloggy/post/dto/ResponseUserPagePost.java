@@ -19,10 +19,10 @@ public class ResponseUserPagePost {
 
     private List<String> tagNames;
     @Builder
-    public ResponseUserPagePost(Long postId, String title, String content, LocalDateTime createdAt, List<String> tagNames) {
+    public ResponseUserPagePost(Long postId, String title, String subContent, LocalDateTime createdAt, List<String> tagNames) {
         this.postId = postId;
         this.title = title;
-        this.content = content;
+        this.content = subContent;
         this.createdAt = createdAt;
         this.tagNames = tagNames;
     }

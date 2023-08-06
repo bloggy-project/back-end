@@ -46,7 +46,7 @@ public class PagingQueryRepository {
                         post.id,
                         post.thumbnail,
                         post.title,
-                        post.content,
+                        post.subContent,
                         post.postUser.name,
                         post.createdAt,
                         post.commentCount,
@@ -78,7 +78,7 @@ public class PagingQueryRepository {
                         post.id,
                         post.thumbnail,
                         post.title,
-                        post.content,
+                        post.subContent,
                         post.postUser.name,
                         post.createdAt,
                         post.commentCount,
@@ -117,7 +117,7 @@ public class PagingQueryRepository {
                         post.id,
                         post.thumbnail,
                         post.title,
-                        post.content,
+                        post.subContent,
                         post.postUser.name,
                         post.createdAt,
                         post.commentCount,
@@ -152,7 +152,7 @@ public class PagingQueryRepository {
         List<ResponseUserPagePost> results = posts.stream().map(post -> ResponseUserPagePost.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
-                .content(post.getContent())
+                .subContent(post.getSubContent())
                 .createdAt(post.getCreatedAt())
                 .tagNames(post.getRegPostTags().stream().map(postTag -> postTag.getTagName()).collect(toList()))
                 .build()).collect(toList());
@@ -163,7 +163,6 @@ public class PagingQueryRepository {
                 .fetchOne();
         return new PageImpl<>(results, pageable, total);
     }
-
 
    //merge문제
     private static JPQLQuery<Long> getPostCommentCount() {
