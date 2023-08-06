@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface TokenRepository extends CrudRepository<Token,String> {
     Optional<Token> findById(String id);
+
+    void deleteById(String id);
 }
