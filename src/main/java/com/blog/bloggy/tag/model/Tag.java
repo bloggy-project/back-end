@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "tag",indexes = @Index(name = "tag_name_idx",columnList = "name"))
+@Table(name = "tag",indexes = @Index(name = "idx_name",columnList = "name"))
 public class Tag {
 
     @Id
