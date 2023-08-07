@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
 import javax.persistence.Id;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -17,6 +19,8 @@ public class TempPost {
     private String id;
     private String title;
     private String content;
+    private List<String> tagNames = new ArrayList<>();
+    private List<String> imageList = new ArrayList<>();
 
     @TimeToLive(unit = TimeUnit.SECONDS)
     private Long expiration;
@@ -27,10 +31,13 @@ public class TempPost {
         this.expiration = expiration;
     }
     @Builder
-    public TempPost(String id, String title, String content, Long expiration) {
+    public TempPost(String id, String title, String content, List<String> tagNames, List<String> imageList, Long expiration) {
         this.id = id;
         this.title = title;
         this.content = content;
+        this.tagNames = tagNames;
+        this.imageList = imageList;
         this.expiration = expiration;
     }
+
 }

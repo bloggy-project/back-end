@@ -102,6 +102,8 @@ public class PostService {
                         .id(postDto.getUserId())
                         .title(postDto.getTitle())
                         .content(postDto.getContent())
+                        .tagNames(postDto.getTagNames())
+                        .imageList(postDto.getImageList())
                         .expiration(Long.valueOf(env.getProperty("temp_post.expiration_time")))
                         .build()
         );

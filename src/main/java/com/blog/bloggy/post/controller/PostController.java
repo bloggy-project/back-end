@@ -113,6 +113,8 @@ public class PostController {
         TempPostDto postDto= TempPostDto.builder()
                 .title(requestPostRegister.getTitle())
                 .content(requestPostRegister.getContent())
+                .tagNames(requestPostRegister.getTagNames())
+                .imageList(requestPostRegister.getImageList())
                 .userId(tokenDto.getUserId())
                 .build();
         TempPost tempPost = postService.createTempPost(postDto);
