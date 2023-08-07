@@ -108,6 +108,19 @@ public class PostController {
         Page<ResponseUserPagePost> results = postService.getUserPostsOrderByCreatedAt(name, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(results);
     }
-
+    @AccessTokenRequired
+    @PostMapping("/temp-posts")
+    public ResponseEntity<ResponsePost> createTempPost(AccessTokenDto tokenDto,
+                                                       @RequestBody RequestPostRegister requestPostRegister){
+        PostDto postDto= PostDto.builder()
+                .thumbnail(requestPostRegister.getThumbnail())
+                .title(requestPostRegister.getTitle())
+                .subContent(requestPostRegister.getSubContent())
+                .content(requestPostRegister.getContent())
+                .userId(tokenDto.getUserId())
+                .tagNames(requestPostRegister.getTagNames())
+                .build();
+        postService.createTempPost(postDto);
+    }
 
 }

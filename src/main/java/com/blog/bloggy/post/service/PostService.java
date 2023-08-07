@@ -91,6 +91,9 @@ public class PostService {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
+    public void createTempPost(PostDto postDto) {
+
+    }
     //@Transactional
     public PostTag updatePostTag(Post post, String tagName) {
         PostTag postTag=PostTag.builder()
@@ -103,6 +106,7 @@ public class PostService {
         return postTag;
     }
     //@Transactional
+
     public PostTag createPostTag(Post post, Tag tag,String tagName) {
         PostTag postTag = PostTag.builder()
                 .tagPost(post)
@@ -114,7 +118,6 @@ public class PostService {
         //tag.addPostTag(postTag);
         return postTag;
     }
-
     @CachePut(cacheNames = POST, key = "#post.getPostId()")
     public ResponsePost updatePost(PostUpdateDto post){
         String redisKey = postRedisKey(post.getPostId());
@@ -197,6 +200,7 @@ public class PostService {
         postRepository.saveAll(posts);
         postTagRepository.saveAll(bulkPostTags);
     }
+
     public Set<String> getKeysWithPattern(String pattern) {
         Set<String> keys = new HashSet<>();
         redisTemplate.execute((RedisCallback<Void>) connection -> {
@@ -235,13 +239,13 @@ public class PostService {
         }
         postsUpdate(postsToUpdate);
     }
-
     private String postRedisKey(Long postId) {
         return "POST::" + postId;
     }
     // 이 포스트를 클릭했을 때 Favorite을 누른 User는 하트가 색깔이 차있도록 보여야 한다.
     // 그렇다면 필요한 정보는? 현재 로그인한 User의 정보 Post가 보유한 Favorite중에 User에 대한 정보가 있는경우
     // isFavorite은 true로 반환. User는 로그인을 했을 수도 있고, 안했을 수도 있다.
+
     public ResponsePost getPostOne(Long postId, String username){
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(PostNotFoundException::new);
@@ -254,7 +258,6 @@ public class PostService {
         }
         return getResponsePostOne(post);
     }
-
     @Cacheable(cacheNames = POST, key = "#postId")
     public ResponsePost getPostById(Long postId) {
         // DB에서 데이터를 조회하는 부분
@@ -263,6 +266,7 @@ public class PostService {
         ResponsePost responsePost = getResponsePostOne(post);
         return responsePost; // 존재하지 않는 경우
     }
+
     @Transactional(readOnly = true)
     public ResponsePost getResponsePostOne(Post post) {
         ResponsePost responsePost = ResponsePost.builder()
