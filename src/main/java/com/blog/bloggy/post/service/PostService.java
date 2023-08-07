@@ -1,11 +1,14 @@
 package com.blog.bloggy.post.service;
 
 
+import com.blog.bloggy.aop.token.dto.AccessTokenDto;
 import com.blog.bloggy.comment.model.Comment;
 import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.common.exception.PostNotFoundException;
 import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.common.repository.PagingQueryRepository;
+import com.blog.bloggy.post.model.TempPost;
+import com.blog.bloggy.post.redisRepository.TempPostRepository;
 import com.blog.bloggy.postTag.dto.PostTagStatus;
 import com.blog.bloggy.comment.dto.CommentStatus;
 import com.blog.bloggy.favorite.model.Favorite;
@@ -25,6 +28,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -53,7 +57,8 @@ public class PostService {
     private final PostTagRepository postTagRepository;
     private final TagRepository tagRepository;
     private final RedisTemplate<String,Object> redisTemplate;
-
+    private final TempPostRepository tempPostRepository;
+    private final Environment env;
     @Transactional
     public ResponsePost createPost(PostDto postDto) {
         List<String> tagNames = postDto.getTagNames();
@@ -91,8 +96,21 @@ public class PostService {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
-    public void createTempPost(PostDto postDto) {
-
+    public TempPost createTempPost(TempPostDto postDto) {
+        TempPost tempPost = tempPostRepository.save(
+                TempPost.builder()
+                        .id(postDto.getUserId())
+                        .title(postDto.getTitle())
+                        .content(postDto.getContent())
+                        .expiration(Long.valueOf(env.getProperty("temp_post.expiration_time")))
+                        .build()
+        );
+        return tempPost;
+    }
+    public TempPost getTempPost(AccessTokenDto tokenDto) {
+        TempPost tempPost = tempPostRepository.findById(tokenDto.getUserId())
+                .orElseThrow(() -> new PostNotFoundException());
+        return tempPost;
     }
     //@Transactional
     public PostTag updatePostTag(Post post, String tagName) {
@@ -105,8 +123,8 @@ public class PostService {
         post.addPostTag(postTag);
         return postTag;
     }
-    //@Transactional
 
+    //@Transactional
     public PostTag createPostTag(Post post, Tag tag,String tagName) {
         PostTag postTag = PostTag.builder()
                 .tagPost(post)
@@ -139,6 +157,7 @@ public class PostService {
         DELETED: 연관관계를 모두 지운, 삭제할 예정. (벌크 연산으로 한번에 삭제 예정)
         REGISTERED: 이미 Tag 객체가 존재하는 경우.
     */
+
     @Transactional
     public void postsUpdate(List<ResponsePost> postDtos){
         List<Post> posts = new ArrayList<>();
@@ -215,7 +234,6 @@ public class PostService {
         });
         return keys;
     }
-
     @Scheduled(fixedDelay = 20000) // 일정 시간마다 실행될 수 있도록 스케줄링 설정 1000, 1초
     @Transactional
     public void saveUpdatedPostsToDB() {
@@ -244,8 +262,8 @@ public class PostService {
     }
     // 이 포스트를 클릭했을 때 Favorite을 누른 User는 하트가 색깔이 차있도록 보여야 한다.
     // 그렇다면 필요한 정보는? 현재 로그인한 User의 정보 Post가 보유한 Favorite중에 User에 대한 정보가 있는경우
-    // isFavorite은 true로 반환. User는 로그인을 했을 수도 있고, 안했을 수도 있다.
 
+    // isFavorite은 true로 반환. User는 로그인을 했을 수도 있고, 안했을 수도 있다.
     public ResponsePost getPostOne(Long postId, String username){
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(PostNotFoundException::new);
@@ -258,6 +276,7 @@ public class PostService {
         }
         return getResponsePostOne(post);
     }
+
     @Cacheable(cacheNames = POST, key = "#postId")
     public ResponsePost getPostById(Long postId) {
         // DB에서 데이터를 조회하는 부분

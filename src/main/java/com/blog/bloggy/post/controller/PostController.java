@@ -5,6 +5,7 @@ import com.blog.bloggy.aop.token.AccessTokenRequired;
 import com.blog.bloggy.aop.token.dto.AccessTokenDto;
 import com.blog.bloggy.common.dto.TrendSearchCondition;
 import com.blog.bloggy.post.dto.*;
+import com.blog.bloggy.post.model.TempPost;
 import com.blog.bloggy.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,15 +28,12 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<ResponsePost> postRegister(
             AccessTokenDto tokenDto,
-            @RequestBody RequestPostRegister requestPostRegister) {
+            @RequestBody RequestTempPostRegister requestPostRegister) {
 
         PostDto postDto= PostDto.builder()
-                .thumbnail(requestPostRegister.getThumbnail())
                 .title(requestPostRegister.getTitle())
-                .subContent(requestPostRegister.getSubContent())
                 .content(requestPostRegister.getContent())
                 .userId(tokenDto.getUserId())
-                .tagNames(requestPostRegister.getTagNames())
                 .build();
         ResponsePost response = postService.createPost(postDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -110,17 +108,23 @@ public class PostController {
     }
     @AccessTokenRequired
     @PostMapping("/temp-posts")
-    public ResponseEntity<ResponsePost> createTempPost(AccessTokenDto tokenDto,
-                                                       @RequestBody RequestPostRegister requestPostRegister){
-        PostDto postDto= PostDto.builder()
-                .thumbnail(requestPostRegister.getThumbnail())
+    public ResponseEntity<TempPost> createTempPost(AccessTokenDto tokenDto,
+                                                       @RequestBody RequestTempPostRegister requestPostRegister){
+        TempPostDto postDto= TempPostDto.builder()
                 .title(requestPostRegister.getTitle())
-                .subContent(requestPostRegister.getSubContent())
                 .content(requestPostRegister.getContent())
                 .userId(tokenDto.getUserId())
-                .tagNames(requestPostRegister.getTagNames())
                 .build();
-        postService.createTempPost(postDto);
-    }
+        TempPost tempPost = postService.createTempPost(postDto);
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(tempPost);
+    }
+    @AccessTokenRequired
+    @GetMapping("/temp-posts")
+    public ResponseEntity<TempPost> getTempPost(AccessTokenDto tokenDto){
+
+        TempPost tempPost = postService.getTempPost(tokenDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(tempPost);
+    }
 }

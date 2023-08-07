@@ -29,7 +29,7 @@ import static com.blog.bloggy.common.config.CacheKeyConfig.POST;
 
 @Configuration
 @EnableCaching
-@EnableRedisRepositories(basePackages = "com.blog.bloggy.token.repository")
+@EnableRedisRepositories(basePackages = {"com.blog.bloggy.token.repository", "com.blog.bloggy.post.redisRepository"})
 public class RedisConfig extends CachingConfigurerSupport {
     @Value("${spring.redis.host}")
     private String host;
