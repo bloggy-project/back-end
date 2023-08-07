@@ -121,6 +121,7 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(tempPost);
     }
+
     @AccessTokenRequired
     @GetMapping("/temp-posts")
     public ResponseEntity<TempPost> getTempPost(AccessTokenDto tokenDto){
