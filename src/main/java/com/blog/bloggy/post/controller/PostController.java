@@ -26,14 +26,17 @@ public class PostController {
 
     @AccessTokenRequired
     @PostMapping("/posts")
-    public ResponseEntity<ResponsePost> postRegister(
+    public ResponseEntity<ResponsePost> createPost(
             AccessTokenDto tokenDto,
-            @RequestBody RequestTempPostRegister requestPostRegister) {
+            @RequestBody RequestPostRegister requestPostRegister) {
 
         PostDto postDto= PostDto.builder()
+                .thumbnail(requestPostRegister.getThumbnail())
                 .title(requestPostRegister.getTitle())
+                .subContent(requestPostRegister.getSubContent())
                 .content(requestPostRegister.getContent())
                 .userId(tokenDto.getUserId())
+                .tagNames(requestPostRegister.getTagNames())
                 .build();
         ResponsePost response = postService.createPost(postDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

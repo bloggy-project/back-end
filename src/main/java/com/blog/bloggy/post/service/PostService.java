@@ -84,6 +84,7 @@ public class PostService {
             );
         }
         postTagRepository.saveAll(postTags);
+        tempPostRepository.deleteById(user.getUserId());
         List<String> tags = post.getPostTags().stream().map((pt) -> pt.getTagName()).collect(toList());
         return ResponsePost.builder()
                 .postId(post.getId())

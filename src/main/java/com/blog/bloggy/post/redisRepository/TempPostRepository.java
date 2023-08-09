@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface TempPostRepository extends CrudRepository<TempPost, String> {
     Optional<TempPost> findById(String id);
 
+    @Override
+    void deleteById(String id);
 }
