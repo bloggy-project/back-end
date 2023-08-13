@@ -82,7 +82,7 @@ class PagingQueryRepositoryTest {
                     updatePostTag(post,tagName);
                 }
                 updatePostTag(post,"tag"+i);
-                //getFavorites(user1, user2, i, post);
+                ////getFavorites(user1, user2, i, post);
             }
             else if(i%3==0) {
                 Post post = makeTest(user2, i);
