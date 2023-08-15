@@ -4,9 +4,12 @@ package com.blog.bloggy.post.controller;
 import com.blog.bloggy.aop.token.AccessTokenRequired;
 import com.blog.bloggy.aop.token.dto.AccessTokenDto;
 import com.blog.bloggy.common.dto.TrendSearchCondition;
+import com.blog.bloggy.common.exception.UserNotFoundException;
 import com.blog.bloggy.post.dto.*;
 import com.blog.bloggy.post.model.TempPost;
+import com.blog.bloggy.post.repository.PostRepository;
 import com.blog.bloggy.post.service.PostService;
+import com.blog.bloggy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private static final int pageSize=15;
 
     @AccessTokenRequired
@@ -47,6 +52,14 @@ public class PostController {
             @PathVariable Long postId,
             AccessTokenDto tokenDto,
             @RequestBody RequestPostRegister requestPostRegister) {
+        // 수정 권한이 없는 유저 막는 로직
+        Long uId = userRepository.findIdByName(tokenDto.getUserId())
+                .orElseThrow(() -> new UserNotFoundException());
+        Long postUserId = postRepository.getUsersIdById(postId)
+                .orElseThrow(() -> new UserNotFoundException());
+        if(uId!=postUserId){
+            throw new UserNotFoundException();
+        }
 
         PostUpdateDto postDto= PostUpdateDto.builder()
                 .thumbnail(requestPostRegister.getThumbnail())

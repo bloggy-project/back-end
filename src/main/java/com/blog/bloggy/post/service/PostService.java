@@ -92,7 +92,7 @@ public class PostService {
                 .title(post.getTitle())
                 .subContent(post.getSubContent())
                 .content(post.getContent())
-                .name(user.getName())
+                .username(user.getName())
                 .tagNames(tags)
                 .updatedAt(post.getUpdatedAt())
                 .build();
@@ -296,7 +296,7 @@ public class PostService {
                 .thumbnail(post.getThumbnail())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .name(post.getPostUser().getName())
+                .username(post.getPostUser().getName())
                 .updatedAt(post.getUpdatedAt())
                 .tagNames(post.getRegPostTags().stream().map(postTag -> postTag.getTagName()).collect(toList()))
                 .build();

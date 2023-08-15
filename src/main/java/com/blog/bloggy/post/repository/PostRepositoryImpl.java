@@ -37,7 +37,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         );
     }
 
-
+    @Override
+    public Optional<Long> getUsersIdById(Long id) {
+        return Optional.ofNullable(
+                queryFactory
+                        .select(post.postUser.id)
+                        .from(post)
+                        .where(post.id.eq(id))
+                        .fetchOne()
+        );
+    }
 
 
 }
