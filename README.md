@@ -42,5 +42,4 @@
 
 ## 🗺️ 프로젝트 개선 시나리오
 
-- <a href="https://velog.io/@gon109/%EB%B6%84%EC%82%B0-%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%97%90%EC%84%9C%EC%9D%98-Unique-ID-%EC%83%9D%EC%84%B1%EA%B8%B0-%EC%84%A4%EA%B3%84">[#1-1] 분산 환경에서 사용할 수 없는 Auto_increment 속성을 해결하기 위한 스노플레이크 기법</a> <br>
-- <a href="https://velog.io/@gon109/%EB%B6%84%EC%82%B0-%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%97%90%EC%84%9C%EC%9D%98-Unique-ID-%EC%83%9D%EC%84%B1%EA%B8%B0-%EC%84%A4%EA%B3%84-2">[#1-2] tuid 생성 기법과 Auto_increment의 성능 고찰 </a> <br>
+- <a href="https://velog.io/@gon109/%EB%B6%84%EC%82%B0-%ED%99%98%EA%B2%BD%EC%97%90%EC%84%9C-%EC%82%AC%EC%9A%A9%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-Autoincrement-%EC%86%8D%EC%84%B1%EC%9D%84-%ED%95%B4%EA%B2%B0%ED%95%98%EA%B8%B0-%EC%9C%84%ED%95%9C-tuid">[#1-1] 분산 환경에서 사용할 수 없는 Auto_increment 속성을 해결하기 위한 PK 생성전략</a> <br>
