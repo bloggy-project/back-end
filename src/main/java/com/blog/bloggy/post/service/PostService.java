@@ -170,11 +170,7 @@ public class PostService {
             Post post = postRepository.findById(postId)
                     .orElseThrow(PostNotFoundException::new);
 
-            String thumbnail = postDto.getThumbnail();
-            String title = postDto.getTitle();
-            String content = postDto.getContent();
-            LocalDateTime updatedAt = postDto.getUpdatedAt();
-            post.updatePost(thumbnail, title, content, updatedAt);
+            post.updatePost(postDto.getThumbnail(), postDto.getTitle(), postDto.getContent(), postDto.getUpdatedAt());
 
             List<PostTag> postTags = post.getPostTags();
             List<PostTagPair> newTags = postDto.getTagNames().stream()
